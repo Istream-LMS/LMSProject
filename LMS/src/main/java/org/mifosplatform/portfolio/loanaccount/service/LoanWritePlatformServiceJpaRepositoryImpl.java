@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,12 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.plexus.util.FileUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -33,12 +27,10 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.domain.EmailDetail;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.GmailSendingNotificationToClients;
-import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -79,7 +71,6 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedExce
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
-import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.SingleDisbursalCommand;
@@ -125,7 +116,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -159,7 +149,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final AccountTransfersWritePlatformService accountTransfersWritePlatformService;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
-    private final LoanChargeReadPlatformService LoanChargeReadPlatformService;
+    private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final LoanReadPlatformService loanReadPlatformService;
     private final FromJsonHelper fromApiJsonHelper;
     private final GmailSendingNotificationToClients gmailSendingNotificationToClients;
@@ -204,7 +194,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.accountTransfersWritePlatformService = accountTransfersWritePlatformService;
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
-        this.LoanChargeReadPlatformService = loanChargeReadPlatformService;
+        this.loanChargeReadPlatformService = loanChargeReadPlatformService;
         this.loanReadPlatformService = loanReadPlatformService;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.gmailSendingNotificationToClients=gmailSendingNotificationToClients;
@@ -1177,13 +1167,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Override
     @CronTarget(jobName = JobName.TRANSFER_FEE_CHARGE_FOR_LOANS)
     public void transferFeeCharges() throws JobExecutionException {
-        final Collection<LoanChargeData> chargeDatas = this.LoanChargeReadPlatformService.retrieveLoanChargesForFeePayment(
+        final Collection<LoanChargeData> chargeDatas = this.loanChargeReadPlatformService.retrieveLoanChargesForFeePayment(
                 ChargePaymentMode.ACCOUNT_TRANSFER.getValue(), LoanStatus.ACTIVE.getValue());
         final StringBuilder sb = new StringBuilder();
         if (chargeDatas != null) {
             for (final LoanChargeData chargeData : chargeDatas) {
                 if (chargeData.isInstallmentFee()) {
-                    final Collection<LoanInstallmentChargeData> chargePerInstallments = this.LoanChargeReadPlatformService
+                    final Collection<LoanInstallmentChargeData> chargePerInstallments = this.loanChargeReadPlatformService
                             .retrieveInstallmentLoanCharges(chargeData.getId(), true);
                     PortfolioAccountData portfolioAccountData = null;
                     for (final LoanInstallmentChargeData installmentChargeData : chargePerInstallments) {

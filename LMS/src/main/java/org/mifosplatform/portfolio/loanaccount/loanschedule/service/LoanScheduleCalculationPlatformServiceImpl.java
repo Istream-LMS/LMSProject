@@ -109,6 +109,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
     @Override
 	public String calculateTaxLoanSchedule(JsonQuery query, boolean flag) {
 		// TODO Auto-generated method stub
+		
 		JsonObject taxJson;
 		JsonArray taxArray = new JsonArray();
 		
@@ -116,13 +117,19 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 		
 		final BigDecimal principal = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("principal", query.parsedJson());
 		
-		BigDecimal amount = principal;
+		BigDecimal amount = principal, taxAmount = BigDecimal.ZERO;
 		
 		if (query.parsedJson().isJsonObject()) {
 			
             final JsonObject topLevelJsonElement = query.parsedJson().getAsJsonObject();
             
             final Locale locale = this.fromJsonHelper.extractLocaleParameter(topLevelJsonElement);
+            
+			if (topLevelJsonElement.has("deposit")) {
+				
+				final BigDecimal deposit = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("deposit", query.parsedJson());
+				amount = amount.subtract(deposit);
+			}
             
             if (topLevelJsonElement.has("taxes") && topLevelJsonElement.get("taxes").isJsonArray()) {
             	
@@ -134,62 +141,53 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 					
                     final JsonObject loanChargeElement = array.get(i).getAsJsonObject();                
                     final Long taxId = this.fromJsonHelper.extractLongNamed("id", loanChargeElement); 
+                    final String type = this.fromJsonHelper.extractStringNamed("type", loanChargeElement);
+            		final BigDecimal localeAmount = this.fromJsonHelper.extractBigDecimalNamed("taxValue", loanChargeElement, locale);
                     
-                    amount = calculateTax(loanChargeElement, locale, amount); 
-                    final BigDecimal taxAmount = this.fromJsonHelper.extractBigDecimalNamed("taxAmount", loanChargeElement, locale);
+                    TaxMap taxMap = this.taxMapRepository.findOneWithNotFoundDetection(taxId);
+                                
+                    taxAmount = calculateTax(type, localeAmount, amount); 
+                   
+                    if (taxMap.getTaxInclusive() == 1) {
+                    	amount = amount.subtract(taxAmount);
+        			} else {
+        				amount= amount.add(taxAmount);
+        			}
                     
-                    if(flag) {       
-                    	TaxMap taxMap = this.taxMapRepository.findOneWithNotFoundDetection(taxId);
+                    if(flag) {                     	
                     	LoanTaxMap loanTaxMap = new LoanTaxMap(0L, taxId, taxAmount, new Date(), taxMap.getTaxInclusive());
                     	this.loanTaxMapRepository.save(loanTaxMap);
                     	taxJson.addProperty("taxMapId", loanTaxMap.getId());
                     }
+                    
                     taxJson.addProperty("taxAmount", taxAmount);
                     taxJson.addProperty("taxId", taxId);
                     taxArray.add(taxJson);
                 }	
             }
         }
-		 
 		taxJson = new JsonObject();
 		taxJson.addProperty("finalAmount", amount);
+		taxJson.addProperty("vatAmount", taxAmount);
 		taxJson.add("taxArray", taxArray);
 		
 		return taxJson.toString();
 	}
     
-    private BigDecimal calculateTax(JsonObject loanChargeElement, 
-			Locale locale, BigDecimal principal) {
+    @Override
+    public BigDecimal calculateTax(final String type, final BigDecimal amount,
+			final BigDecimal principal) {
 
-		BigDecimal taxAmount;
-		final Long taxId = this.fromJsonHelper.extractLongNamed("id", loanChargeElement);
-		final String type = this.fromJsonHelper.extractStringNamed("type", loanChargeElement);
-		final BigDecimal amount = this.fromJsonHelper.extractBigDecimalNamed("taxValue", loanChargeElement, locale);
-
-		TaxMap taxMap = this.taxMapRepository.findOneWithNotFoundDetection(taxId);
-		
 		if (isMcodeValue(type)) {
-			// String chargeType = taxMap.getChargeType();
-			String taxType = taxMap.getTaxType();
-			int taxInclusive = taxMap.getTaxInclusive();
-
-			if (PERCENTAGE.equalsIgnoreCase(taxType))
-				taxAmount = percentageOf(principal, amount);
-			else if (FLAT.equalsIgnoreCase(taxType))
-				taxAmount = amount;
-			else
-				throw new TaxMapTypeNotExist(taxType);
 			
-			loanChargeElement.addProperty("taxAmount", taxAmount);
-			if (taxInclusive == 1) {
-				return principal.subtract(taxAmount);
-			} else {
-				return principal.add(taxAmount);
-			}
-
-		} else {
+			if (PERCENTAGE.equalsIgnoreCase(type))
+				return percentageOf(principal, amount);
+			else if (FLAT.equalsIgnoreCase(type))
+				return amount;
+			else
+				throw new TaxMapTypeNotExist(type);
+		} else 
 			throw new TaxTypeNotExist(type);
-		}
 	}
 
 	private boolean isMcodeValue(String mcodeType) {

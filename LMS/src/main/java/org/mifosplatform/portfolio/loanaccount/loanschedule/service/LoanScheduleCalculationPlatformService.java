@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 
+import java.math.BigDecimal;
+
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 
@@ -13,4 +15,7 @@ public interface LoanScheduleCalculationPlatformService {
     LoanScheduleModel calculateLoanSchedule(JsonQuery query);
 
 	String calculateTaxLoanSchedule(JsonQuery query, boolean flag);
+
+	BigDecimal calculateTax(String type, BigDecimal amount, BigDecimal principal);
+	
 }

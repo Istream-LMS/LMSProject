@@ -705,4 +705,8 @@ public class CommandWrapper {
 	public boolean isAllDelete() {
 		return this.actionName.equalsIgnoreCase("DELETEALL");
 	}
+
+	public boolean isLoanCalculatorResource() {
+		return this.entityName.equalsIgnoreCase("LOANCALCULATOR");	
+	}
 }

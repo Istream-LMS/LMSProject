@@ -660,6 +660,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
 		
+        } else if (wrapper.isLoanCalculatorResource()) {
+			if(wrapper.isCreate()){
+				handler = applicationContext.getBean("createLoanCalculatorCommandHandler",NewCommandSourceHandler.class);
+			} else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+		
         } else {
 
             throw new UnsupportedCommandException(wrapper.commandName());

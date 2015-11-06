@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -685,4 +686,22 @@ public class LoansApiResource {
     private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
+    
+    @POST
+    @Path("calculator")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String loanCalculator(final String apiRequestBodyAsJson) {
+       
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCalculator().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        Map<String, Object> data = result.getChanges();
+        return (String) data.get("data");
+        //return this.toApiJsonSerializer.serialize(result);
+        
+    }
+    
+    
 }

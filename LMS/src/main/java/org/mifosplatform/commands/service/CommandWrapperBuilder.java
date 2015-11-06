@@ -1555,14 +1555,14 @@ public class CommandWrapperBuilder {
 		this.actionName = "CREATE";
 		this.entityName = "LOANTAXMAPPING";
 		this.entityId = entityId;
-		this.href = "loan/tax";
+		this.href = "loans/tax";
 		return this;
 	}
 
 	public CommandWrapperBuilder updateLoanTaxMap() {
 		this.actionName = "UPDATE";
 		this.entityName = "LOANTAXMAPPING";
-		this.href = "loan/tax";
+		this.href = "loans/tax";
 		return this;
 	}
 
@@ -1577,7 +1577,14 @@ public class CommandWrapperBuilder {
 	public CommandWrapperBuilder deleteAllLoanTaxMap() {
 		this.actionName = "DELETEALL";
 		this.entityName = "LOANTAXMAPPING";
-		this.href = "loan/tax/";
+		this.href = "loans/tax";
 		return this;
+	}
+
+	public CommandWrapperBuilder createLoanCalculator() {
+		this.actionName = "CREATE";
+		this.entityName = "LOANCALCULATOR";
+		this.href = "loans/calculator";
+		return this;	
 	}
 }

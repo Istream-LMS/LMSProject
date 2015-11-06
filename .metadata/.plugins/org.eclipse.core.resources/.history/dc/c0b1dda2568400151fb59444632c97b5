@@ -1,0 +1,13 @@
+package com.ashok.test;
+
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+public class MathTesting {
+
+	public static void main(String a[]) {
+		
+		private final MathContext mc = new MathContext(6, RoundingMode.HALF_EVEN);
+		
+	}
+}

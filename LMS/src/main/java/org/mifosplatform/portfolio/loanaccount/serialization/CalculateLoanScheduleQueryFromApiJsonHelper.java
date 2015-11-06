@@ -44,7 +44,8 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
             "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId"));
     
-    final Set<String> supportedParametersForTax = new HashSet<String>(Arrays.asList("taxes", "principal", "locale"));
+    final Set<String> supportedParametersForTax = new HashSet<String>(Arrays.asList("taxes", "principal", "locale", 
+    		"charges", "intrest", "deposit"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

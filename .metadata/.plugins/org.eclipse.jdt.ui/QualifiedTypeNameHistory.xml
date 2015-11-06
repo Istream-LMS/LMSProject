@@ -1,2 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMapRepository"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMap"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData"/>
+<fullyQualifiedTypeName name="java.math.BigDecimal"/>
+</qualifiedTypeNameHistroy>

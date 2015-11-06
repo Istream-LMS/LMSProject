@@ -1,0 +1,21 @@
+package com.ashok.test;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+public class MathTesting {
+
+	private final static MathContext mc = new MathContext(6, RoundingMode.HALF_EVEN);
+	private final static MathContext mc1 = new MathContext(8, RoundingMode.HALF_EVEN);
+	
+	public static void main(String a[]) {
+		BigDecimal val = new BigDecimal(23);
+		BigDecimal value = new BigDecimal(3).divide(val, mc);
+		
+		System.out.println("value=" + value);
+		
+		
+		
+	}
+}
