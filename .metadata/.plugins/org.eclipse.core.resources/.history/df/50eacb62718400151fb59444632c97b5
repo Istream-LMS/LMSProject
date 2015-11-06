@@ -1,0 +1,234 @@
+package org.mifosplatform.portfolio.loanaccount.service;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
+
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.api.JsonQuery;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.taxmapping.domain.TaxMap;
+import org.mifosplatform.organisation.taxmapping.domain.TaxMapRepository;
+import org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
+import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.google.gson.JsonElement;
+
+@Service
+public class LoanCalculatorWritePlatformServiceImpl implements LoanCalculatorWritePlatformService {
+
+	
+	private final PlatformSecurityContext context;
+    private final LoanRepository loanRepository; 
+    private final ChargeRepositoryWrapper chargeRepository;
+    private final LoanChargeRepository loanChargeRepository;    
+    private final LoanProductReadPlatformService loanProductReadPlatformService;  
+    private final LoanChargeReadPlatformService loanChargeReadPlatformService;
+    private final LoanReadPlatformService loanReadPlatformService;
+    private final FromJsonHelper fromApiJsonHelper;
+    private final LoanScheduleCalculationPlatformService calculationPlatformService;
+    private final TaxMapRepositoryWrapper taxMapRepository;
+    
+    public final String ACCOUNTWDV = "ACCT.TAX";
+    public final String TAXWDV = "TAX_DEP";
+    public final String VAT = "VAT";
+    private final BigDecimal TWELVE = new BigDecimal(12);
+    private final BigDecimal TWO = new BigDecimal(2);
+    private final BigDecimal ONEHALF = new BigDecimal(1.15);
+    private final BigDecimal HUNDERED = new BigDecimal(100);
+    private final BigDecimal ONE = BigDecimal.ONE;
+    private final int payTerms[] = {12,24,36,48,60};
+    
+    private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+    
+    private TaxMap accountWDV;
+    private TaxMap taxWDV;
+    private TaxMap vatWDV;
+    
+
+    @Autowired
+    public LoanCalculatorWritePlatformServiceImpl(final PlatformSecurityContext context,
+            final LoanRepository loanRepository, final ChargeRepositoryWrapper chargeRepository, 
+            final LoanChargeRepository loanChargeRepository, 
+            final LoanProductReadPlatformService loanProductReadPlatformService,
+            final LoanChargeReadPlatformService loanChargeReadPlatformService,
+            final LoanReadPlatformService loanReadPlatformService, final FromJsonHelper fromApiJsonHelper,
+            final LoanScheduleCalculationPlatformService calculationPlatformService,
+            final TaxMapRepositoryWrapper taxMapRepository) {
+    	
+        this.context = context;        
+        this.loanRepository = loanRepository;
+        this.chargeRepository = chargeRepository;
+        this.loanChargeRepository = loanChargeRepository;
+        this.loanProductReadPlatformService = loanProductReadPlatformService;
+        this.loanChargeReadPlatformService = loanChargeReadPlatformService;
+        this.loanReadPlatformService = loanReadPlatformService;
+        this.fromApiJsonHelper = fromApiJsonHelper;
+        this.calculationPlatformService = calculationPlatformService;
+        this.taxMapRepository = taxMapRepository;
+    }
+	
+	@Override
+	public CommandProcessingResult createLoanCalculator(JsonCommand command) {
+		
+		try {
+			
+			generateData();
+			/*final JsonElement parsedQuery = this.fromApiJsonHelper.parse(command.json());
+			
+			final JsonQuery query = JsonQuery.from(command.json(), parsedQuery, this.fromApiJsonHelper);
+
+			String vatTaxJsonString = this.calculationPlatformService.calculateTaxLoanSchedule(query, false);
+			
+			JsonElement vatTaxJson = this.fromApiJsonHelper.parse(vatTaxJsonString);
+			
+			final BigDecimal finalAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("finalAmount", vatTaxJson);
+			final BigDecimal totalPrincipal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", query.parsedJson());	
+			final BigDecimal vatAmount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("vatAmount", vatTaxJson);*/
+			
+			final JsonElement parsedJson = this.fromApiJsonHelper.parse(command.json());
+			final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", parsedJson);	
+			final BigDecimal interest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", parsedJson);	
+			final BigDecimal costOfFund = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("costOfFund", parsedJson);	
+			final BigDecimal maintenance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maintenance", parsedJson);	
+			
+			BigDecimal totalPrincipal = principal;
+			final BigDecimal accountWDVRate = accountWDV.getRate();
+			final BigDecimal taxWDVRate = taxWDV.getRate();
+			final BigDecimal amountvwRate = vatWDV.getRate().divide(HUNDERED, mc);
+			
+			BigDecimal amountawRate, amounttwRate;
+			
+			if ( accountWDV.getTaxInclusive() == 1) {
+				amountawRate = ONE.subtract(accountWDVRate, mc);
+			} else {
+				amountawRate = ONE.add(accountWDVRate, mc);
+			}
+			
+			if(taxWDV.getTaxInclusive() == 1) {
+				amounttwRate = ONE.subtract(taxWDVRate, mc);
+			} else {
+				amounttwRate = ONE.add(taxWDVRate, mc);
+			}
+			
+			BigDecimal processingAmount = principal.multiply(amountvwRate, mc);
+			
+			for(int payTerm : payTerms ) {
+				
+				generateCalculation(payTerm, totalPrincipal, interest, 
+						costOfFund, maintenance, amountawRate, amounttwRate, amountvwRate, processingAmount);
+			}
+		
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		
+		return null;
+	}
+	
+	private TaxMap getTaxMapData(String taxCode) {
+		return this.taxMapRepository.findByTaxCode(taxCode);
+	}
+	
+	private void generateData() {	
+		accountWDV = getTaxMapData(ACCOUNTWDV);
+		taxWDV = getTaxMapData(TAXWDV);
+		vatWDV = getTaxMapData(VAT);
+	}
+	
+	/*private static boolean isGreaterThanZero(final BigDecimal value) {
+        return value.compareTo(BigDecimal.ZERO) == 1;
+    }*/
+	
+	/*private static BigDecimal percentageOf(final BigDecimal value, final BigDecimal percentage) {
+
+        BigDecimal percentageOf = BigDecimal.ZERO;
+
+        if (isGreaterThanZero(value)) {
+            final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+            //final BigDecimal multiplicand = percentage.divide(BigDecimal.valueOf(100l), mc);
+            percentageOf = value.multiply(multiplicand, mc);
+        }
+        return percentageOf;
+    }
+	*/
+	
+	
+	private LoanCalculatorData generateCalculation(int key, BigDecimal totalAmount1, 
+			BigDecimal intrestRate, BigDecimal cof, BigDecimal maintenance, 
+			BigDecimal amountawRate, BigDecimal amounttwRate, 
+			BigDecimal amountvwRate, BigDecimal processingAmount) {
+
+		switch (key) {
+
+		case 12:
+			BigDecimal keyPercent = new BigDecimal(key).divide(TWELVE, mc); //D15/12
+			BigDecimal vatAmount = totalAmount1.multiply(amountvwRate, mc);
+			BigDecimal purchasePrice = totalAmount1.subtract(vatAmount, mc);
+	
+			//BigDecimal amountawRateVal = amountawRate.multiply(keyPercent, mc);
+			//BigDecimal amounttwRateVal = amounttwRate.multiply(keyPercent, mc);
+			
+			BigDecimal awAmount = processingAmount.multiply((amountawRate.multiply(keyPercent, mc)), mc); //=B18*(1-E69*D15/12)
+			BigDecimal twAmount = processingAmount.multiply((amounttwRate.multiply(keyPercent, mc)), mc); //=B18*(1-E70*D15/12)
+
+			BigDecimal residualAmountVEP = (awAmount.add(twAmount, mc)).divide(TWO, mc); //D45=(D55+D56) /2
+			BigDecimal residualAmountVIP = residualAmountVEP.multiply(ONEHALF, mc); // =D45*1.15
+			BigDecimal residualCost = residualAmountVEP.divide(processingAmount, mc); //=D45/B18
+			BigDecimal residualDeprecisation = (processingAmount.subtract(residualAmountVEP, mc)).divide(keyPercent)
+					.divide(processingAmount, mc); //(($B$18-C45)/(D15/12))/$B$18
+			
+			BigDecimal deprecisationForMonth = processingAmount.multiply(residualDeprecisation, mc); //=$B$18*D43	
+			BigDecimal coiForMonth = (processingAmount.multiply(intrestRate, mc)).divide(HUNDERED, mc); //=($B$18*8*D15/D15)/100
+			BigDecimal totalForMonth = 
+			
+			BigDecimal deprecisation = deprecisationForMonth.multiply(keyPercent, mc); //=$B$18*D43*D15/12
+			BigDecimal coiForYear = keyPercent.multiply(coiForMonth, mc); //=$B$18*$B$8*(D15/12)/100
+			BigDecimal cofForYear = keyPercent.multiply(cof, mc); //=B6*D15/12
+			BigDecimal maintenanceForYear = keyPercent.multiply(maintenance, mc); //=$B$7*D15/12
+			
+			BigDecimal totalwoMaintenance = coiForYear.add(deprecisation, mc); 
+			BigDecimal totalMaintenance = totalwoMaintenance.add(cofForYear, mc).add(maintenanceForYear, mc);
+
+			BigDecimal rateWOM = totalwoMaintenance.divide(TWELVE, mc);
+			BigDecimal costWOM = totalwoMaintenance.divide(TWELVE, mc);
+			BigDecimal rateWithM = totalMaintenance.divide(TWELVE, mc);
+
+			// LoanCalculatorData data = new LoanCalculatorData(totalAmount, );
+
+			break;
+
+		case 24:
+
+			break;
+
+		case 36:
+
+			break;
+
+		case 48:
+
+			break;
+
+		case 60:
+
+			break;
+
+		default:
+			break;
+		}
+
+		return null;
+	}
+
+}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog">
+		<item value="true" key="ShowStatusLine"/>
+		<item value="false" key="ShowDerived"/>
+		<item value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#x0A;&lt;workingSet workingSetName=&quot;&quot;/&gt;" key="WorkingSet"/>
+		<item value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#x0A;&lt;History&gt;&#x0A;&lt;historyRootNode&gt;&#x0A;&lt;infoNode path=&quot;/LMS/build.gradle&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/resources/META-INF/spring/appContext.xml&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/resources/META-INF/spring/infrastructure.xml&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/test/resources/META-INF/context.xml&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/commands/service/SynchronousCommandProcessingService.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/portfolio/loanaccount/api/LoansApiResource.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/portfolio/loanproduct/handler/CreateLoanProductCommandHandler.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/portfolio/loanaccount/service/LoanWritePlatformServiceJpaRepositoryImpl.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/organisation/taxmapping/handler/CreateLoanTaxMapCommandHandler.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/organisation/taxmapping/domain/TaxMapRepository.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/organisation/taxmapping/domain/TaxMapRepositoryWrapper.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;infoNode path=&quot;/LMS/src/main/java/org/mifosplatform/organisation/taxmapping/domain/LoanTaxMapRepository.java&quot; type=&quot;1&quot;/&gt;&#x0A;&lt;/historyRootNode&gt;&#x0A;&lt;/History&gt;" key="History"/>
+		<section name="DialogBoundsSettings">
+			<item value="600" key="DIALOG_WIDTH"/>
+			<item value="53" key="DIALOG_Y_ORIGIN"/>
+			<item value="500" key="DIALOG_HEIGHT"/>
+			<item value="351" key="DIALOG_X_ORIGIN"/>
+			<item value="1|Ubuntu|11.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
+		</section>
+	</section>
+	<section name="ExternalProjectImportWizard">
+		<item value="false" key="WizardProjectsImportPage.STORE_ARCHIVE_SELECTED"/>
+		<item value="false" key="WizardProjectsImportPage.STORE_COPY_PROJECT_ID"/>
+	</section>
+</section>

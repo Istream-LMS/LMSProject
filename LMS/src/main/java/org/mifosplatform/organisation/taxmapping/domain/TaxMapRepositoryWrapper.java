@@ -21,4 +21,12 @@ public class TaxMapRepositoryWrapper {
 
         return taxDefinition;
     }
+
+	public TaxMap findByTaxCode(String taxCode) {
+		
+		final TaxMap taxDefinition = this.repository.findByTaxCode(taxCode);
+        if (taxDefinition == null) { throw new TaxMapNotFoundException(taxCode); }
+
+        return taxDefinition;
+	}
 }

@@ -303,7 +303,7 @@ buildscript {
 
 
 flyway {
-    url = "jdbc:mysql://localhost:3306/LMS-demo"
+    url = "jdbc:mysql://localhost:3306/lmstenant-default"
     user = mysqlUser
     password = mysqlPassword
     

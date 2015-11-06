@@ -1,0 +1,7 @@
+package org.mifosplatform.portfolio.loanaccount.data;
+
+public class LoanCalculatorData {
+
+	private BigDecimal retailPrice;
+	
+}
