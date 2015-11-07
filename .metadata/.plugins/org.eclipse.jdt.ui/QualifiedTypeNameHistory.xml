@@ -6,4 +6,6 @@
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData"/>
 <fullyQualifiedTypeName name="java.math.BigDecimal"/>
+<fullyQualifiedTypeName name="org.apache.commons.collections.map.HashedMap"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
 </qualifiedTypeNameHistroy>
