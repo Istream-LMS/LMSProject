@@ -38,7 +38,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private final BigDecimal ONEHALF = new BigDecimal(1.15);
 	private final BigDecimal HUNDERED = new BigDecimal(100);
 	private final BigDecimal ONE = BigDecimal.ONE;
-	private final int payTerms[] = { 12, 24, 36, 48, 60 };
+	//private final int payTerms[] = { 12, 24, 36, 48, 60 };
 
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 	private final MathContext mc2 = new MathContext(8, RoundingMode.HALF_UP);
@@ -59,91 +59,48 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	@Override
 	public CommandProcessingResult createLoanCalculator(JsonCommand command) {
 
-		try {
+		this.context.authenticatedUser();
+		generateData();
+		JsonObject jsonObject = new JsonObject();
+		JsonArray jsonArray = new JsonArray();
+		Gson gson = new Gson();		
 
-			this.context.authenticatedUser();
-			generateData();
-			JsonObject jsonObject = new JsonObject();
-			JsonArray jsonArray = new JsonArray();
-			Gson gson = new Gson();
-			/*
-			 * final JsonElement parsedQuery =
-			 * this.fromApiJsonHelper.parse(command.json());
-			 * 
-			 * final JsonQuery query = JsonQuery.from(command.json(),
-			 * parsedQuery, this.fromApiJsonHelper);
-			 * 
-			 * String vatTaxJsonString =
-			 * this.calculationPlatformService.calculateTaxLoanSchedule(query,
-			 * false);
-			 * 
-			 * JsonElement vatTaxJson =
-			 * this.fromApiJsonHelper.parse(vatTaxJsonString);
-			 * 
-			 * final BigDecimal finalAmount =
-			 * this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed
-			 * ("finalAmount", vatTaxJson); final BigDecimal totalPrincipal =
-			 * this
-			 * .fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal",
-			 * query.parsedJson()); final BigDecimal vatAmount =
-			 * this.fromApiJsonHelper
-			 * .extractBigDecimalWithLocaleNamed("vatAmount", vatTaxJson);
-			 */
+		final JsonElement parsedJson = this.fromApiJsonHelper.parse(command.json());
+		String[] payTerms = this.fromApiJsonHelper.extractArrayNamed("payTerms", parsedJson);
+		final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", parsedJson);
+		final BigDecimal interest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", parsedJson);
+		final BigDecimal costOfFund = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("costOfFund", parsedJson);
+		final BigDecimal maintenance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maintenance", parsedJson);
 
-			final JsonElement parsedJson = this.fromApiJsonHelper.parse(command.json());
-			final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", parsedJson);
-			final BigDecimal interest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", parsedJson);
-			final BigDecimal costOfFund = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("costOfFund", parsedJson);
-			final BigDecimal maintenance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maintenance", parsedJson);
+		JsonElement jsonParser;
+		BigDecimal totalPrincipal = principal;
+		final BigDecimal accountWDVRate = accountWDV.getRate();
+		final BigDecimal taxWDVRate = taxWDV.getRate();
+		final BigDecimal amountvwRate = vatWDV.getRate().divide(HUNDERED, mc);
+		
+		BigDecimal vatA = principal.multiply(amountvwRate, mc);
+		BigDecimal processingAmount = principal.subtract(vatA, mc);
 
-			JsonElement jsonParser;
-			BigDecimal totalPrincipal = principal;
-			final BigDecimal accountWDVRate = accountWDV.getRate();
-			final BigDecimal taxWDVRate = taxWDV.getRate();
-			final BigDecimal amountvwRate = vatWDV.getRate().divide(HUNDERED, mc);
-
-			/*BigDecimal amountawRate, amounttwRate;
-
-			if (accountWDV.getTaxInclusive() == 1) {
-				amountawRate = ONE.subtract(accountWDVRate, mc);
-			} else {
-				amountawRate = ONE.add(accountWDVRate, mc);
-			}
-
-			if (taxWDV.getTaxInclusive() == 1) {
-				amounttwRate = ONE.subtract(taxWDVRate, mc);
-			} else {
-				amounttwRate = ONE.add(taxWDVRate, mc);
-			}*/
-			
-			BigDecimal vatA = principal.multiply(amountvwRate, mc);
-			BigDecimal processingAmount = principal.subtract(vatA, mc);
-
-			for (int payTerm : payTerms) {
-
-				LoanCalculatorData loanCalculatorData = generateCalculation(
-						payTerm, totalPrincipal, interest, costOfFund,
-						maintenance, accountWDVRate, taxWDVRate, amountvwRate,
-						processingAmount);
-
-				totalPrincipal = loanCalculatorData.getResidualAmountVIP();
-				jsonParser = this.fromApiJsonHelper.parse(gson
-						.toJson(loanCalculatorData));
-				jsonArray.add(jsonParser);
-			}
-			jsonObject.addProperty("principal", principal);
-			jsonObject.add("payTerms", jsonArray);
-			
-			Map<String, Object> withChanges = new HashMap<String, Object>();
-			withChanges.put("data", jsonObject.toString());
-			
-			return new CommandProcessingResultBuilder().with(withChanges).build();
-
-		} catch (Exception e) {
-			e.printStackTrace();
+		if(payTerms.length == 0 ) {
+			payTerms = new String[] { "12", "24", "36", "48", "60" };
 		}
+		for (String payTerm : payTerms) {
 
-		return new CommandProcessingResultBuilder().withCommandId(-1L).build();
+			LoanCalculatorData loanCalculatorData = generateCalculation(
+					Integer.parseInt(payTerm), totalPrincipal, interest, costOfFund, maintenance,
+					accountWDVRate, taxWDVRate, amountvwRate, processingAmount);
+
+			totalPrincipal = loanCalculatorData.getResidualAmountVIP();
+			jsonParser = this.fromApiJsonHelper.parse(gson.toJson(loanCalculatorData));
+			jsonArray.add(jsonParser);
+		}
+		jsonObject.addProperty("principal", principal);
+		jsonObject.add("payTerms", jsonArray);
+
+		Map<String, Object> withChanges = new HashMap<String, Object>();
+		withChanges.put("data", jsonObject.toString());
+
+		return new CommandProcessingResultBuilder().with(withChanges).build();
 	}
 
 	private TaxMap getTaxMapData(String taxCode) {
@@ -159,7 +116,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private BigDecimal divideAtCalc(BigDecimal residual, BigDecimal value) {
 		
 		try {
-			return residual.divide(value, mc);
+			if(isGreaterThanZero(residual)) {
+				return residual.divide(value, mc);
+			}
+			return BigDecimal.ZERO;
 		} catch (ArithmeticException e) {
 			return residual.divide(value, mc2);
 		} catch (Exception e) {
@@ -167,6 +127,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			return null;
 		}
 	}
+	
+	private static boolean isGreaterThanZero(final BigDecimal value) {
+        return value.compareTo(BigDecimal.ZERO) == 1;
+    }
 
 	private LoanCalculatorData generateCalculation(int key, BigDecimal retailPrice, BigDecimal intrestRate,
 			BigDecimal cofForMonth, BigDecimal maintenanceForMonth, BigDecimal accountWDVRate, 
