@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -141,6 +143,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final String XLSX_FILE_EXTENSION = ".xlsx";
     private SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
     private static final String UNDERSCORE = "_";
+    private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+    private final BigDecimal HUNDERED = new BigDecimal(100);
 
 
     @Autowired
@@ -1517,14 +1521,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	
 	private String getFileLocation() {
 
-		String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator;
+		String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE;
 
 		/** Recursively create the directory if it does not exist **/
 		if (!new File(fileLocation).isDirectory()) {
 			new File(fileLocation).mkdirs();
 		}
 
-		return fileLocation + LEASE + UNDERSCORE + dateFormat.format(new Date()) + XLSX_FILE_EXTENSION;
+		return fileLocation + File.separator + LEASE + UNDERSCORE + dateFormat.format(new Date()) + XLSX_FILE_EXTENSION;
 	}
 	
 	@Override
@@ -1563,11 +1567,19 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			for (int j = 0; j < arrayList.size(); j++) {
 
 				Row row = sheet.getRow(j);
-				String keyy = arrayList.get(j);
+				String keyName = arrayList.get(j);
 				if (j == 0) {
-					row.createCell(i).setCellValue(Integer.parseInt(jsonObj.get(keyy).toString()));
+					row.createCell(i).setCellValue(Integer.parseInt(jsonObj.get(keyName).toString()));
 				} else {
-					row.createCell(i).setCellValue(jsonObj.get(keyy).toString());
+					//residualDeprecisation.multiply(HUNDERED, mc)
+					BigDecimal finalValue = jsonObj.get(keyName).getAsBigDecimal();
+					if(keyName.equalsIgnoreCase("residualDeprecisation") || keyName.equalsIgnoreCase("residualCost")) {
+						finalValue = finalValue.multiply(HUNDERED, mc).setScale(2, BigDecimal.ROUND_HALF_UP);
+						row.createCell(i).setCellValue(String.valueOf(finalValue) + "%");
+					} else {
+						finalValue = finalValue.setScale(2, BigDecimal.ROUND_HALF_UP);
+						row.createCell(i).setCellValue(String.valueOf(finalValue));
+					}			
 				}
 			}
 		}

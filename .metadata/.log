@@ -2668,3 +2668,6 @@ java.lang.NullPointerException
 
 !ENTRY org.eclipse.ui 4 4 2015-11-10 12:52:18.980
 !MESSAGE Plug-in 'org.eclipse.jpt.jpa.ui' contributed an invalid Menu Extension (Path: 'org.eclipse.jpt.jpa.ui.menu.JpaTools' is invalid): org.eclipse.jpt.jpa.ui.generateEntities
+
+!ENTRY org.eclipse.php.debug.core 4 4 2015-11-10 16:22:35.407
+!MESSAGE The debug port 9000 is in use. Please select a different port for the debugger.

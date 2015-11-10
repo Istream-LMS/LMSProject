@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
@@ -46,7 +45,7 @@ public final class LoanCalculatorCommandFromApiJsonDeserializer {
 		}
 
 		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("principal", "interestRatePerPeriod", "costOfFund",
-						"locale", "dateFormat", "maintenance","payTerms"));
+						"locale", "dateFormat", "maintenance","payTerms", "deposit"));
 
 		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 		}.getType();

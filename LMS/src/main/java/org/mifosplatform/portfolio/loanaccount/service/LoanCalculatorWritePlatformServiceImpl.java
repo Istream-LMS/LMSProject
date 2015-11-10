@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.taxmapping.domain.TaxMap;
 import org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanCalculatorCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.exception.PrincipalAmountGreaterThanDepositException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private final PlatformSecurityContext context;
 	private final FromJsonHelper fromApiJsonHelper;
 	private final TaxMapRepositoryWrapper taxMapRepository;
+	private final LoanCalculatorCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
 	public final String ACCOUNTWDV = "ACCT.TAX";
 	public final String TAXWDV = "TAX_DEP";
@@ -50,17 +52,21 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	
 	@Autowired
 	public LoanCalculatorWritePlatformServiceImpl(final PlatformSecurityContext context,
-			final FromJsonHelper fromApiJsonHelper, final TaxMapRepositoryWrapper taxMapRepository) {
+			final FromJsonHelper fromApiJsonHelper, final TaxMapRepositoryWrapper taxMapRepository,
+			final LoanCalculatorCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
 
 		this.context = context;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.taxMapRepository = taxMapRepository;
+		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 	}
 
 	@Override
 	public CommandProcessingResult createLoanCalculator(JsonCommand command) {
 
 		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForCreate(command.json());
+		
 		generateData();
 		JsonElement jsonParser;
 
@@ -80,7 +86,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final BigDecimal costOfFund = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("costOfFund", parsedJson);
 		final BigDecimal maintenance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maintenance", parsedJson);
 
-		if (principal.compareTo(deposit) < 1) {
+		if (null != deposit && principal.compareTo(deposit) < 1) {
 			throw new PrincipalAmountGreaterThanDepositException(principal, deposit);
 		}
 
@@ -201,8 +207,8 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		BigDecimal quoteWOMaintenance = rateWOMaintenance; // (21)
 		BigDecimal quoteWMaintenance = rateWithMaintenance; // (22)
 		
-		residualDeprecisation = residualDeprecisation.multiply(HUNDERED, mc);
-		residualCost = residualCost.multiply(HUNDERED, mc);
+		/*residualDeprecisation = residualDeprecisation.multiply(HUNDERED, mc);
+		residualCost = residualCost.multiply(HUNDERED, mc);*/
 
 		return new LoanCalculatorData(retailPrice, vatAmount, purchasePrice, coiForYear, cofForYear, 
 				maintenanceForYear, deprecisationForYear, totalForYear, coi, cof,
