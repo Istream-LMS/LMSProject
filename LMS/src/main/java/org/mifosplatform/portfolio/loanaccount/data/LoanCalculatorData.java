@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
 
+@SuppressWarnings("unused")
 public class LoanCalculatorData {
 
 	private int key;
@@ -27,7 +28,6 @@ public class LoanCalculatorData {
 	private BigDecimal costWithOutMaintenance;
 	private BigDecimal rateWithMaintenance;
 
-	
 	private BigDecimal residualDeprecisation;
 	private BigDecimal residualCost;
 	private BigDecimal residualAmountVEP;
