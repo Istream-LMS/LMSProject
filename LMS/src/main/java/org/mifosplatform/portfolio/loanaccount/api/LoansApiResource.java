@@ -696,11 +696,43 @@ public class LoansApiResource {
     	final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCalculator().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        Map<String, Object> data = result.getChanges();
-        return (String) data.get("data");
-        //return this.toApiJsonSerializer.serialize(result);
         
+        Map<String, Object> changes = result.getChanges();
+        
+        if(null != changes && !changes.isEmpty()) {
+        	
+        	return changes.get("data").toString();
+        }
+        return null;
+    }
+    
+    @POST
+    @Path("calculator/export")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response exportToXlsx(final String apiRequestBodyAsJson) {
+    	
+    	this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    	
+    	String jsonString = loanCalculator(apiRequestBodyAsJson);
+    	
+    	String fileName = this.loanReadPlatformService.exportToExcel(jsonString);
+       
+        if(null == fileName) {
+        	throw new LeaseScreenReportFileNameNotNullException();
+        }
+        
+        File file = new File(fileName);
+        
+        if(!file.exists()) {
+        	throw new LeaseScreenReportFileNotFoundException(fileName);
+        }
+        
+        final ResponseBuilder response = Response.ok(file);
+        response.header("Content-Disposition", "attachment; filename=" + file.getName().replace(" ", "_"));
+        response.header("Content-Type", "application/vnd.ms-excel");
+       
+        return response.build();
     }
     
     

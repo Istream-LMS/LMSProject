@@ -6,27 +6,39 @@
 package org.mifosplatform.portfolio.loanaccount.service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
@@ -98,6 +110,10 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
@@ -119,6 +135,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final LoanMapper loaanLoanMapper = new LoanMapper();
     private final TaxMapReadPlatformService taxMapReadPlatformService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
+	private final FromJsonHelper fromApiJsonHelper;
+    private static final String LEASE = "LeaseCalculator";
+    private static final String DATEFORMAT = "ddMMyyhhmmss";
+    private static final String XLSX_FILE_EXTENSION = ".xlsx";
+    private SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+    private static final String UNDERSCORE = "_";
+
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final LoanRepository loanRepository,
@@ -129,7 +152,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final FundReadPlatformService fundReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService, final RoutingDataSource dataSource,
             final CalendarReadPlatformService calendarReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
-            final TaxMapReadPlatformService taxMapReadPlatformService,final ClientRepositoryWrapper clientRepositoryWrapper) {
+            final TaxMapReadPlatformService taxMapReadPlatformService,final ClientRepositoryWrapper clientRepositoryWrapper,
+            final FromJsonHelper fromApiJsonHelper) {
         this.context = context;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -145,6 +169,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.staffReadPlatformService = staffReadPlatformService;
         this.taxMapReadPlatformService = taxMapReadPlatformService;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
+        this.fromApiJsonHelper = fromApiJsonHelper;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -1488,6 +1513,82 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		String name = client.getDisplayName();
 		name = (name == null || client.getDisplayName().isEmpty()) ? client.getFirstname() : name;
 		return lsrDoc.createPDF(loanId, repaymentSchedule, name, client.getEmailId(), client.getMobileNo());
+	}
+	
+	private String getFileLocation() {
+
+		String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator;
+
+		/** Recursively create the directory if it does not exist **/
+		if (!new File(fileLocation).isDirectory()) {
+			new File(fileLocation).mkdirs();
+		}
+
+		return fileLocation + LEASE + UNDERSCORE + dateFormat.format(new Date()) + XLSX_FILE_EXTENSION;
+	}
+	
+	@Override
+	public String exportToExcel(String changeJson) {
+
+		int rownum = 0;
+
+		HSSFWorkbook workbook = new HSSFWorkbook();
+
+		HSSFSheet sheet = workbook.createSheet("Loan_Calculator");
+
+		JsonObject jsonObject = this.fromApiJsonHelper.parse(changeJson).getAsJsonObject();
+
+		JsonArray array = jsonObject.getAsJsonArray("payTerms");
+
+		JsonObject arrayFirstJson = array.get(0).getAsJsonObject();
+
+		Set<Entry<String, JsonElement>> keys = arrayFirstJson.entrySet();
+
+		ArrayList<String> arrayList = new ArrayList<String>();
+
+		for (Entry<String, JsonElement> key : keys) {
+
+			String keyval = key.getKey();
+			arrayList.add(keyval);
+			Row row = sheet.createRow(rownum);
+			Cell cell = row.createCell(0);
+			cell.setCellValue(keyval);
+			rownum++;
+		}
+
+		for (int i = 1; i <= array.size(); i++) {
+
+			JsonObject jsonObj = array.get(i - 1).getAsJsonObject();
+
+			for (int j = 0; j < arrayList.size(); j++) {
+
+				Row row = sheet.getRow(j);
+				String keyy = arrayList.get(j);
+				if (j == 0) {
+					row.createCell(i).setCellValue(Integer.parseInt(jsonObj.get(keyy).toString()));
+				} else {
+					row.createCell(i).setCellValue(jsonObj.get(keyy).toString());
+				}
+			}
+		}
+
+		try {
+
+			String location = getFileLocation();
+			File file = new File(location);
+			file.createNewFile();
+			FileOutputStream out = new FileOutputStream(file);
+			workbook.write(out);
+			out.close();
+			return location;
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
     
 }
