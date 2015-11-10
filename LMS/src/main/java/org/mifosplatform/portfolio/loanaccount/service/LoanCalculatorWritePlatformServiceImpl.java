@@ -14,6 +14,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.taxmapping.domain.TaxMap;
 import org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanCalculatorCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.exception.PrincipalAmountGreaterThanDepositException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +31,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private final PlatformSecurityContext context;
 	private final FromJsonHelper fromApiJsonHelper;
 	private final TaxMapRepositoryWrapper taxMapRepository;
+	private final LoanCalculatorCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
 	public final String ACCOUNTWDV = "ACCT.TAX";
 	public final String TAXWDV = "TAX_DEP";
@@ -46,49 +49,64 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private TaxMap accountWDV;
 	private TaxMap taxWDV;
 	private TaxMap vatWDV;
-
+	
 	@Autowired
 	public LoanCalculatorWritePlatformServiceImpl(final PlatformSecurityContext context,
-			final FromJsonHelper fromApiJsonHelper, final TaxMapRepositoryWrapper taxMapRepository) {
+			final FromJsonHelper fromApiJsonHelper, final TaxMapRepositoryWrapper taxMapRepository,
+			final LoanCalculatorCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
 
 		this.context = context;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.taxMapRepository = taxMapRepository;
+		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 	}
 
 	@Override
 	public CommandProcessingResult createLoanCalculator(JsonCommand command) {
 
 		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForCreate(command.json());
+		
 		generateData();
+		JsonElement jsonParser;
+
+		final BigDecimal accountWDVRate = accountWDV.getRate();
+		final BigDecimal taxWDVRate = taxWDV.getRate();
+		final BigDecimal amountvwRate = vatWDV.getRate().divide(HUNDERED, mc);
+
 		JsonObject jsonObject = new JsonObject();
 		JsonArray jsonArray = new JsonArray();
-		Gson gson = new Gson();		
+		Gson gson = new Gson();
 
 		final JsonElement parsedJson = this.fromApiJsonHelper.parse(command.json());
 		String[] payTerms = this.fromApiJsonHelper.extractArrayNamed("payTerms", parsedJson);
+		BigDecimal deposit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("deposit", parsedJson);
 		final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", parsedJson);
 		final BigDecimal interest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", parsedJson);
 		final BigDecimal costOfFund = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("costOfFund", parsedJson);
 		final BigDecimal maintenance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maintenance", parsedJson);
 
-		JsonElement jsonParser;
-		BigDecimal totalPrincipal = principal;
-		final BigDecimal accountWDVRate = accountWDV.getRate();
-		final BigDecimal taxWDVRate = taxWDV.getRate();
-		final BigDecimal amountvwRate = vatWDV.getRate().divide(HUNDERED, mc);
-		
-		BigDecimal vatA = principal.multiply(amountvwRate, mc);
-		BigDecimal processingAmount = principal.subtract(vatA, mc);
+		if (null == deposit) {
+			deposit = BigDecimal.ZERO;
+		}
+		if (principal.compareTo(deposit) < 1) {
+			throw new PrincipalAmountGreaterThanDepositException(principal, deposit);
+		}
 
-		if(payTerms.length == 0 ) {
+		BigDecimal totalPrincipal = principal.subtract(deposit);
+
+		BigDecimal vatA = totalPrincipal.multiply(amountvwRate, mc);
+		BigDecimal processingAmount = totalPrincipal.subtract(vatA, mc);
+
+		if (payTerms.length == 0) {
 			payTerms = new String[] { "12", "24", "36", "48", "60" };
 		}
 		for (String payTerm : payTerms) {
 
 			LoanCalculatorData loanCalculatorData = generateCalculation(
-					Integer.parseInt(payTerm), totalPrincipal, interest, costOfFund, maintenance,
-					accountWDVRate, taxWDVRate, amountvwRate, processingAmount);
+					Integer.parseInt(payTerm), totalPrincipal, interest,
+					costOfFund, maintenance, accountWDVRate, taxWDVRate,
+					amountvwRate, processingAmount);
 
 			totalPrincipal = loanCalculatorData.getResidualAmountVIP();
 			jsonParser = this.fromApiJsonHelper.parse(gson.toJson(loanCalculatorData));
@@ -133,7 +151,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
     }
 
 	private LoanCalculatorData generateCalculation(int key, BigDecimal retailPrice, BigDecimal intrestRate,
-			BigDecimal cofForMonth, BigDecimal maintenanceForMonth, BigDecimal accountWDVRate, 
+			BigDecimal cofForYear, BigDecimal maintenanceForYear, BigDecimal accountWDVRate, 
 			BigDecimal taxWDVRate, BigDecimal amountvwRate, BigDecimal processingAmount) {
 
 		BigDecimal keyBigDecimal = new BigDecimal(key);
@@ -166,19 +184,19 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		BigDecimal residualDeprecisation = divideAtCalc(residuald, processingAmount);
 		
 		//BigDecimal coiForMonth = (processingAmount.multiply(intrestRate, mc)).divide(HUNDERED, mc);// (9) //=($B$18*8*D15/D15)/100
-		BigDecimal coiForMonthD = processingAmount.multiply(intrestRate, mc);
-		BigDecimal coiForMonth = divideAtCalc(coiForMonthD, HUNDERED);
+		BigDecimal coiForYearRate = processingAmount.multiply(intrestRate, mc);
+		BigDecimal coiForYear = divideAtCalc(coiForYearRate, HUNDERED);
 		
-		BigDecimal deprecisationForMonth = processingAmount.multiply(residualDeprecisation, mc); // (10) //=$B$18*D43
-		BigDecimal totalForMonth = coiForMonth.add(cofForMonth, mc).add(maintenanceForMonth, mc).add(deprecisationForMonth, mc); // (11)
+		BigDecimal deprecisationForYear = processingAmount.multiply(residualDeprecisation, mc); // (10) //=$B$18*D43
+		BigDecimal totalForYear = coiForYear.add(cofForYear, mc).add(maintenanceForYear, mc).add(deprecisationForYear, mc); // (11)
 
-		BigDecimal coiForYear = keyPercent.multiply(coiForMonth, mc);// (12) //=$B$18*$B$8*(D15/12)/100
-		BigDecimal cofForYear = keyPercent.multiply(cofForMonth, mc);// (13) //=B6*D15/12
-		BigDecimal maintenanceForYear = keyPercent.multiply(maintenanceForMonth, mc);// (14) //=$B$7*D15/12
-		BigDecimal deprecisationForYear = deprecisationForMonth.multiply(keyPercent, mc);// (15) //=$B$18*D43*D15/12
+		BigDecimal coi = keyPercent.multiply(coiForYear, mc);// (12) //=$B$18*$B$8*(D15/12)/100
+		BigDecimal cof = keyPercent.multiply(cofForYear, mc);// (13) //=B6*D15/12
+		BigDecimal maintenance = keyPercent.multiply(maintenanceForYear, mc);// (14) //=$B$7*D15/12
+		BigDecimal deprecisation = deprecisationForYear.multiply(keyPercent, mc);// (15) //=$B$18*D43*D15/12
 
-		BigDecimal totalwoMaintenance = coiForYear.add(deprecisationForYear, mc); // (16)
-		BigDecimal totalMaintenance = totalwoMaintenance.add(cofForYear, mc).add(maintenanceForYear, mc); // (17)
+		BigDecimal totalwoMaintenance = coi.add(deprecisation, mc); // (16)
+		BigDecimal totalMaintenance = totalwoMaintenance.add(cof, mc).add(maintenance, mc); // (17)
 
 		//BigDecimal rateWOMaintenance = totalwoMaintenance.divide(keyBigDecimal, mc);// (18) //=D36/D15
 		BigDecimal rateWOMaintenance = divideAtCalc(totalwoMaintenance, keyBigDecimal);
@@ -191,14 +209,16 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		
 		BigDecimal quoteWOMaintenance = rateWOMaintenance; // (21)
 		BigDecimal quoteWMaintenance = rateWithMaintenance; // (22)
+		
+		/*residualDeprecisation = residualDeprecisation.multiply(HUNDERED, mc);
+		residualCost = residualCost.multiply(HUNDERED, mc);*/
 
-		return new LoanCalculatorData(retailPrice, vatAmount, purchasePrice, coiForMonth, cofForMonth, 
-				maintenanceForMonth, deprecisationForMonth, totalForMonth, coiForYear, cofForYear,
-				maintenanceForYear, deprecisationForYear, totalwoMaintenance, totalMaintenance, 
+		return new LoanCalculatorData(retailPrice, vatAmount, purchasePrice, coiForYear, cofForYear, 
+				maintenanceForYear, deprecisationForYear, totalForYear, coi, cof,
+				maintenance, deprecisation, totalwoMaintenance, totalMaintenance, 
 				rateWOMaintenance, costWOMaintenance, rateWithMaintenance, residualDeprecisation, 
-				residualCost, residualAmountVEP, residualAmountVIP, quoteWOMaintenance, quoteWMaintenance, key,awAmount,twAmount);
-	}
-
-	
+				residualCost, residualAmountVEP, residualAmountVIP, quoteWOMaintenance, quoteWMaintenance,
+				key, awAmount, twAmount);
+	}	
 
 }
