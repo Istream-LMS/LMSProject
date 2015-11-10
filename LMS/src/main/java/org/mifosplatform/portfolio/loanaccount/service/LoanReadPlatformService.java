@@ -81,5 +81,7 @@ public interface LoanReadPlatformService {
 	List<LoanTaxMapData> retrieveLoanTaxMappingData(Long loanId);
 
 	String printLeaseScreenReportDoc(Long loanId);
+
+	String exportToExcel(String changeJson);
 	
 }

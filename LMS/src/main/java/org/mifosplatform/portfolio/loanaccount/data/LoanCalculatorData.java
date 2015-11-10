@@ -20,22 +20,21 @@ public class LoanCalculatorData {
 	private BigDecimal cof;
 	private BigDecimal maintenance;
 	private BigDecimal deprecisation;
-	private BigDecimal totalWOMaintenance;
+	private BigDecimal totalWithOutMaintenance;
 	private BigDecimal totalMaintenance;
 
 	
-	private BigDecimal rateWOMaintenance;
-	private BigDecimal costWOMaintenance;
+	private BigDecimal rateWithOutMaintenance;
+	private BigDecimal costWithOutMaintenance;
 	private BigDecimal rateWithMaintenance;
 
-	
 	private BigDecimal residualDeprecisation;
 	private BigDecimal residualCost;
 	private BigDecimal residualAmountVEP;
 	private BigDecimal residualAmountVIP;
 
-	private BigDecimal quoteWOMaintenance;
-	private BigDecimal quoteWMaintenance;
+	private BigDecimal quoteWithOutMaintenance;
+	private BigDecimal quoteWithMaintenance;
 
 	private BigDecimal accountWDV;
 	private BigDecimal taxWDV;
@@ -55,7 +54,8 @@ public class LoanCalculatorData {
 			BigDecimal rateWithMaintenance, BigDecimal residualDeprecisation,
 			BigDecimal residualCost, BigDecimal residualAmountVEP,
 			BigDecimal residualAmountVIP, BigDecimal quoteWOMaintenance,
-			BigDecimal quoteWMaintenance, int key,BigDecimal awAmount, BigDecimal twAmount) {
+			BigDecimal quoteWMaintenance, int key, 
+			BigDecimal awAmount, BigDecimal twAmount) {
 		// TODO Auto-generated constructor stub
 		
 		this.retailPrice = retailPrice;
@@ -70,24 +70,23 @@ public class LoanCalculatorData {
 		this.cof = cof;
 		this.maintenance = maintenance;
 		this.deprecisation = deprecisation;
-		this.totalWOMaintenance = totalwoMaintenance;
+		this.totalWithOutMaintenance = totalwoMaintenance;
 		this.totalMaintenance = totalMaintenance;
-		this.rateWOMaintenance = rateWOMaintenance;
-		this.costWOMaintenance = costWOMaintenance;
+		this.rateWithOutMaintenance = rateWOMaintenance;
+		this.costWithOutMaintenance = costWOMaintenance;
 		this.rateWithMaintenance = rateWithMaintenance;
 		this.residualDeprecisation = residualDeprecisation;
 		this.residualCost = residualCost;
 		this.residualAmountVEP = residualAmountVEP;
 		this.residualAmountVIP = residualAmountVIP;
-		this.quoteWOMaintenance = quoteWOMaintenance;
-		this.quoteWMaintenance = quoteWMaintenance;
+		this.quoteWithOutMaintenance = quoteWOMaintenance;
+		this.quoteWithMaintenance = quoteWMaintenance;
 		this.key = key;
 		this.accountWDV = awAmount;
 		this.taxWDV = twAmount;
-		
 	}
-
+	
 	public BigDecimal getResidualAmountVIP() {
 		return residualAmountVIP;
-	}
+	}	
 }
