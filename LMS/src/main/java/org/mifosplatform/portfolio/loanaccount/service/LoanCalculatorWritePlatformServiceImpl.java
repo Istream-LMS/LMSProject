@@ -80,13 +80,16 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 
 		final JsonElement parsedJson = this.fromApiJsonHelper.parse(command.json());
 		String[] payTerms = this.fromApiJsonHelper.extractArrayNamed("payTerms", parsedJson);
-		final BigDecimal deposit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("deposit", parsedJson);
+		BigDecimal deposit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("deposit", parsedJson);
 		final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", parsedJson);
 		final BigDecimal interest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", parsedJson);
 		final BigDecimal costOfFund = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("costOfFund", parsedJson);
 		final BigDecimal maintenance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maintenance", parsedJson);
 
-		if (null != deposit && principal.compareTo(deposit) < 1) {
+		if (null == deposit) {
+			deposit = BigDecimal.ZERO;
+		}
+		if (principal.compareTo(deposit) < 1) {
 			throw new PrincipalAmountGreaterThanDepositException(principal, deposit);
 		}
 
