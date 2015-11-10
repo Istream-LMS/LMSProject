@@ -54,7 +54,7 @@ public class LoanCalculatorData {
 			BigDecimal rateWithMaintenance, BigDecimal residualDeprecisation,
 			BigDecimal residualCost, BigDecimal residualAmountVEP,
 			BigDecimal residualAmountVIP, BigDecimal quoteWOMaintenance,
-			BigDecimal quoteWMaintenance, int key) {
+			BigDecimal quoteWMaintenance, int key,BigDecimal awAmount, BigDecimal twAmount) {
 		// TODO Auto-generated constructor stub
 		
 		this.retailPrice = retailPrice;
@@ -81,6 +81,8 @@ public class LoanCalculatorData {
 		this.quoteWOMaintenance = quoteWOMaintenance;
 		this.quoteWMaintenance = quoteWMaintenance;
 		this.key = key;
+		this.accountWDV = awAmount;
+		this.taxWDV = twAmount;
 		
 	}
 

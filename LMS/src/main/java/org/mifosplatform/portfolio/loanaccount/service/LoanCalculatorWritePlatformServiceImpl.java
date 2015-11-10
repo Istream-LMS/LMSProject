@@ -196,7 +196,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				maintenanceForMonth, deprecisationForMonth, totalForMonth, coiForYear, cofForYear,
 				maintenanceForYear, deprecisationForYear, totalwoMaintenance, totalMaintenance, 
 				rateWOMaintenance, costWOMaintenance, rateWithMaintenance, residualDeprecisation, 
-				residualCost, residualAmountVEP, residualAmountVIP, quoteWOMaintenance, quoteWMaintenance, key);
+				residualCost, residualAmountVEP, residualAmountVIP, quoteWOMaintenance, quoteWMaintenance, key,awAmount,twAmount);
 	}
 
 	
