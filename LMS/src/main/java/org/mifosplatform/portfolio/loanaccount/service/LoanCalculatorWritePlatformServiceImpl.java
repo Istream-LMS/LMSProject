@@ -85,10 +85,31 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final BigDecimal interest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", parsedJson);
 		final BigDecimal costOfFund = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("costOfFund", parsedJson);
 		final BigDecimal maintenance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maintenance", parsedJson);
+		BigDecimal mileage = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("mileage", parsedJson);
+		BigDecimal excess = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("excess", parsedJson);
+		BigDecimal FLPForYear = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("FLPForYear", parsedJson);
+		JsonArray deprecisationArray = this.fromApiJsonHelper.extractJsonArrayNamed("deprecisationArray", parsedJson);
 
 		if (null == deposit) {
 			deposit = BigDecimal.ZERO;
 		}
+		
+		if(null == deprecisationArray) {
+			deprecisationArray = new JsonArray();
+		}
+		
+		if (null == mileage) {
+			mileage = BigDecimal.ZERO;
+		}
+		
+		if(null == FLPForYear) {
+			FLPForYear = BigDecimal.ZERO;
+		} 
+		
+		if (null == excess) {
+			excess = BigDecimal.ZERO;
+		}
+		
 		if (principal.compareTo(deposit) < 1) {
 			throw new PrincipalAmountGreaterThanDepositException(principal, deposit);
 		}
@@ -101,13 +122,34 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		if (payTerms.length == 0) {
 			payTerms = new String[] { "12", "24", "36", "48", "60" };
 		}
+		
 		for (String payTerm : payTerms) {
 
 			LoanCalculatorData loanCalculatorData = generateCalculation(
 					Integer.parseInt(payTerm), totalPrincipal, interest,
 					costOfFund, maintenance, accountWDVRate, taxWDVRate,
-					amountvwRate, processingAmount);
-
+					amountvwRate, processingAmount, mileage, FLPForYear);
+				
+			for (JsonElement element : deprecisationArray) {
+				
+				String key = this.fromApiJsonHelper.extractStringNamed("key", element);
+				
+				BigDecimal keyPercent = divideAtCalc(new BigDecimal(key), TWELVE);
+				
+				if (payTerm.equalsIgnoreCase(key)) {
+					
+					BigDecimal value = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("value", element);
+					value = divideAtCalc(value, HUNDERED);
+					BigDecimal deprecisationForYear = processingAmount.multiply(value, mc);
+					BigDecimal deprecisation = deprecisationForYear.multiply(keyPercent, mc);
+					
+					loanCalculatorData.setDeprecisationForYear(deprecisationForYear);
+					loanCalculatorData.setDeprecisation(deprecisation);
+					loanCalculatorData.setResidualDeprecisation(value);
+				}
+			}
+			
+			loanCalculatorData.setExcess(excess);
 			totalPrincipal = loanCalculatorData.getResidualAmountVIP();
 			jsonParser = this.fromApiJsonHelper.parse(gson.toJson(loanCalculatorData));
 			jsonArray.add(jsonParser);
@@ -152,7 +194,8 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 
 	private LoanCalculatorData generateCalculation(int key, BigDecimal retailPrice, BigDecimal intrestRate,
 			BigDecimal cofForYear, BigDecimal maintenanceForYear, BigDecimal accountWDVRate, 
-			BigDecimal taxWDVRate, BigDecimal amountvwRate, BigDecimal processingAmount) {
+			BigDecimal taxWDVRate, BigDecimal amountvwRate, BigDecimal processingAmount, 
+			BigDecimal mileage, BigDecimal fLPForYear) {
 
 		BigDecimal keyBigDecimal = new BigDecimal(key);
 		
@@ -210,6 +253,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		BigDecimal quoteWOMaintenance = rateWOMaintenance; // (21)
 		BigDecimal quoteWMaintenance = rateWithMaintenance; // (22)
 		
+		BigDecimal mileageVal = mileage.multiply(keyPercent, mc);
+		BigDecimal financialLeasePayout = residualAmountVEP.add(fLPForYear, mc);
+				
+		
 		/*residualDeprecisation = residualDeprecisation.multiply(HUNDERED, mc);
 		residualCost = residualCost.multiply(HUNDERED, mc);*/
 
@@ -218,7 +265,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				maintenance, deprecisation, totalwoMaintenance, totalMaintenance, 
 				rateWOMaintenance, costWOMaintenance, rateWithMaintenance, residualDeprecisation, 
 				residualCost, residualAmountVEP, residualAmountVIP, quoteWOMaintenance, quoteWMaintenance,
-				key, awAmount, twAmount);
+				key, awAmount, twAmount, mileageVal, fLPForYear, financialLeasePayout);
 	}	
 
 }
