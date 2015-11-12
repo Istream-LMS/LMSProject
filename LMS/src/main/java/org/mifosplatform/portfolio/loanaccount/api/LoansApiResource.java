@@ -308,11 +308,15 @@ public class LoansApiResource {
         if(null == fileName) {
         	throw new LeaseScreenReportFileNameNotNullException();
         }
-        
+
         File file = new File(fileName);
         
         if(!file.exists()) {
-        	throw new LeaseScreenReportFileNotFoundException(fileName);
+        	String fileNameData = fileName.replace("\\\\", "/");
+        	file = new File(fileNameData);
+        	if(!file.exists()) {
+        		throw new LeaseScreenReportFileNotFoundException(fileNameData);
+        	}    	
         }
         
         final ResponseBuilder response = Response.ok(file);
@@ -728,10 +732,8 @@ public class LoansApiResource {
         }
         
         JsonObject object = new JsonObject();
-        object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + "/", "").trim());
-        return object.toString();
-       
-       
+        object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator, "").trim());
+        return object.toString();       
     }
     
     @GET
@@ -739,16 +741,21 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response testing(@QueryParam("file") final String fileName) {
-       
+    	
+    	String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator + fileName;
+    	
         if(null == fileName) {
         	throw new LeaseScreenReportFileNameNotNullException();
         }
-        String location =  FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator 
-        		+ "LeaseCalculator/";
-        File file = new File(location+fileName);
+        
+        File file = new File(fileLocation);
         
         if(!file.exists()) {
-        	throw new LeaseScreenReportFileNotFoundException(fileName);
+        	String fileNameData = fileName.replace("\\\\", "/");
+        	file = new File(fileNameData);
+        	if(!file.exists()) {
+        		throw new LeaseScreenReportFileNotFoundException(fileNameData);
+        	}    	
         }
         
         final ResponseBuilder response = Response.ok(file);

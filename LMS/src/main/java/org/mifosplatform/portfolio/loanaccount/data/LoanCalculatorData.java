@@ -35,6 +35,12 @@ public class LoanCalculatorData {
 
 	private BigDecimal quoteWithOutMaintenance;
 	private BigDecimal quoteWithMaintenance;
+	
+	private BigDecimal mileage;
+	private BigDecimal excess;
+	
+	private BigDecimal financialLeasePayoutForYear;
+	private BigDecimal financialLeasePayout;
 
 	private BigDecimal accountWDV;
 	private BigDecimal taxWDV;
@@ -54,8 +60,9 @@ public class LoanCalculatorData {
 			BigDecimal rateWithMaintenance, BigDecimal residualDeprecisation,
 			BigDecimal residualCost, BigDecimal residualAmountVEP,
 			BigDecimal residualAmountVIP, BigDecimal quoteWOMaintenance,
-			BigDecimal quoteWMaintenance, int key, 
-			BigDecimal awAmount, BigDecimal twAmount) {
+			BigDecimal quoteWMaintenance, int key, BigDecimal awAmount, 
+			BigDecimal twAmount, BigDecimal mileage, BigDecimal fLPForYear, 
+			BigDecimal financialLeasePayout) {
 		// TODO Auto-generated constructor stub
 		
 		this.retailPrice = retailPrice;
@@ -84,9 +91,48 @@ public class LoanCalculatorData {
 		this.key = key;
 		this.accountWDV = awAmount;
 		this.taxWDV = twAmount;
+		this.mileage = mileage;
+		this.financialLeasePayoutForYear = fLPForYear;
+		this.financialLeasePayout = financialLeasePayout;
 	}
 	
 	public BigDecimal getResidualAmountVIP() {
 		return residualAmountVIP;
+	}
+
+	public BigDecimal getExcess() {
+		return excess;
+	}
+
+	public void setExcess(BigDecimal excess) {
+		this.excess = excess;
+	}
+
+	public BigDecimal getDeprecisationForYear() {
+		return deprecisationForYear;
+	}
+
+	public void setDeprecisationForYear(BigDecimal deprecisationForYear) {
+		this.deprecisationForYear = deprecisationForYear;
+	}
+
+	public BigDecimal getDeprecisation() {
+		return deprecisation;
+	}
+
+	public void setDeprecisation(BigDecimal deprecisation) {
+		this.deprecisation = deprecisation;
+	}
+
+	public BigDecimal getResidualDeprecisation() {
+		return residualDeprecisation;
+	}
+
+	public void setResidualDeprecisation(BigDecimal residualDeprecisation) {
+		this.residualDeprecisation = residualDeprecisation;
 	}	
+	
+	
+	
+	
 }
