@@ -9,8 +9,6 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
-import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
-import org.mifosplatform.organisation.taxmapping.service.TaxMapReadPlatformServiceImp.TaxMapDataMapper;
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
