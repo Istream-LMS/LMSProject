@@ -18,6 +18,8 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
 import org.mifosplatform.organisation.taxmapping.service.TaxMapReadPlatformService;
@@ -40,14 +42,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
     private final JdbcTemplate jdbcTemplate;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final TaxMapReadPlatformService taxMapReadPlatformService;
+    private final FeeMasterReadplatformService feeMasterReadplatformService;
 
     @Autowired
     public LoanProductReadPlatformServiceImpl(final PlatformSecurityContext context,
             final ChargeReadPlatformService chargeReadPlatformService,final TaxMapReadPlatformService taxMapReadPlatformService,
-            final RoutingDataSource dataSource) {
+            final FeeMasterReadplatformService feeMasterReadplatformService,final RoutingDataSource dataSource) {
         this.context = context;
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.taxMapReadPlatformService = taxMapReadPlatformService;
+        this.feeMasterReadplatformService = feeMasterReadplatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -57,8 +61,9 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         try {
             final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProductId);
             final Collection<TaxMapData> taxes = this.taxMapReadPlatformService.retrieveLoanProductTaxes(loanProductId);
+            final Collection<FeeMasterData> feeMasterData = this.feeMasterReadplatformService.retrieveLoanProductFeeMasterData(loanProductId,"Deposit");
             final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(loanProductId);
-            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas,taxes);
+            final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas,taxes,feeMasterData);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanProductId });
@@ -80,7 +85,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
         this.context.authenticatedUser();
 
-        final LoanProductMapper rm = new LoanProductMapper(null, null,null);
+        final LoanProductMapper rm = new LoanProductMapper(null, null,null,null);
 
         final String sql = "select " + rm.loanProductSchema();
 
@@ -111,13 +116,16 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         private final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas;
         
         private final Collection<TaxMapData> taxes;
+        
+        private final Collection<FeeMasterData> feeMasterData;
 
         public LoanProductMapper(final Collection<ChargeData> charges,
                 final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas,
-                final Collection<TaxMapData> taxes) {
+                final Collection<TaxMapData> taxes,final Collection<FeeMasterData> feeMasterData) {
             this.charges = charges;
             this.borrowerCycleVariationDatas = borrowerCycleVariationDatas;
             this.taxes = taxes;
+            this.feeMasterData = feeMasterData;
         }
 
         public String loanProductSchema() {
@@ -230,7 +238,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     transactionStrategyId, transactionStrategyName, graceOnPrincipalPayment, graceOnInterestPayment,
                     graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, useBorrowerCycle, startDate,
                     closeDate, status, externalId, principalVariationsForBorrowerCycle, interestRateVariationsForBorrowerCycle,
-                    numberOfRepaymentVariationsForBorrowerCycle,this.taxes);
+                    numberOfRepaymentVariationsForBorrowerCycle,this.taxes,this.feeMasterData);
         }
 
     }
