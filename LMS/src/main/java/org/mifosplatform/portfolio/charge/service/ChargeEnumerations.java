@@ -50,7 +50,10 @@ public class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeTimeType.OVERDUE_INSTALLMENT.getValue().longValue(),ChargeTimeType.OVERDUE_INSTALLMENT.getCode(),"overdue fees") ;
             break;
             case RESIDUAL_AMOUNT:
-            	optionData= new EnumOptionData(ChargeTimeType.RESIDUAL_AMOUNT.getValue().longValue(),ChargeTimeType.RESIDUAL_AMOUNT.getCode(),"residual amt");
+            	optionData= new EnumOptionData(ChargeTimeType.RESIDUAL_AMOUNT.getValue().longValue(),ChargeTimeType.RESIDUAL_AMOUNT.getCode(),"Residual Amount");
+                  break;
+            case DEPOSITE:
+            	optionData= new EnumOptionData(ChargeTimeType.DEPOSITE.getValue().longValue(),ChargeTimeType.DEPOSITE.getCode(),"Deposit");
                   break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
