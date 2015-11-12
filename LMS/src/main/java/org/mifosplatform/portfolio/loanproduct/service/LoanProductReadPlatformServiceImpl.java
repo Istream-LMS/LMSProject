@@ -61,7 +61,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         try {
             final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveLoanProductCharges(loanProductId);
             final Collection<TaxMapData> taxes = this.taxMapReadPlatformService.retrieveLoanProductTaxes(loanProductId);
-            final Collection<FeeMasterData> feeMasterData = this.feeMasterReadplatformService.retrieveLoanProductFeeMasterData(loanProductId,"Deposit");
+            final Collection<FeeMasterData> feeMasterData = this.feeMasterReadplatformService.retrieveLoanProductFeeMasterData(loanProductId);
             final Collection<LoanProductBorrowerCycleVariationData> borrowerCycleVariationDatas = retrieveLoanProductBorrowerCycleVariations(loanProductId);
             final LoanProductMapper rm = new LoanProductMapper(charges, borrowerCycleVariationDatas,taxes,feeMasterData);
             final String sql = "select " + rm.loanProductSchema() + " where lp.id = ?";

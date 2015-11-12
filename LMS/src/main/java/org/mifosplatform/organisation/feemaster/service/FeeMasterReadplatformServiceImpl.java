@@ -83,7 +83,7 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 			final FeeMasterDataMapper mapper = new FeeMasterDataMapper();			
 			 String sql = "select " + mapper.schema() +"  where is_deleted = 'N'";
 			if(transactionType != null){
-				sql = "select " + mapper.schema() +"  where is_deleted = 'N' and fm.transaction_type ="+transactionType;
+				sql = "select " + mapper.schema() +"  where is_deleted = 'N' and fm.transaction_type ='"+transactionType+"'";
 			}
 	    	return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		
@@ -93,14 +93,16 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 	}
 	
 	@Override
-	public Collection<FeeMasterData> retrieveLoanProductFeeMasterData(Long loanProductId,String transactionType) {
+	public Collection<FeeMasterData> retrieveLoanProductFeeMasterData(Long loanProductId) {
 		
 		this.context.authenticatedUser();
         final FeeMasterDataMapper tm = new FeeMasterDataMapper();
+        
+        final String transactionType = "Deposit";
 
-        final String sql = "select " + tm.loanProductFeeMasterSchema() + " where plfm.product_loan_id=? and fm.transaction_type = ?";
+        final String sql = "select " + tm.loanProductFeeMasterSchema() + " where plfm.product_loan_id=? and fm.is_deleted = 'N' and fm.transaction_type = '"+transactionType+"'";
 
-        return this.jdbcTemplate.query(sql, tm, new Object[] { loanProductId,transactionType });
+        return this.jdbcTemplate.query(sql, tm, new Object[] { loanProductId });
 	}
 
 }

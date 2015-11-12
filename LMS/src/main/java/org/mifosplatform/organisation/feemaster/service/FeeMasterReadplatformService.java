@@ -10,5 +10,6 @@ public interface FeeMasterReadplatformService {
 
 	Collection<FeeMasterData> retrieveAllData(String transactionType);
 	
-	Collection<FeeMasterData> retrieveLoanProductFeeMasterData(Long loanProductId,String transactionType);
+	Collection<FeeMasterData> retrieveLoanProductFeeMasterData(Long loanProductId);
+	
 }
