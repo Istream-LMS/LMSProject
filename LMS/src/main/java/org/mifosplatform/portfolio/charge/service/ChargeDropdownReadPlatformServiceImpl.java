@@ -83,4 +83,14 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
                 chargeTimeType(ChargeTimeType.WITHDRAWAL_FEE),
                 chargeTimeType(ChargeTimeType.ANNUAL_FEE), chargeTimeType(ChargeTimeType.MONTHLY_FEE));
     }
+    
+    @Override
+    public List<EnumOptionData> retrieveFeeMasterCollectionTimeTypes() {
+        return Arrays.asList(chargeTimeType(ChargeTimeType.DEPOSITE));
+    }
+    
+    @Override
+    public List<EnumOptionData> retrieveFeeMasterCalculationTypes() {
+        return Arrays.asList(chargeCalculationType(ChargeCalculationType.FLAT), chargeCalculationType(ChargeCalculationType.PERCENT_OF_AMOUNT));
+    }
 }

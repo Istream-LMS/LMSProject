@@ -123,6 +123,7 @@ public class LoansApiResource {
             "loanCounter", "loanProductCounter", "notes", "accountLinkingOptions", "linkedAccount"));
 
     private final String resourceNameForPermissions = "LOAN";
+    private static final String LEASE = "LeaseCalculator";
 
     private final PlatformSecurityContext context;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -149,7 +150,6 @@ public class LoansApiResource {
     private final LoanTaxReadPlatformService loanTaxReadPlatformService;
     private final TaxMapReadPlatformService taxMapReadPlatformService;
     private final DefaultToApiJsonSerializer<LoanTaxMapData> loanTaxMappingApiJsonSerializer;
-    private static final String LEASE = "LeaseCalculator";
     
 
     @Autowired
@@ -734,7 +734,6 @@ public class LoansApiResource {
         JsonObject object = new JsonObject();
         object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator, "").trim());
         return object.toString();       
-       
     }
     
     @GET

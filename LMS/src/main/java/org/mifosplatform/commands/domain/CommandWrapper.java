@@ -709,4 +709,16 @@ public class CommandWrapper {
 	public boolean isLoanCalculatorResource() {
 		return this.entityName.equalsIgnoreCase("LOANCALCULATOR");	
 	}
+	
+	public boolean isRefund() {
+		return this.entityName.equalsIgnoreCase("REFUND");
+	}
+
+	public boolean isDeposit() {
+		return this.entityName.equalsIgnoreCase("DEPOSIT");
+	}
+
+	public boolean isFeeMasterResource() {
+		return this.entityName.equalsIgnoreCase("FEEMASTER");
+	}
 }
