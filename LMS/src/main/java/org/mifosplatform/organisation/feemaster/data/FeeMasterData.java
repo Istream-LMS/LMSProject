@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 
@@ -22,24 +23,33 @@ public class FeeMasterData {
 	private FeeMasterData feeMasterData;
 	private Collection<MCodeData> transactionTypeDatas;
 	private String isRefundable;
+	
+	private EnumOptionData chargeTimeType;
+	private EnumOptionData chargeCalculationType;
+	
+	private List<EnumOptionData> chargeTimeTypeOptions;
+	private List<EnumOptionData> chargeCalculationTypeOptions;
 
-	public FeeMasterData(Long id, String feeCode, String feeDescription,String transactionType, String chargeCode,
-			BigDecimal defaultFeeAmount, String isRefundable) {
+	public FeeMasterData(Long id, String feeCode, String feeDescription,String transactionType,EnumOptionData chargeTimeType,
+			EnumOptionData chargeCalculationType,BigDecimal defaultFeeAmount, String isRefundable) {
 
 		this.id = id;
 		this.feeCode = feeCode;
 		this.feeDescription = feeDescription;
 		this.transactionType = transactionType;
-		this.chargeCode = chargeCode;
+		this.chargeTimeType = chargeTimeType;
+		this.chargeCalculationType = chargeCalculationType;
 		this.defaultFeeAmount = defaultFeeAmount;
 		this.isRefundable = isRefundable;
 
 	}
 
-	public FeeMasterData(Collection<MCodeData> transactionTypeDatas,List<ChargeData> chargeDatas) {
+	public FeeMasterData(Collection<MCodeData> transactionTypeDatas,List<EnumOptionData> chargeTimeTypeOptions,
+			List<EnumOptionData> chargeCalculationTypeOptions) {
 
 		this.transactionTypeDatas = transactionTypeDatas;
-		this.chargeDatas = chargeDatas;
+		this.chargeTimeTypeOptions = chargeTimeTypeOptions;
+		this.chargeCalculationTypeOptions = chargeCalculationTypeOptions;
 	}
 
 	public FeeMasterData(Long id, Long feeId, Long regionId, BigDecimal amount) {
@@ -51,11 +61,12 @@ public class FeeMasterData {
 	}
 
 	public FeeMasterData(FeeMasterData feeMasterData,Collection<MCodeData> transactionTypeDatas,
-			List<ChargeData> chargeDatas) {
+			List<EnumOptionData> chargeTimeTypeOptions, List<EnumOptionData> chargeCalculationTypeOptions) {
 
 		this.feeMasterData = feeMasterData;
 		this.transactionTypeDatas = transactionTypeDatas;
-		this.chargeDatas = chargeDatas;
+		this.chargeTimeTypeOptions = chargeTimeTypeOptions;
+		this.chargeCalculationTypeOptions = chargeCalculationTypeOptions;
 	}
 
 	public Long getId() {

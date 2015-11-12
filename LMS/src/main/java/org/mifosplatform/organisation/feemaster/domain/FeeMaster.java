@@ -1,26 +1,22 @@
 package org.mifosplatform.organisation.feemaster.domain;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
+import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_fee_master", uniqueConstraints = {
+@Table(name = "m_fee_master", uniqueConstraints = {
 		@UniqueConstraint(columnNames = { "fee_code" }, name = "fee_code"),
 		@UniqueConstraint(columnNames = { "transaction_type" }, name = "fee_transaction_type") })
 public class FeeMaster extends AbstractPersistable<Long> {
@@ -39,12 +35,15 @@ public class FeeMaster extends AbstractPersistable<Long> {
 	@Column(name = "transaction_type")
 	private String transactionType;
 
-	@Column(name = "charge_code")
-	private String chargeCode;
-
+	@Column(name = "charge_time_enum", nullable = false)
+	private Integer chargeTime;
+	
+	@Column(name = "charge_calculation_enum")
+	private Integer chargeCalculation;
+	
 	@Column(name = "default_fee_amount")
 	private BigDecimal defaultFeeAmount;
-
+	
 	@Column(name = "is_deleted", nullable = false)
 	private char deleted = 'N';
 
@@ -55,12 +54,13 @@ public class FeeMaster extends AbstractPersistable<Long> {
 	}
 
 	public FeeMaster(final String feeCode, final String feeDescription,
-			final String transactionType, final String chargeCode,
+			final String transactionType,final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType,
 			final BigDecimal defaultFeeAmount, final String isRefundable) {
 		this.feeCode = feeCode;
 		this.feeDescription = feeDescription;
 		this.transactionType = transactionType;
-		this.chargeCode = chargeCode;
+		this.chargeTime = chargeTime.getValue();
+        this.chargeCalculation = chargeCalculationType.getValue();
 		this.defaultFeeAmount = defaultFeeAmount;
 		this.isRefundable = isRefundable;
 	}
@@ -89,14 +89,6 @@ public class FeeMaster extends AbstractPersistable<Long> {
 		this.transactionType = transactionType;
 	}
 
-	public String getChargeCode() {
-		return chargeCode;
-	}
-
-	public void setChargeCode(String chargeCode) {
-		this.chargeCode = chargeCode;
-	}
-
 	public BigDecimal getDefaultFeeAmount() {
 		return defaultFeeAmount;
 	}
@@ -114,12 +106,12 @@ public class FeeMaster extends AbstractPersistable<Long> {
 	}
 
 	public Map<String, Object> update(JsonCommand command) {
-		if ("Y".equals(deleted)) {
-			/*throw new ItemNotFoundException(command.entityId().toString());*/
-		}
+		
 
 		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(
 				1);
+		
+		final String localeAsInput = command.locale();
 
 		final String itemCodeParamName = "feeCode";
 		if (command.isChangeInStringParameterNamed(itemCodeParamName,
@@ -127,6 +119,7 @@ public class FeeMaster extends AbstractPersistable<Long> {
 			final String newValue = command
 					.stringValueOfParameterNamed(itemCodeParamName);
 			actualChanges.put(itemCodeParamName, newValue);
+			actualChanges.put("locale", localeAsInput);
 			this.feeCode = StringUtils.defaultIfEmpty(newValue, null);
 		}
 		final String itemDescriptionParamName = "feeDescription";
@@ -135,6 +128,7 @@ public class FeeMaster extends AbstractPersistable<Long> {
 			final String newValue = command
 					.stringValueOfParameterNamed(itemDescriptionParamName);
 			actualChanges.put(itemDescriptionParamName, newValue);
+			actualChanges.put("locale", localeAsInput);
 			this.feeDescription = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
@@ -144,17 +138,27 @@ public class FeeMaster extends AbstractPersistable<Long> {
 			final String newValue = command
 					.stringValueOfParameterNamed(itemClassParamName);
 			actualChanges.put(itemClassParamName, newValue);
+			actualChanges.put("locale", localeAsInput);
 			this.transactionType = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
-		final String chargeCodeParamName = "chargeCode";
-		if (command.isChangeInStringParameterNamed(chargeCodeParamName,
-				this.chargeCode)) {
-			final String newValue = command
-					.stringValueOfParameterNamed(chargeCodeParamName);
-			actualChanges.put(chargeCodeParamName, newValue);
-			this.chargeCode = StringUtils.defaultIfEmpty(newValue, null);
-		}
+		final String chargeTimeParamName = "chargeTimeType";
+        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTime)) {
+            final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
+            actualChanges.put(chargeTimeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
+
+        }
+        
+        final String chargeCalculationParamName = "chargeCalculationType";
+        if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
+            final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
+            actualChanges.put(chargeCalculationParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
+
+        }
 
 		final String unitPriceParamName = "defaultFeeAmount";
 		if (command.isChangeInBigDecimalParameterNamed(unitPriceParamName,
@@ -162,6 +166,7 @@ public class FeeMaster extends AbstractPersistable<Long> {
 			final BigDecimal newValue = command
 					.bigDecimalValueOfParameterNamed(unitPriceParamName);
 			actualChanges.put(unitPriceParamName, newValue);
+			actualChanges.put("locale", localeAsInput);
 			this.defaultFeeAmount = newValue;
 		}
 
@@ -172,6 +177,7 @@ public class FeeMaster extends AbstractPersistable<Long> {
 				final String newValue = command
 						.stringValueOfParameterNamed(isRefundableParamName);
 				actualChanges.put(isRefundableParamName, newValue);
+				actualChanges.put("locale", localeAsInput);
 				this.isRefundable = newValue;
 			}
 		} else {
@@ -195,16 +201,18 @@ public class FeeMaster extends AbstractPersistable<Long> {
 				.stringValueOfParameterNamed("feeDescription");
 		final String transactionType = command
 				.stringValueOfParameterNamed("transactionType");
-		final String chargeCode = command
-				.stringValueOfParameterNamed("chargeCode");
-		final BigDecimal defaultFeeAmount = command
-				.bigDecimalValueOfParameterNamed("defaultFeeAmount");
+        final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command
+        		.integerValueOfParameterNamed("chargeTimeType"));
+        final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
+                .integerValueOfParameterNamed("chargeCalculationType"));
+        final BigDecimal defaultFeeAmount = command
+        		.bigDecimalValueOfParameterNamed("defaultFeeAmount");
 		final String isRefundable = command
 				.stringValueOfParameterNamed("isRefundable");
 		// final char isRefundable =
 		// command.booleanObjectValueOfParameterNamed("isRefundable")?'Y':'N';
 		return new FeeMaster(feeCode, feeDescription, transactionType,
-				chargeCode, defaultFeeAmount, isRefundable);
+				chargeTimeType,chargeCalculationType, defaultFeeAmount, isRefundable);
 	}
 
 }

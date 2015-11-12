@@ -20,7 +20,7 @@ public enum ChargeTimeType {
     INSTALMENT_FEE(8, "chargeTimeType.instalmentFee"),// only for loan charges
     OVERDUE_INSTALLMENT(9, "overdue_installment"), // only for loan charges
     RESIDUAL_AMOUNT(10,"chargeTimeType.residualAmt"),  // this is residual amoutn type
-    DEPOSITE(11,"chargeTimeType.deposite");  // only for loan deposite
+    DEPOSITE(11,"chargeTimeType.deposit");  // only for loan deposit
 
     private final Integer value;
     private final String code;

@@ -28,7 +28,7 @@ public class FeeMasterCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("feeCode", "feeDescription", "transactionType",
-					"chargeCode","defaultFeeAmount", "locale","isRefundable"));
+					"defaultFeeAmount", "locale","isRefundable","chargeCalculationType","chargeTimeType"));
 	
 	private final FromJsonHelper fromApiJsonHelper;
 
@@ -57,13 +57,16 @@ public class FeeMasterCommandFromApiJsonDeserializer {
         final String feeCode = fromApiJsonHelper.extractStringNamed("feeCode", element);
         final String feeDescription = fromApiJsonHelper.extractStringNamed("feeDescription", element);
         final String transactionType = fromApiJsonHelper.extractStringNamed("transactionType", element);
-        final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode",element);
+        final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeCalculationType", element);
+        final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
         final BigDecimal defaultFeeAmount = fromApiJsonHelper.extractBigDecimalNamed("defaultFeeAmount", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
+        
         
         baseDataValidator.reset().parameter("feeCode").value(feeCode).notBlank().notExceedingLengthOf(10);
         baseDataValidator.reset().parameter("feeDescription").value(feeDescription).notBlank();
         baseDataValidator.reset().parameter("transactionType").value(transactionType).notBlank();
-        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notNull().notExceedingLengthOf(10);
+        baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull();
+        baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
 		baseDataValidator.reset().parameter("defaultFeeAmount").value(defaultFeeAmount).notNull();
 		
 

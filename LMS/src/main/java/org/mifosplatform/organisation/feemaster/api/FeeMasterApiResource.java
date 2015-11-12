@@ -24,6 +24,7 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -32,7 +33,7 @@ import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformSer
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
-import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.charge.service.ChargeDropdownReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -48,14 +49,15 @@ public class FeeMasterApiResource {
 	private final DefaultToApiJsonSerializer<FeeMasterData> toApiJsonSerializer;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-	/*private final ItemReadPlatformService itemReadPlatformService;*/
 	private final MCodeReadPlatformService mCodeReadPlatformService; 
 	private final FeeMasterReadplatformService feeMasterReadplatformService; 
+	private final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService;
 	
 	@Autowired
 	public FeeMasterApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<FeeMasterData> toApiJsonSerializer, 
 			final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-			final MCodeReadPlatformService mCodeReadPlatformService,final FeeMasterReadplatformService feeMasterReadplatformService) {
+			final MCodeReadPlatformService mCodeReadPlatformService,final FeeMasterReadplatformService feeMasterReadplatformService,
+			final ChargeDropdownReadPlatformService chargeDropdownReadPlatformService) {
 		
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
@@ -63,6 +65,7 @@ public class FeeMasterApiResource {
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		        this.mCodeReadPlatformService=mCodeReadPlatformService;
 		        this.feeMasterReadplatformService=feeMasterReadplatformService;
+		        this.chargeDropdownReadPlatformService=chargeDropdownReadPlatformService;
 		 
 		    }
 	
@@ -83,8 +86,9 @@ public class FeeMasterApiResource {
     public String retrieveFeeMasterTemplateInfo(@Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
     final Collection<MCodeData> transactionTypeDatas = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.TRANSACTION_TYPE);
-    /*final List<ChargeData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();*/
-    final FeeMasterData feeMasterData=new FeeMasterData(transactionTypeDatas,null);
+    final List<EnumOptionData> feeMasterChargeTimeTypeOptions = this.chargeDropdownReadPlatformService.retrieveFeeMasterCollectionTimeTypes();
+    final List<EnumOptionData> feeMasterChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveFeeMasterCalculationTypes();
+    final FeeMasterData feeMasterData=new FeeMasterData(transactionTypeDatas,feeMasterChargeTimeTypeOptions,feeMasterChargeCalculationTypeOptions);
     final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, feeMasterData, RESPONSE_DATA_PARAMETERS);
     
@@ -99,10 +103,10 @@ public class FeeMasterApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		FeeMasterData feeMasterData=this.feeMasterReadplatformService.retrieveSingleFeeMasterDetails(id); 
 		final Collection<MCodeData> transactionTypeDatas = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.TRANSACTION_TYPE);
-	    /*final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();*/
-		final List<ChargeData> chargeDatas = null;
+		final List<EnumOptionData> feeMasterChargeTimeTypeOptions = this.chargeDropdownReadPlatformService.retrieveFeeMasterCollectionTimeTypes();
+	    final List<EnumOptionData> feeMasterChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveFeeMasterCalculationTypes();
    		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-   		feeMasterData=new FeeMasterData(feeMasterData,transactionTypeDatas,chargeDatas);
+   		feeMasterData=new FeeMasterData(feeMasterData,transactionTypeDatas,feeMasterChargeTimeTypeOptions,feeMasterChargeCalculationTypeOptions);
    		return this.toApiJsonSerializer.serialize(settings, feeMasterData, RESPONSE_DATA_PARAMETERS);
 	}
 	
