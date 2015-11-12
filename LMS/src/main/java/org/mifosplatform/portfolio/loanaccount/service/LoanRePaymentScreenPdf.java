@@ -48,6 +48,9 @@ public class LoanRePaymentScreenPdf {
 			new File(fileLocation).mkdirs();
 		}
 
+		System.out.println(fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
+				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION);
+
 		return fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
 				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION;
 	}
@@ -119,10 +122,13 @@ public class LoanRePaymentScreenPdf {
 			dex.printStackTrace();
 		} catch (Exception ex) {
 			ex.printStackTrace();
+		
 		} finally {
+
 			if (doc != null) {
 				doc.close();
 			}
+
 			if (docWriter != null) {
 				docWriter.close();
 			}

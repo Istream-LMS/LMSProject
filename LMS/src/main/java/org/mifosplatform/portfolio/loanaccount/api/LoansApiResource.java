@@ -46,6 +46,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
@@ -100,6 +101,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Path("/loans")
 @Component
@@ -147,6 +149,7 @@ public class LoansApiResource {
     private final LoanTaxReadPlatformService loanTaxReadPlatformService;
     private final TaxMapReadPlatformService taxMapReadPlatformService;
     private final DefaultToApiJsonSerializer<LoanTaxMapData> loanTaxMappingApiJsonSerializer;
+    private static final String LEASE = "LeaseCalculator";
     
 
     @Autowired
@@ -305,11 +308,15 @@ public class LoansApiResource {
         if(null == fileName) {
         	throw new LeaseScreenReportFileNameNotNullException();
         }
-        
+
         File file = new File(fileName);
         
         if(!file.exists()) {
-        	throw new LeaseScreenReportFileNotFoundException(fileName);
+        	String fileNameData = fileName.replace("\\\\", "/");
+        	file = new File(fileNameData);
+        	if(!file.exists()) {
+        		throw new LeaseScreenReportFileNotFoundException(fileNameData);
+        	}    	
         }
         
         final ResponseBuilder response = Response.ok(file);
@@ -710,28 +717,52 @@ public class LoansApiResource {
     @Path("calculator/export")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response exportToXlsx(final String apiRequestBodyAsJson) {
+    public String exportToXlsx(final String apiRequestBodyAsJson) {
     	
     	this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
     	
     	String jsonString = loanCalculator(apiRequestBodyAsJson);
     	
     	String fileName = this.loanReadPlatformService.exportToExcel(jsonString);
-       
-        if(null == fileName) {
-        	throw new LeaseScreenReportFileNameNotNullException();
-        }
-        
-        File file = new File(fileName);
+    	
+    	File file = new File(fileName);
         
         if(!file.exists()) {
         	throw new LeaseScreenReportFileNotFoundException(fileName);
         }
         
+        JsonObject object = new JsonObject();
+        object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator, "").trim());
+        return object.toString();       
+       
+    }
+    
+    @GET
+    @Path("calculator/export")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public Response testing(@QueryParam("file") final String fileName) {
+    	
+    	String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator + fileName;
+    	
+        if(null == fileName) {
+        	throw new LeaseScreenReportFileNameNotNullException();
+        }
+        
+        File file = new File(fileLocation);
+        
+        if(!file.exists()) {
+        	String fileNameData = fileName.replace("\\\\", "/");
+        	file = new File(fileNameData);
+        	if(!file.exists()) {
+        		throw new LeaseScreenReportFileNotFoundException(fileNameData);
+        	}    	
+        }
+        
         final ResponseBuilder response = Response.ok(file);
         response.header("Content-Disposition", "attachment; filename=" + file.getName().replace(" ", "_"));
         response.header("Content-Type", "application/vnd.ms-excel");
-       
+        
         return response.build();
     }
     
