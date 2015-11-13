@@ -56,7 +56,7 @@ public final class LoanProductDataValidator {
             LOAN_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue(),LoanProductConstants.useBorrowerCycleParameterName, 
             LoanProductConstants.principalVariationsForBorrowerCycleParameterName,LoanProductConstants.interestRateVariationsForBorrowerCycleParameterName,
-            LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName,"taxes"));
+            LoanProductConstants.numberOfRepaymentVariationsForBorrowerCycleParameterName,"taxes","feeMasterData"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

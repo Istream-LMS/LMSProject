@@ -10,15 +10,14 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.finance.depositandrefund.domain.DepositCalculationType;
+import org.mifosplatform.finance.depositandrefund.domain.DepositTimeType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
-import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_fee_master", uniqueConstraints = {
-		@UniqueConstraint(columnNames = { "fee_code" }, name = "fee_code"),
-		@UniqueConstraint(columnNames = { "transaction_type" }, name = "fee_transaction_type") })
+		@UniqueConstraint(columnNames = { "fee_code" }, name = "fee_code") })
 public class FeeMaster extends AbstractPersistable<Long> {
 
 	/**
@@ -35,14 +34,17 @@ public class FeeMaster extends AbstractPersistable<Long> {
 	@Column(name = "transaction_type")
 	private String transactionType;
 
-	@Column(name = "charge_time_enum", nullable = false)
-	private Integer chargeTime;
+	@Column(name = "deposit_time_enum", nullable = false)
+	private Integer depositTime;
 	
-	@Column(name = "charge_calculation_enum")
-	private Integer chargeCalculation;
+	@Column(name = "deposit_calculation_enum")
+	private Integer depositCalculation;
 	
-	@Column(name = "default_fee_amount")
-	private BigDecimal defaultFeeAmount;
+	@Column(name = "deposit_on_enum")
+	private Integer depositOn;
+	
+	@Column(name = "amount")
+	private BigDecimal amount;
 	
 	@Column(name = "is_deleted", nullable = false)
 	private char deleted = 'N';
@@ -54,14 +56,15 @@ public class FeeMaster extends AbstractPersistable<Long> {
 	}
 
 	public FeeMaster(final String feeCode, final String feeDescription,
-			final String transactionType,final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType,
-			final BigDecimal defaultFeeAmount, final String isRefundable) {
+			final String transactionType,final DepositTimeType depositTime, final DepositCalculationType depositCalculationType,
+			final DepositTimeType depositOn,final BigDecimal amount, final String isRefundable) {
 		this.feeCode = feeCode;
 		this.feeDescription = feeDescription;
 		this.transactionType = transactionType;
-		this.chargeTime = chargeTime.getValue();
-        this.chargeCalculation = chargeCalculationType.getValue();
-		this.defaultFeeAmount = defaultFeeAmount;
+		this.depositTime = depositTime.getValue();
+        this.depositCalculation = depositCalculationType.getValue();
+        this.depositOn = depositOn.getValue();
+		this.amount = amount;
 		this.isRefundable = isRefundable;
 	}
 
@@ -89,12 +92,12 @@ public class FeeMaster extends AbstractPersistable<Long> {
 		this.transactionType = transactionType;
 	}
 
-	public BigDecimal getDefaultFeeAmount() {
-		return defaultFeeAmount;
+	public BigDecimal getAmount() {
+		return amount;
 	}
 
-	public void setDefaultFeeAmount(BigDecimal defaultFeeAmount) {
-		this.defaultFeeAmount = defaultFeeAmount;
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
 	}
 
 	public char getDeleted() {
@@ -142,32 +145,41 @@ public class FeeMaster extends AbstractPersistable<Long> {
 			this.transactionType = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
-		final String chargeTimeParamName = "chargeTimeType";
-        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTime)) {
-            final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
-            actualChanges.put(chargeTimeParamName, newValue);
+		final String depositTimeParamName = "depositTimeType";
+        if (command.isChangeInIntegerParameterNamed(depositTimeParamName, this.depositTime)) {
+            final Integer newValue = command.integerValueOfParameterNamed(depositTimeParamName);
+            actualChanges.put(depositTimeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
+            this.depositTime = DepositTimeType.fromInt(newValue).getValue();
 
         }
         
-        final String chargeCalculationParamName = "chargeCalculationType";
-        if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
-            final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
-            actualChanges.put(chargeCalculationParamName, newValue);
+        final String depositCalculationParamName = "depositCalculationType";
+        if (command.isChangeInIntegerParameterNamed(depositCalculationParamName, this.depositCalculation)) {
+            final Integer newValue = command.integerValueOfParameterNamed(depositCalculationParamName);
+            actualChanges.put(depositCalculationParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
+            this.depositCalculation = DepositCalculationType.fromInt(newValue).getValue();
 
         }
+        
+        final String depositOnParamName = "depositOn";
+        if (command.isChangeInIntegerParameterNamed(depositOnParamName, this.depositOn)) {
+        	final Integer newValue = command.integerValueOfParameterNamed(depositOnParamName);
+        	actualChanges.put(depositOnParamName, newValue);
+        	actualChanges.put("locale", localeAsInput);
+        	this.depositOn = DepositCalculationType.fromInt(newValue).getValue();
+        	
+        }
 
-		final String unitPriceParamName = "defaultFeeAmount";
+		final String unitPriceParamName = "amount";
 		if (command.isChangeInBigDecimalParameterNamed(unitPriceParamName,
-				this.defaultFeeAmount)) {
+				this.amount)) {
 			final BigDecimal newValue = command
 					.bigDecimalValueOfParameterNamed(unitPriceParamName);
 			actualChanges.put(unitPriceParamName, newValue);
 			actualChanges.put("locale", localeAsInput);
-			this.defaultFeeAmount = newValue;
+			this.amount = newValue;
 		}
 
 		final String isRefundableParamName = "isRefundable";
@@ -191,8 +203,6 @@ public class FeeMaster extends AbstractPersistable<Long> {
 	public void delete() {
 		this.deleted='Y';
 		this.feeCode=this.feeCode+"_"+this.getId();
-		this.transactionType=this.transactionType+"_"+this.getId();
-		
 	}
 
 	public static FeeMaster fromJson(JsonCommand command) {
@@ -201,18 +211,20 @@ public class FeeMaster extends AbstractPersistable<Long> {
 				.stringValueOfParameterNamed("feeDescription");
 		final String transactionType = command
 				.stringValueOfParameterNamed("transactionType");
-        final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command
-        		.integerValueOfParameterNamed("chargeTimeType"));
-        final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
-                .integerValueOfParameterNamed("chargeCalculationType"));
-        final BigDecimal defaultFeeAmount = command
-        		.bigDecimalValueOfParameterNamed("defaultFeeAmount");
+        final DepositTimeType depositTimeType = DepositTimeType.fromInt(command
+        		.integerValueOfParameterNamed("depositTimeType"));
+        final DepositCalculationType depositCalculationType = DepositCalculationType.fromInt(command
+                .integerValueOfParameterNamed("depositCalculationType"));
+        final DepositTimeType depositOn = DepositTimeType.fromInt(command
+                .integerValueOfParameterNamed("depositOn"));
+        final BigDecimal amount = command
+        		.bigDecimalValueOfParameterNamed("amount");
 		final String isRefundable = command
 				.stringValueOfParameterNamed("isRefundable");
 		// final char isRefundable =
 		// command.booleanObjectValueOfParameterNamed("isRefundable")?'Y':'N';
 		return new FeeMaster(feeCode, feeDescription, transactionType,
-				chargeTimeType,chargeCalculationType, defaultFeeAmount, isRefundable);
+				depositTimeType,depositCalculationType,depositOn, amount, isRefundable);
 	}
 
 }
