@@ -27,11 +27,11 @@
 <fullyQualifiedTypeName name="org.json.JSONArray"/>
 <fullyQualifiedTypeName name="org.json.JSONObject"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonParser"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.lang.InternalError"/>
 <fullyQualifiedTypeName name="java.lang.Integer"/>
 <fullyQualifiedTypeName name="java.math.BigDecimal"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
 </qualifiedTypeNameHistroy>

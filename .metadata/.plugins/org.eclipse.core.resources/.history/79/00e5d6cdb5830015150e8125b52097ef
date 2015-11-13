@@ -1,5 +1,0 @@
-package org.mifosplatform.portfolio.loanaccount.handler;
-
-public class CreateLoanCalculatorCommandHandler {
-
-}

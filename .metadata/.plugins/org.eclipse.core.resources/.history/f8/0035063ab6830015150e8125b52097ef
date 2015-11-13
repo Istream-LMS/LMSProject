@@ -1,5 +1,0 @@
-package org.mifosplatform.portfolio.loanaccount.service;
-
-public interface LoanCalculatorWritePlatformService {
-
-}
