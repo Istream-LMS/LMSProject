@@ -50,6 +50,11 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 						" fm.charge_calculation_enum as chargeCalculation,fm.default_fee_amount as defaultFeeAmount, fm.is_refundable as isRefundable from m_fee_master fm";
 				
 			}
+			
+			public String loanProductFeeMasterSchema() {
+	            return schema() + " join m_product_loan_feemaster plfm on plfm.feemaster_id = fm.id";
+	       }
+			
 			@Override
 			public FeeMasterData mapRow(ResultSet rs, int rowNum)
 					throws SQLException {
@@ -78,13 +83,26 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 			final FeeMasterDataMapper mapper = new FeeMasterDataMapper();			
 			 String sql = "select " + mapper.schema() +"  where is_deleted = 'N'";
 			if(transactionType != null){
-				sql = "select " + mapper.schema() +"  where is_deleted = 'N' and fm.transaction_type ="+transactionType;
+				sql = "select " + mapper.schema() +"  where is_deleted = 'N' and fm.transaction_type ='"+transactionType+"'";
 			}
 	    	return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		
 		}catch (final EmptyResultDataAccessException e) {
 		    return null;
 		}
+	}
+	
+	@Override
+	public Collection<FeeMasterData> retrieveLoanProductFeeMasterData(Long loanProductId) {
+		
+		this.context.authenticatedUser();
+        final FeeMasterDataMapper tm = new FeeMasterDataMapper();
+        
+        final String transactionType = "Deposit";
+
+        final String sql = "select " + tm.loanProductFeeMasterSchema() + " where plfm.product_loan_id=? and fm.is_deleted = 'N' and fm.transaction_type = '"+transactionType+"'";
+
+        return this.jdbcTemplate.query(sql, tm, new Object[] { loanProductId });
 	}
 
 }

@@ -16,6 +16,10 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.feemaster.domain.FeeMaster;
+import org.mifosplatform.organisation.feemaster.domain.FeeMasterRepository;
+import org.mifosplatform.organisation.feemaster.exception.FeeMasterNotFoundException;
 import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
 import org.mifosplatform.organisation.taxmapping.domain.TaxMap;
 import org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper;
@@ -56,6 +60,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
     private final ChargeRepositoryWrapper chargeRepository;
     private final TaxMapRepositoryWrapper taxmapRepository;
+    private final FeeMasterRepository feeMasterRepository;
     private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
 
     @Autowired
@@ -65,7 +70,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
             final ChargeRepositoryWrapper chargeRepository,
             final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService,
-            final TaxMapRepositoryWrapper taxmapRepository) {
+            final TaxMapRepositoryWrapper taxmapRepository,final FeeMasterRepository feeMasterRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -75,6 +80,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         this.chargeRepository = chargeRepository;
         this.accountMappingWritePlatformService = accountMappingWritePlatformService;
         this.taxmapRepository = taxmapRepository;
+        this.feeMasterRepository = feeMasterRepository;
     }
 
     @Transactional
@@ -96,9 +102,10 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
             final List<Charge> charges = assembleListOfProductCharges(command, currencyCode);
             final List<TaxMap> taxes = assembleListOfProductTaxes(command);
+            final List<FeeMaster> feeMasterData = assembleListOfProductFeeMasterData(command);
 
             final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
-                    this.aprCalculator,taxes);
+                    this.aprCalculator,taxes,feeMasterData);
 
             this.loanProductRepository.save(loanproduct);
 
@@ -175,6 +182,14 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             	final boolean updated = product.updateTaxes(taxes);
             	if (!updated) {
             		taxes.remove("taxes");
+            	}
+            }
+            
+            if (changes.containsKey("feeMasterData")) {
+            	final List<FeeMaster> feeMasterData = assembleListOfProductFeeMasterData(command);
+            	final boolean updated = product.updateFeeMasterData(feeMasterData);
+            	if (!updated) {
+            		feeMasterData.remove("feeMasterData");
             	}
             }
 
@@ -256,6 +271,31 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         }
 
         return taxes;
+    }
+    
+    private List<FeeMaster> assembleListOfProductFeeMasterData(final JsonCommand command) {
+
+        final List<FeeMaster> feeMasterData = new ArrayList<FeeMaster>();
+
+        if (command.parameterExists("feeMasterData")) {
+            final JsonArray feeMasterDataArray = command.arrayOfParameterNamed("feeMasterData");
+            if (feeMasterDataArray != null) {
+                for (int i = 0; i < feeMasterDataArray.size(); i++) {
+
+                    final JsonObject jsonObject = feeMasterDataArray.get(i).getAsJsonObject();
+                    if (jsonObject.has("id")) {
+                        final Long id = jsonObject.get("id").getAsLong();
+                        
+                        final FeeMaster feeMaster = this.feeMasterRepository.findOne(id);
+                        if (feeMaster == null) { throw new FeeMasterNotFoundException(id.toString()); }
+
+                        feeMasterData.add(feeMaster);
+                    }
+                }
+            }
+        }
+
+        return feeMasterData;
     }
 
     /*

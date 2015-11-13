@@ -36,9 +36,9 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.organisation.feemaster.domain.FeeMaster;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
 import org.mifosplatform.organisation.taxmapping.domain.TaxMap;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.fund.domain.Fund;
@@ -84,6 +84,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @ManyToMany
     @JoinTable(name = "m_product_loan_tax", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "tax_id"))
     private Collection<TaxMap> taxes;
+    
+    @ManyToMany
+    @JoinTable(name = "m_product_loan_feemaster", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "tax_id"))
+    private Collection<FeeMaster> feeMasterData;
 
     @Embedded
     private final LoanProductRelatedDetail loanProductRelatedDetail;
@@ -116,7 +120,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     private Set<LoanProductBorrowerCycleVariations> borrowerCycleVariations = new HashSet<LoanProductBorrowerCycleVariations>();
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
-            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator,List<TaxMap> taxes) {
+            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator,List<TaxMap> taxes,Collection<FeeMaster> feeMasterData) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final String description = command.stringValueOfParameterNamed("description");
@@ -172,7 +176,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
                 amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate,
-                externalId, useBorrowerCycle, loanProductBorrowerCycleVariations,taxes);
+                externalId, useBorrowerCycle, loanProductBorrowerCycleVariations,taxes,feeMasterData);
     }
 
     /**
@@ -382,7 +386,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle, final LocalDate startDate,
             final LocalDate closeDate, final String externalId, final boolean useBorrowerCycle,
             final Set<LoanProductBorrowerCycleVariations> loanProductBorrowerCycleVariations,
-            final List<TaxMap> taxes) {
+            final List<TaxMap> taxes,final Collection<FeeMaster> feeMasterData) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -398,6 +402,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         
         if (taxes != null) {
         	this.taxes = taxes;
+        }
+        
+        if (feeMasterData != null) {
+        	this.feeMasterData = feeMasterData;
         }
 
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
@@ -485,6 +493,25 @@ public class LoanProduct extends AbstractPersistable<Long> {
     	}
     	return updated;
     }
+    
+    public boolean updateFeeMasterData(final Collection<FeeMaster> newProductFeeMasterData) {
+    	if (newProductFeeMasterData == null) { return false; }
+    	
+    	boolean updated = false;
+    	if (this.feeMasterData != null) {
+    		final Set<FeeMaster> currentSetOfFeeMasterData = new HashSet<FeeMaster>(this.feeMasterData);
+    		final Set<FeeMaster> newSetOfFeeMasterData = new HashSet<FeeMaster>(newProductFeeMasterData);
+    		
+    		if (!currentSetOfFeeMasterData.equals(newSetOfFeeMasterData)) {
+    			updated = true;
+    			this.feeMasterData = newProductFeeMasterData;
+    		}
+    	} else {
+    		updated = true;
+    		this.feeMasterData = newProductFeeMasterData;
+    	}
+    	return updated;
+    }
 
     public Integer getAccountingType() {
         return this.accountingRule;
@@ -549,6 +576,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
         	final JsonArray jsonArray = command.arrayOfParameterNamed(taxesParamName);
         	if (jsonArray != null) {
         		actualChanges.put(taxesParamName, command.jsonFragment(taxesParamName));
+        	}
+        }
+        
+        final String feeMasterDataParamName = "feeMasterData";
+        if (command.hasParameter(feeMasterDataParamName)) {
+        	final JsonArray jsonArray = command.arrayOfParameterNamed(feeMasterDataParamName);
+        	if (jsonArray != null) {
+        		actualChanges.put(feeMasterDataParamName, command.jsonFragment(feeMasterDataParamName));
         	}
         }
 
@@ -797,4 +832,5 @@ public class LoanProduct extends AbstractPersistable<Long> {
         }
         return borrowerCycleVariations;
     }
+
 }

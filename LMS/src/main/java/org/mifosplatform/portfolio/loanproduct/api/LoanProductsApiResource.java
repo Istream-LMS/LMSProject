@@ -41,6 +41,8 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
@@ -97,6 +99,7 @@ public class LoanProductsApiResource {
     private final DefaultToApiJsonSerializer<ProductMixData> productMixDataApiJsonSerializer;
     private final ProductMixReadPlatformService productMixReadPlatformService;
     private final TaxMapReadPlatformService taxMapReadPlatformService;
+    private final FeeMasterReadplatformService feeMasterReadplatformService;
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -109,7 +112,8 @@ public class LoanProductsApiResource {
             final CodeValueReadPlatformService codeValueReadPlatformService,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
             final DefaultToApiJsonSerializer<ProductMixData> productMixDataApiJsonSerializer,
-            final ProductMixReadPlatformService productMixReadPlatformService,final TaxMapReadPlatformService taxMapReadPlatformService) {
+            final ProductMixReadPlatformService productMixReadPlatformService,final TaxMapReadPlatformService taxMapReadPlatformService,
+            final FeeMasterReadplatformService feeMasterReadplatformService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -125,6 +129,7 @@ public class LoanProductsApiResource {
         this.productMixDataApiJsonSerializer = productMixDataApiJsonSerializer;
         this.productMixReadPlatformService = productMixReadPlatformService;
         this.taxMapReadPlatformService = taxMapReadPlatformService;
+        this.feeMasterReadplatformService = feeMasterReadplatformService;
     }
 
     @POST
@@ -244,6 +249,11 @@ public class LoanProductsApiResource {
         if(taxMapData.isEmpty()){
         	taxMapData = null;
         }
+        
+        Collection<FeeMasterData> feeMasterDataOptions=this.feeMasterReadplatformService.retrieveAllData("Deposit");
+        if(feeMasterDataOptions.isEmpty()){
+        	feeMasterDataOptions = null;
+        }
 
         Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveLoanApplicablePenalties();
         if (penaltyOptions.isEmpty()) {
@@ -279,7 +289,7 @@ public class LoanProductsApiResource {
         return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
                 amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
-                accountingRuleTypeOptions,loanCycleValueConditionTypeOptions,taxMapData);
+                accountingRuleTypeOptions,loanCycleValueConditionTypeOptions,taxMapData,feeMasterDataOptions);
     }
 
 }

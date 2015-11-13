@@ -19,6 +19,7 @@ import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccou
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -110,6 +111,9 @@ public class LoanProductData {
     private Collection<TaxMapData> taxes;
     
     private List<TaxMapData> taxMapData;
+    
+    private Collection<FeeMasterData> feeMasterDataOptions;
+    private Collection<FeeMasterData> feeMasterData;
     /**
      * Used when returning lookup information about loan product for dropdowns.
      */
@@ -152,6 +156,7 @@ public class LoanProductData {
         final String status = null;
         final String externalId = null;
         Collection<TaxMapData> taxes = null;
+        Collection<FeeMasterData> feeMasterData = null;
         
         return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
@@ -159,7 +164,7 @@ public class LoanProductData {
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations, 
-                interestRateVariations, numberOfRepaymentVariations,taxes);
+                interestRateVariations, numberOfRepaymentVariations,taxes,feeMasterData);
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
@@ -198,6 +203,7 @@ public class LoanProductData {
         final String status = null;
         final String externalId = null;
         Collection<TaxMapData> taxes = null;
+        Collection<FeeMasterData> feeMasterData = null;
         
         final Collection<LoanProductBorrowerCycleVariationData> principalVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(1);
         final Collection<LoanProductBorrowerCycleVariationData> interestRateVariations = new ArrayList<LoanProductBorrowerCycleVariationData>(1);
@@ -209,7 +215,7 @@ public class LoanProductData {
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariations, 
-                interestRateVariations, numberOfRepaymentVariations,taxes);
+                interestRateVariations, numberOfRepaymentVariations,taxes,feeMasterData);
     }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
@@ -258,6 +264,7 @@ public class LoanProductData {
         final String status = null;
         final String externalId = null;
         Collection<TaxMapData> taxes = null;
+        Collection<FeeMasterData> feeMasterData = null;
 
         return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
@@ -265,7 +272,7 @@ public class LoanProductData {
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
                 accountingType, includeInBorrowerCycle, useBorrowerCycle, startDate, closeDate, status, externalId, principalVariationsForBorrowerCycle, 
-                interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle,taxes);
+                interestRateVariationsForBorrowerCycle, numberOfRepaymentVariationsForBorrowerCycle,taxes,feeMasterData);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -291,7 +298,7 @@ public class LoanProductData {
             final Collection<ChargeData> charges, final EnumOptionData accountingType, final boolean includeInBorrowerCycle,
             boolean useBorrowerCycle, final LocalDate startDate, final LocalDate closeDate, final String status, final String externalId, 
             Collection<LoanProductBorrowerCycleVariationData> principalVariations, Collection<LoanProductBorrowerCycleVariationData> interestRateVariations, 
-            Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations,Collection<TaxMapData> taxes) {
+            Collection<LoanProductBorrowerCycleVariationData> numberOfRepaymentVariations,Collection<TaxMapData> taxes,Collection<FeeMasterData> feeMasterData) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -353,6 +360,8 @@ public class LoanProductData {
         this.numberOfRepaymentVariationsForBorrowerCycle = numberOfRepaymentVariations;
         this.taxMapData = null;
         this.taxes = taxes;
+        this.feeMasterDataOptions = null;
+        this.feeMasterData = feeMasterData;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -362,7 +371,7 @@ public class LoanProductData {
             final List<EnumOptionData> repaymentFrequencyTypeOptions, final List<EnumOptionData> interestRateFrequencyTypeOptions,
             final Collection<FundData> fundOptions, final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
-            final List<EnumOptionData>  valueConditionTypeOptions,final List<TaxMapData> taxMapData) {
+            final List<EnumOptionData>  valueConditionTypeOptions,final List<TaxMapData> taxMapData,final Collection<FeeMasterData> feeMasterDataOptions) {
         this.id = productData.id;
         this.name = productData.name;
         this.description = productData.description;
@@ -436,6 +445,8 @@ public class LoanProductData {
         this.valueConditionTypeOptions = valueConditionTypeOptions;
         this.taxes = nullIfEmptyTaxes(productData.taxes());
         this.taxMapData = taxMapData;
+        this.feeMasterData = nullIfEmptyFeeMasterData(productData.feeMasterData());
+        this.feeMasterDataOptions = feeMasterDataOptions;
 
     }
 
@@ -454,6 +465,14 @@ public class LoanProductData {
     	}
     	return taxesLocal;
     }
+    
+    private Collection<FeeMasterData> nullIfEmptyFeeMasterData(final Collection<FeeMasterData> feeMasterData) {
+    	Collection<FeeMasterData> feeMasterDataLocal = feeMasterData;
+    	if (feeMasterData == null || feeMasterData.isEmpty()) {
+    		feeMasterDataLocal = null;
+    	}
+    	return feeMasterDataLocal;
+    }
 
     public Collection<ChargeData> charges() {
         Collection<ChargeData> chargesLocal = new ArrayList<ChargeData>();
@@ -469,6 +488,14 @@ public class LoanProductData {
         	taxesLocal = this.taxes;
         }
         return taxesLocal;
+    }
+    
+    public Collection<FeeMasterData> feeMasterData() {
+    	Collection<FeeMasterData> feeMasterDataLocal = new ArrayList<FeeMasterData>();
+    	if (this.feeMasterData != null) {
+    		feeMasterDataLocal = this.feeMasterData;
+    	}
+    	return feeMasterDataLocal;
     }
 
     public EnumOptionData accountingRuleType() {
