@@ -64,7 +64,7 @@ public class DepositeReadPlatformServiceImpl implements DepositeReadPlatformServ
 			final String chargeCode = rs.getString("chargeCode");
 			final BigDecimal defaultFeeAmount = rs.getBigDecimal("amount");
 			final String isRefundable = rs.getString("isRefundable");
-			return new FeeMasterData(id, feeCode, " ", "Deposit", null,null, defaultFeeAmount, isRefundable);
+			return new FeeMasterData(id, feeCode, " ", "Deposit", null,null,null, defaultFeeAmount, isRefundable);
 
 		}
 	}

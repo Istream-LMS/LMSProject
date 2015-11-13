@@ -15,7 +15,6 @@ public class FeeMasterData {
 	private String feeDescription;
 	private String transactionType;
 	private String chargeCode;
-	private BigDecimal defaultFeeAmount;
 	private List<ChargeData> chargeDatas;
 	private Long feeId;
 	private Long regionId;
@@ -24,32 +23,36 @@ public class FeeMasterData {
 	private Collection<MCodeData> transactionTypeDatas;
 	private String isRefundable;
 	
-	private EnumOptionData chargeTimeType;
-	private EnumOptionData chargeCalculationType;
+	private EnumOptionData depositTimeType;
+	private EnumOptionData depositCalculationType;
+	private EnumOptionData depositOnType;
 	
-	private List<EnumOptionData> chargeTimeTypeOptions;
-	private List<EnumOptionData> chargeCalculationTypeOptions;
+	private List<EnumOptionData> depositTimeTypeOptions;
+	private List<EnumOptionData> depositCalculationTypeOptions;
+	private List<EnumOptionData> depositOnTypeOptions;
 
-	public FeeMasterData(Long id, String feeCode, String feeDescription,String transactionType,EnumOptionData chargeTimeType,
-			EnumOptionData chargeCalculationType,BigDecimal defaultFeeAmount, String isRefundable) {
+	public FeeMasterData(Long id, String feeCode, String feeDescription,String transactionType,EnumOptionData depositTimeType,
+			EnumOptionData depositCalculationType,EnumOptionData depositOnType,BigDecimal amount, String isRefundable) {
 
 		this.id = id;
 		this.feeCode = feeCode;
 		this.feeDescription = feeDescription;
 		this.transactionType = transactionType;
-		this.chargeTimeType = chargeTimeType;
-		this.chargeCalculationType = chargeCalculationType;
-		this.defaultFeeAmount = defaultFeeAmount;
+		this.depositTimeType = depositTimeType;
+		this.depositCalculationType = depositCalculationType;
+		this.depositOnType = depositOnType;
+		this.amount = amount;
 		this.isRefundable = isRefundable;
 
 	}
 
-	public FeeMasterData(Collection<MCodeData> transactionTypeDatas,List<EnumOptionData> chargeTimeTypeOptions,
-			List<EnumOptionData> chargeCalculationTypeOptions) {
+	public FeeMasterData(Collection<MCodeData> transactionTypeDatas,List<EnumOptionData> depositTimeTypeOptions,
+			List<EnumOptionData> depositCalculationTypeOptions,List<EnumOptionData> depositOnTypeOptions) {
 
 		this.transactionTypeDatas = transactionTypeDatas;
-		this.chargeTimeTypeOptions = chargeTimeTypeOptions;
-		this.chargeCalculationTypeOptions = chargeCalculationTypeOptions;
+		this.depositTimeTypeOptions = depositTimeTypeOptions;
+		this.depositCalculationTypeOptions = depositCalculationTypeOptions;
+		this.depositOnTypeOptions = depositOnTypeOptions;
 	}
 
 	public FeeMasterData(Long id, Long feeId, Long regionId, BigDecimal amount) {
@@ -61,12 +64,14 @@ public class FeeMasterData {
 	}
 
 	public FeeMasterData(FeeMasterData feeMasterData,Collection<MCodeData> transactionTypeDatas,
-			List<EnumOptionData> chargeTimeTypeOptions, List<EnumOptionData> chargeCalculationTypeOptions) {
+			List<EnumOptionData> depositTimeTypeOptions, List<EnumOptionData> depositCalculationTypeOptions,
+			List<EnumOptionData> depositOnTypeOptions) {
 
 		this.feeMasterData = feeMasterData;
 		this.transactionTypeDatas = transactionTypeDatas;
-		this.chargeTimeTypeOptions = chargeTimeTypeOptions;
-		this.chargeCalculationTypeOptions = chargeCalculationTypeOptions;
+		this.depositTimeTypeOptions = depositTimeTypeOptions;
+		this.depositCalculationTypeOptions = depositCalculationTypeOptions;
+		this.depositOnTypeOptions = depositOnTypeOptions;
 	}
 
 	public Long getId() {
@@ -107,14 +112,6 @@ public class FeeMasterData {
 
 	public void setChargeCode(String chargeCode) {
 		this.chargeCode = chargeCode;
-	}
-
-	public BigDecimal getDefaultFeeAmount() {
-		return defaultFeeAmount;
-	}
-
-	public void setDefaultFeeAmount(BigDecimal defaultFeeAmount) {
-		this.defaultFeeAmount = defaultFeeAmount;
 	}
 
 	public List<ChargeData> getChargeDatas() {

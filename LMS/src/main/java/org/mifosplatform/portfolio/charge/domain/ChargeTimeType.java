@@ -19,8 +19,7 @@ public enum ChargeTimeType {
     MONTHLY_FEE(7, "chargeTimeType.monthlyFee"), // only for savings
     INSTALMENT_FEE(8, "chargeTimeType.instalmentFee"),// only for loan charges
     OVERDUE_INSTALLMENT(9, "overdue_installment"), // only for loan charges
-    RESIDUAL_AMOUNT(10,"chargeTimeType.residualAmt"),  // this is residual amoutn type
-    DEPOSITE(11,"chargeTimeType.deposit");  // only for loan deposit
+    RESIDUAL_AMOUNT(10,"chargeTimeType.residualAmt");  // this is residual amoutn type
 
     private final Integer value;
     private final String code;
@@ -40,7 +39,7 @@ public enum ChargeTimeType {
 
     public static Object[] validLoanValues() {
         return new Integer[] { ChargeTimeType.DISBURSEMENT.getValue(), ChargeTimeType.SPECIFIED_DUE_DATE.getValue(),
-                ChargeTimeType.INSTALMENT_FEE.getValue(),ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),ChargeTimeType.RESIDUAL_AMOUNT.getValue(),ChargeTimeType.DEPOSITE.getValue() };
+                ChargeTimeType.INSTALMENT_FEE.getValue(),ChargeTimeType.OVERDUE_INSTALLMENT.getValue(),ChargeTimeType.RESIDUAL_AMOUNT.getValue() };
     }
 
     public static Object[] validSavingsValues() {
@@ -82,9 +81,6 @@ public enum ChargeTimeType {
                 break;
                 case 10:
                 	chargeTimeType=RESIDUAL_AMOUNT;
-                	break;
-                case 11:
-                	chargeTimeType=DEPOSITE;
                 	break;
                 default:
                     chargeTimeType = INVALID;
@@ -134,9 +130,6 @@ public enum ChargeTimeType {
     	return this.value.equals(ChargeTimeType.RESIDUAL_AMOUNT.getValue());
     }
     
-    public boolean isDeposite(){
-    	return this.value.equals(ChargeTimeType.DEPOSITE.getValue());
-    }
     public boolean isAllowedLoanChargeTime() {
         return isTimeOfDisbursement() || isOnSpecifiedDueDate() || isInstalmentFee() || isOverdueInstallment() || isResidualAmount();
     }

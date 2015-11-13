@@ -57,7 +57,7 @@ public class DepositeWritePlatformServiceImp implements DepositeWritePlatformSer
 		    if(feeMasterData == null){
 		    	throw new InvalidDepositException(Long.valueOf(feeId));
 		    }
-		    DepositAndRefund depositfund=new DepositAndRefund(Long.valueOf(clientId),Long.valueOf(feeId),feeMasterData.getDefaultFeeAmount(),DateUtils.getDateOfTenant(),feeMasterData.getTransactionType());
+		    DepositAndRefund depositfund=new DepositAndRefund(Long.valueOf(clientId),Long.valueOf(feeId),feeMasterData.getAmount(),DateUtils.getDateOfTenant(),feeMasterData.getTransactionType());
 			this.depositAndRefundRepository.save(depositfund);
 			
 			// Update Client Balance

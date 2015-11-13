@@ -86,7 +86,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     private Collection<TaxMap> taxes;
     
     @ManyToMany
-    @JoinTable(name = "m_product_loan_feemaster", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "tax_id"))
+    @JoinTable(name = "m_product_loan_feemaster", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "feemaster_id"))
     private Collection<FeeMaster> feeMasterData;
 
     @Embedded
