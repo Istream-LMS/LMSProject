@@ -56,10 +56,7 @@ public class FeeMasterWriteplatformServiceImpl implements FeeMasterWriteplatform
 	        if (realCause.getMessage().contains("fee_code")) {
 	            final String name = command.stringValueOfParameterNamed("feeCode");
 	            throw new PlatformDataIntegrityException("error.msg.fee.code.duplicate.name", "A Fee code with name '" + name + "' already exists");
-	        } else if (realCause.getMessage().contains("fee_transaction_type")) {
-	            final String name =command.stringValueOfParameterNamed("transactionType");
-	            throw new PlatformDataIntegrityException("error.msg.fee.transaction.alredy.exists", "A Fee transactionType with this '" + name + "' already exists","transactionType");
-	        }
+	        } 
 
 	        //logger.error(dve.getMessage(), dve);
 	        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",

@@ -28,7 +28,7 @@ public class FeeMasterCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("feeCode", "feeDescription", "transactionType",
-					"defaultFeeAmount", "locale","isRefundable","chargeCalculationType","chargeTimeType"));
+					"amount", "locale","isRefundable","depositCalculationType","depositTimeType","depositOn"));
 	
 	private final FromJsonHelper fromApiJsonHelper;
 
@@ -57,17 +57,19 @@ public class FeeMasterCommandFromApiJsonDeserializer {
         final String feeCode = fromApiJsonHelper.extractStringNamed("feeCode", element);
         final String feeDescription = fromApiJsonHelper.extractStringNamed("feeDescription", element);
         final String transactionType = fromApiJsonHelper.extractStringNamed("transactionType", element);
-        final Integer chargeCalculationType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeCalculationType", element);
-        final Integer chargeTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("chargeTimeType", element);
-        final BigDecimal defaultFeeAmount = fromApiJsonHelper.extractBigDecimalNamed("defaultFeeAmount", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
+        final Integer depositCalculationType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("depositCalculationType", element);
+        final Integer depositTimeType = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("depositTimeType", element);
+        final Integer depositOn = this.fromApiJsonHelper.extractIntegerSansLocaleNamed("depositOn", element);
+        final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
         
         
         baseDataValidator.reset().parameter("feeCode").value(feeCode).notBlank().notExceedingLengthOf(10);
         baseDataValidator.reset().parameter("feeDescription").value(feeDescription).notBlank();
         baseDataValidator.reset().parameter("transactionType").value(transactionType).notBlank();
-        baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull();
-        baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull();
-		baseDataValidator.reset().parameter("defaultFeeAmount").value(defaultFeeAmount).notNull();
+        baseDataValidator.reset().parameter("depositCalculationType").value(depositCalculationType).notNull();
+        baseDataValidator.reset().parameter("depositTimeType").value(depositTimeType).notNull();
+        baseDataValidator.reset().parameter("depositOn").value(depositOn).notNull();
+		baseDataValidator.reset().parameter("amount").value(amount).notNull();
 		
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
