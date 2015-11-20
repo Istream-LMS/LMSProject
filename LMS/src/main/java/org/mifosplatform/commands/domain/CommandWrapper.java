@@ -721,4 +721,12 @@ public class CommandWrapper {
 	public boolean isFeeMasterResource() {
 		return this.entityName.equalsIgnoreCase("FEEMASTER");
 	}
+
+	public boolean isProspect() {
+		return this.entityName.equalsIgnoreCase("PROSPECT");
+	}
+
+	public boolean isConvertToClient() {
+		return this.actionName.equalsIgnoreCase("CONVERTTOCLIENT");
+	}
 }

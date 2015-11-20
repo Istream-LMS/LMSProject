@@ -22,7 +22,7 @@ public class CreateLoanCalculatorCommandHandler implements NewCommandSourceHandl
 	@Transactional
 	@Override
 	public CommandProcessingResult processCommand(final JsonCommand command) {
-		return this.writePlatformService.createLoanCalculator(command);
+		return this.writePlatformService.createLoanCalculator(command.entityId(), command);
 	}
 
 }
