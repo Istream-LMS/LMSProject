@@ -688,9 +688,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	               handler = applicationContext.getBean("deleteFeeMasterCommandHandler",NewCommandSourceHandler.class);
 	           }else {
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
+	    	  }	            
+	    }else if(wrapper.isProspect()){
+	    	  if(wrapper.isCreate()){
+	    		  handler = applicationContext.getBean("createProspectCommandHandler",NewCommandSourceHandler.class);
+	    	  }else if(wrapper.isConvertToClient()) {
+					 handler = applicationContext.getBean("convertProspectToClientCommandHandler",NewCommandSourceHandler.class);
+			  }else {
+	    		  throw new UnsupportedCommandException(wrapper.commandName());
 	    	  }
-	              
-	      }else {
+	    } else {
 
             throw new UnsupportedCommandException(wrapper.commandName());
         }

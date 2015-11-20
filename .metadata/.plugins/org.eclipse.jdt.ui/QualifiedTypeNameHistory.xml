@@ -3,7 +3,6 @@
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMapRepository"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMap"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper"/>
-<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData"/>
 <fullyQualifiedTypeName name="org.apache.commons.collections.map.HashedMap"/>
 <fullyQualifiedTypeName name="org.apache.poi.xssf.usermodel.XSSFWorkbook"/>
 <fullyQualifiedTypeName name="org.apache.poi.xssf.usermodel.XSSFRow"/>
@@ -17,7 +16,6 @@
 <fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.Cell"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="java.util.Set"/>
-<fullyQualifiedTypeName name="java.util.Date"/>
 <fullyQualifiedTypeName name="java.io.FileOutputStream"/>
 <fullyQualifiedTypeName name="java.io.FileNotFoundException"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
@@ -30,8 +28,15 @@
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.lang.InternalError"/>
 <fullyQualifiedTypeName name="java.lang.Integer"/>
-<fullyQualifiedTypeName name="java.math.BigDecimal"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
+<fullyQualifiedTypeName name="java.math.BigDecimal"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData"/>
+<fullyQualifiedTypeName name="net.authorize.sim.Fingerprint"/>
+<fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.data.ClientProspectData"/>
+<fullyQualifiedTypeName name="javax.persistence.OneToOne"/>
+<fullyQualifiedTypeName name="org.springframework.data.jpa.domain.AbstractPersistable"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom"/>
 </qualifiedTypeNameHistroy>
