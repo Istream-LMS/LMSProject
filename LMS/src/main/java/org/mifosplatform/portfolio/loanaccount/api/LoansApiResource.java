@@ -128,6 +128,7 @@ public class LoansApiResource {
 
     private final String resourceNameForPermissions = "LOAN";
     private static final String LEASE = "LeaseCalculator";
+    private static final String PROSPECT = "Prospect";
 
     private final PlatformSecurityContext context;
     private final LoanReadPlatformService loanReadPlatformService;
@@ -206,16 +207,11 @@ public class LoansApiResource {
         this.loanFeeMasterDataReadPlatformService = loanFeeMasterDataReadPlatformService;
         this.feeMasterReadPlatformService = feeMasterReadPlatformService;
     }
-
-    @GET
-    @Path("template")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId, @QueryParam("templateType") final String templateType,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @Context final UriInfo uriInfo) {
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+    
+    public LoanAccountData getTemplate(Long clientId, Long groupId, Long productId, 
+    		String templateType, boolean staffInSelectedOfficeOnly) {
+    	
+    	this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         // template
         final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
         // options
@@ -293,6 +289,19 @@ public class LoansApiResource {
             newLoanAccount = LoanAccountData.associationsAndTemplate(newLoanAccount, productOptions, allowedLoanOfficers, calendarOptions,
                     accountLinkingOptions);
         }
+        
+        return newLoanAccount;
+    }
+
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
+            @QueryParam("productId") final Long productId, @QueryParam("templateType") final String templateType,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @Context final UriInfo uriInfo) {
+    	LoanAccountData newLoanAccount = getTemplate(clientId, groupId, productId, templateType, staffInSelectedOfficeOnly);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, newLoanAccount, this.LOAN_DATA_PARAMETERS);
     }
@@ -562,8 +571,7 @@ public class LoansApiResource {
     @Path("tax")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String calculateTaxForLoanApplication(@QueryParam("flag") final Long flag,
-			@Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
+    public String calculateTaxForLoanApplication(@QueryParam("flag") final Long flag, final String apiRequestBodyAsJson) {
 
 		Long value = 0L;
 		
@@ -718,17 +726,31 @@ public class LoansApiResource {
     @Path("calculator")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String loanCalculator(final String apiRequestBodyAsJson) {
+    public String loanCalculator(final String apiRequestBodyAsJson, @QueryParam("command") String commandParam) {
        
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCalculator().withJson(apiRequestBodyAsJson).build();
+    	Long entityId = new Long(0);
+    	
+    	if (null != commandParam && commandParam.equalsIgnoreCase(PROSPECT)) {
+    		entityId = new Long(1);
+		}
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCalculator(entityId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
+        if(null == result) {
+        	return null;
+        }
+		entityId = result.resourceId() == null ? 0 : result.resourceId();
         
         Map<String, Object> changes = result.getChanges();
         
         if(null != changes && !changes.isEmpty()) {
+        
+        	JsonObject object = this.fromJsonHelper.parse(changes.get("data").toString()).getAsJsonObject();
+        	object.addProperty("prospectLoanCalculatorId", entityId);
         	
-        	return changes.get("data").toString();
+        	return object.toString();
         }
         return null;
     }
@@ -737,11 +759,11 @@ public class LoansApiResource {
     @Path("calculator/export")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String exportToXlsx(final String apiRequestBodyAsJson) {
+    public String exportToXlsx(final String apiRequestBodyAsJson, @QueryParam("command") final String commandParam) {
     	
     	this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
     	
-    	String jsonString = loanCalculator(apiRequestBodyAsJson);
+    	String jsonString = loanCalculator(apiRequestBodyAsJson, commandParam);
     	
     	String fileName = this.loanReadPlatformService.exportToExcel(jsonString);
     	
@@ -751,8 +773,12 @@ public class LoansApiResource {
         	throw new LeaseScreenReportFileNotFoundException(fileName);
         }
         
+        JsonElement element = this.fromJsonHelper.parse(jsonString);
+        Long entityId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
+        
         JsonObject object = new JsonObject();
         object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator, "").trim());
+        object.addProperty("prospectLoanCalculatorId", entityId);
         return object.toString();       
     }
     

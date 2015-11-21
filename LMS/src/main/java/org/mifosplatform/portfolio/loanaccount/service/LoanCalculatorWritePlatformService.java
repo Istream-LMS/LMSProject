@@ -5,6 +5,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface LoanCalculatorWritePlatformService {
 
-	CommandProcessingResult createLoanCalculator(JsonCommand command);
-
+	CommandProcessingResult createLoanCalculator(final Long entityId, final JsonCommand command);
+	
 }

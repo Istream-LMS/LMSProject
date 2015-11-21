@@ -254,4 +254,86 @@ public class LoanChargeData {
         }
         return isInstalmentFee;
     }
+
+	public Long getChargeId() {
+		return chargeId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public EnumOptionData getChargeTimeType() {
+		return chargeTimeType;
+	}
+
+	public EnumOptionData getChargeCalculationType() {
+		return chargeCalculationType;
+	}
+
+	public BigDecimal getPercentage() {
+		return percentage;
+	}
+
+	public BigDecimal getAmountPercentageAppliedTo() {
+		return amountPercentageAppliedTo;
+	}
+
+	public CurrencyData getCurrency() {
+		return currency;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public BigDecimal getAmountPaid() {
+		return amountPaid;
+	}
+
+	public BigDecimal getAmountWaived() {
+		return amountWaived;
+	}
+
+	public BigDecimal getAmountWrittenOff() {
+		return amountWrittenOff;
+	}
+
+	public BigDecimal getAmountOrPercentage() {
+		return amountOrPercentage;
+	}
+
+	public Collection<ChargeData> getChargeOptions() {
+		return chargeOptions;
+	}
+
+	public boolean isPenalty() {
+		return penalty;
+	}
+
+	public EnumOptionData getChargePaymentMode() {
+		return chargePaymentMode;
+	}
+
+	public boolean isPaid() {
+		return paid;
+	}
+
+	public boolean isWaived() {
+		return waived;
+	}
+
+	public BigDecimal getMinCap() {
+		return minCap;
+	}
+
+	public BigDecimal getMaxCap() {
+		return maxCap;
+	}
+
+	public Collection<LoanInstallmentChargeData> getInstallmentChargeData() {
+		return installmentChargeData;
+	}
+    
+    
 }

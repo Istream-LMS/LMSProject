@@ -6,6 +6,8 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mifosplatform.crm.clientprospect.domain.ProspectLoanCalculator;
+import org.mifosplatform.crm.clientprospect.domain.ProspectLoanCalculatorRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -32,6 +34,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private final FromJsonHelper fromApiJsonHelper;
 	private final TaxMapRepositoryWrapper taxMapRepository;
 	private final LoanCalculatorCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+	private final ProspectLoanCalculatorRepository prospectLoanCalculatorRepository;
 
 	public final String ACCOUNTWDV = "ACCT.TAX";
 	public final String TAXWDV = "TAX_DEP";
@@ -42,6 +45,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private final BigDecimal HUNDERED = new BigDecimal(100);
 	private final BigDecimal ONE = BigDecimal.ONE;
 	private final BigDecimal ZERO = BigDecimal.ZERO;
+	
 	//private final int payTerms[] = { 12, 24, 36, 48, 60 };
 
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
@@ -54,12 +58,14 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	@Autowired
 	public LoanCalculatorWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final FromJsonHelper fromApiJsonHelper, final TaxMapRepositoryWrapper taxMapRepository,
-			final LoanCalculatorCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+			final LoanCalculatorCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+			final ProspectLoanCalculatorRepository prospectLoanCalculatorRepository) {
 
 		this.context = context;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.taxMapRepository = taxMapRepository;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+		this.prospectLoanCalculatorRepository = prospectLoanCalculatorRepository;
 	}
 	
 	private BigDecimal getValue(String key, JsonElement parsedJson) {
@@ -73,7 +79,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	}
 
 	@Override
-	public CommandProcessingResult createLoanCalculator(JsonCommand command) {
+	public CommandProcessingResult createLoanCalculator(Long entityId, JsonCommand command) {
 
 		this.context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
@@ -101,11 +107,16 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final BigDecimal fLPForYear = getValue("FLPForYear", parsedJson);	
 		final BigDecimal replacementTyresForYear = getValue("replacementTyres", parsedJson);
 		final BigDecimal comprehensiveInsuranceForYear = getValue("comprehensiveInsurance", parsedJson);
+		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", parsedJson);
 		
 		JsonArray deprecisationArray = this.fromApiJsonHelper.extractJsonArrayNamed("deprecisationArray", parsedJson);
 
 		if(null == deprecisationArray) {
 			deprecisationArray = new JsonArray();
+		}
+		
+		if(null == entityId) {
+			entityId = new Long(0);
 		}
 		
 		if (principal.compareTo(deposit) < 1) {
@@ -116,6 +127,14 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 
 		BigDecimal vatAmount = totalPrincipal.multiply(vatRate, mc);
 		BigDecimal processingAmount = totalPrincipal.subtract(vatAmount, mc);
+		
+		
+		BigDecimal totalcoi = ZERO, totalCof = ZERO, totalMaintenances = ZERO, 
+				totalReplacementTyres = ZERO, totalComprehensiveInsurance = ZERO,	
+				totalResidualDeprecisation = ZERO, totalResidualCostVEP = ZERO, 
+				totalResidualAmountVEP = ZERO, totalResidualAmountVIP = ZERO;
+		
+		int keyPayTerm = 0;
 
 		if (payTerms.length == 0) {
 			payTerms = new String[] { "12", "24", "36", "48", "60" };
@@ -123,7 +142,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		
 		for (String payTerm : payTerms) {
 
-			final int keyPayTerm = Integer.parseInt(payTerm);
+			keyPayTerm = Integer.parseInt(payTerm);
 			final BigDecimal payterm = new BigDecimal(keyPayTerm);
 			final BigDecimal percent = divideAtCalc(payterm, TWELVE);
 			
@@ -131,8 +150,13 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 					keyPayTerm, totalPrincipal, accountWDVRate, taxWDVRate, vatRate, 
 					processingAmount, mileage, fLPForYear, percent);
 			
+			//final BigDecimal totalcoi, final BigDecimal totalCof, final BigDecimal totalMaintenances, 
+			//final BigDecimal totalReplacementTyres, final BigDecimal totalComprehensiveInsurance
+			
+			
 			calculateTotalAmount(processingAmount, interest, percent, payterm, loanCalculatorData.getResidualDeprecisation(), 
-					costOfFund, maintenance, replacementTyresForYear, comprehensiveInsuranceForYear, loanCalculatorData);
+					costOfFund, maintenance, replacementTyresForYear, comprehensiveInsuranceForYear, loanCalculatorData,
+					totalcoi, totalCof, totalMaintenances, totalReplacementTyres, totalComprehensiveInsurance);
 				
 			for (JsonElement element : deprecisationArray) {
 				
@@ -149,8 +173,23 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 					final BigDecimal subComprehensiveInsuranceForYear = getValue("comprehensiveInsurance", element);
 					
 					calculateTotalAmount(processingAmount, interest, keyPercent, keyTerm, subdeprecisation, 
-							subCOF, subMaintenance, subReplacementTyresForYear, subComprehensiveInsuranceForYear, loanCalculatorData);
+							subCOF, subMaintenance, subReplacementTyresForYear, subComprehensiveInsuranceForYear, loanCalculatorData,
+							totalcoi, totalCof, totalMaintenances, totalReplacementTyres, totalComprehensiveInsurance);
 				}
+			}
+			
+			
+			totalcoi = totalcoi.add(loanCalculatorData.getCoiForYear(), mc);
+			totalCof = totalCof.add(loanCalculatorData.getCofForYear(), mc);
+			totalMaintenances = totalMaintenances.add(loanCalculatorData.getMaintenanceForYear(), mc);
+			totalReplacementTyres = totalReplacementTyres.add(loanCalculatorData.getReplacementTyresForYear(), mc);
+			totalComprehensiveInsurance = totalComprehensiveInsurance.add(loanCalculatorData.getComprehensiveInsuranceForYear(), mc);
+			
+			if(entityId == 1) {
+				totalResidualDeprecisation = loanCalculatorData.getResidualDeprecisation();
+				totalResidualCostVEP = loanCalculatorData.getResidualCost();
+				totalResidualAmountVEP = loanCalculatorData.getResidualAmountVEP();
+				totalResidualAmountVIP = loanCalculatorData.getResidualAmountVIP();
 			}
 			
 			loanCalculatorData.setExcess(excess);
@@ -159,13 +198,26 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			jsonParser = this.fromApiJsonHelper.parse(gson.toJson(loanCalculatorData));
 			jsonArray.add(jsonParser);
 		}
+		
 		jsonObject.addProperty("principal", principal);
 		jsonObject.add("payTerms", jsonArray);
 
 		Map<String, Object> withChanges = new HashMap<String, Object>();
 		withChanges.put("data", jsonObject.toString());
 
-		return new CommandProcessingResultBuilder().with(withChanges).build();
+		Long entityValue = new Long(-1);
+		
+		if(entityId == 1) {
+			ProspectLoanCalculator prospectLoanCalculator = new ProspectLoanCalculator(productId,
+					principal, interest, keyPayTerm, deposit, totalCof, totalMaintenances, 
+					totalReplacementTyres, totalComprehensiveInsurance, totalResidualDeprecisation,
+					totalResidualCostVEP, totalResidualAmountVEP, totalResidualAmountVIP);
+			
+			this.prospectLoanCalculatorRepository.save(prospectLoanCalculator);
+			entityValue = prospectLoanCalculator.getId();
+		}
+		
+		return new CommandProcessingResultBuilder().withEntityId(entityValue).with(withChanges).build();
 	}
 
 	private TaxMap getTaxMapData(String taxCode) {
@@ -273,16 +325,26 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			final BigDecimal cofForYear, final BigDecimal maintenanceForYear,
 			final BigDecimal replacementTyresForYear,
 			final BigDecimal comprehensiveInsuranceForYear,
-			LoanCalculatorData loanCalculatorData) {
+			LoanCalculatorData loanCalculatorData,
+			final BigDecimal totalcoi, final BigDecimal totalCof, final BigDecimal totalMaintenances, 
+			final BigDecimal totalReplacementTyres, final BigDecimal totalComprehensiveInsurance) {
 
 		BigDecimal coiForYearRate = processingAmount.multiply(intrest, mc);
 		BigDecimal coiForYear = divideAtCalc(coiForYearRate, HUNDERED);// (9)																		// //=($B$18*8*D15/D15)/100
 		BigDecimal deprecisationForYear = processingAmount.multiply(residualDeprecisation, mc); // (10) //=$B$18*D43
-		BigDecimal coi = keyPercent.multiply(coiForYear, mc);// (12) //=$B$18*$B$8*(D15/12)/100
-		BigDecimal cof = keyPercent.multiply(cofForYear, mc);// (13) //=B6*D15/12
-		BigDecimal maintenance = keyPercent.multiply(maintenanceForYear, mc);// (14) //=$B$7*D15/12
-		BigDecimal replacementTyres = keyPercent.multiply(replacementTyresForYear, mc);
-		BigDecimal comprehensiveInsurance = keyPercent.multiply(comprehensiveInsuranceForYear, mc);
+		
+		//BigDecimal coi = keyPercent.multiply(coiForYear, mc);// (12) //=$B$18*$B$8*(D15/12)/100
+		//BigDecimal cof = keyPercent.multiply(cofForYear, mc);// (13) //=B6*D15/12
+		//BigDecimal maintenance = keyPercent.multiply(maintenanceForYear, mc);// (14) //=$B$7*D15/12
+		//BigDecimal replacementTyres = keyPercent.multiply(replacementTyresForYear, mc);
+		//BigDecimal comprehensiveInsurance = keyPercent.multiply(comprehensiveInsuranceForYear, mc);
+		//BigDecimal deprecisation = keyPercent.multiply(deprecisationForYear, mc);// (15) //=$B$18*D43*D15/12
+		
+		BigDecimal coi = totalcoi.add(coiForYear, mc);// (12) //=$B$18*$B$8*(D15/12)/100
+		BigDecimal cof = totalCof.add(cofForYear, mc);// (13) //=B6*D15/12
+		BigDecimal maintenance = totalMaintenances.add(maintenanceForYear, mc);// (14) //=$B$7*D15/12
+		BigDecimal replacementTyres = totalReplacementTyres.add(replacementTyresForYear, mc);
+		BigDecimal comprehensiveInsurance = totalComprehensiveInsurance.add(comprehensiveInsuranceForYear, mc);
 		BigDecimal deprecisation = keyPercent.multiply(deprecisationForYear, mc);// (15) //=$B$18*D43*D15/12
 
 		BigDecimal totalForYear = coiForYear.add(cofForYear, mc).add(maintenanceForYear, mc)

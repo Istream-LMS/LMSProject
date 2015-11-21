@@ -139,6 +139,7 @@ dependencies {
                 [group: 'net.sf.ehcache', name: 'ehcache', version: '2.7.2'],
                 [group: 'com.itextpdf', name: 'itextpdf', version: '5.5.4'],
                 [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12']
+                       
  	        )
 
  	 testCompile 'junit:junit:4.10',

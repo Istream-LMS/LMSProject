@@ -1581,9 +1581,10 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder createLoanCalculator() {
+	public CommandWrapperBuilder createLoanCalculator(final Long entityId) {
 		this.actionName = "CREATE";
 		this.entityName = "LOANCALCULATOR";
+		this.entityId = entityId;
 		this.href = "loans/calculator";
 		return this;	
 	}
@@ -1617,6 +1618,22 @@ public class CommandWrapperBuilder {
 		this.entityName = "FEEMASTER";
 		this.entityId = id;
 		this.href = "/feemaster/"+id;
+		return this;
+	}
+
+	public CommandWrapperBuilder createProspect() {
+		this.actionName = "CREATE";
+		this.entityName = "PROSPECT";
+		this.entityId = null;
+		this.href = "/prospect";
+		return this;
+	}
+
+	public CommandWrapperBuilder convertProspectToClient(Long prospectId) {
+		this.actionName = "CONVERTTOCLIENT";
+		this.entityName = "PROSPECT";
+		this.entityId = prospectId;
+		this.href = "/prospect/"+ prospectId;
 		return this;
 	}
 }

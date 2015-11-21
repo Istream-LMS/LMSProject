@@ -161,7 +161,8 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
                     }
                     
                     taxJson.addProperty("taxAmount", taxAmount);
-                    taxJson.addProperty("taxId", taxId);
+                    taxJson.addProperty("taxId", taxId);  
+                    taxJson.addProperty("locale", "en");
                     taxArray.add(taxJson);
                 }	
             }
@@ -170,6 +171,7 @@ public class LoanScheduleCalculationPlatformServiceImpl implements LoanScheduleC
 		taxJson.addProperty("finalAmount", amount);
 		taxJson.addProperty("vatAmount", taxAmount);
 		taxJson.add("taxArray", taxArray);
+		taxJson.addProperty("locale", "en");
 		
 		return taxJson.toString();
 	}

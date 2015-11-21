@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -44,8 +45,9 @@ public final class LoanCalculatorCommandFromApiJsonDeserializer {
 			throw new InvalidJsonException();
 		}
 
-		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("principal", "interestRatePerPeriod", "costOfFund",
-						"locale", "dateFormat", "maintenance","payTerms", "deposit", "mileage", "excess", "FLPForYear", "deprecisationArray"));
+		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("principal", 
+				"interestRatePerPeriod", "costOfFund", "locale", "dateFormat", "maintenance","payTerms", 
+				"deposit", "mileage", "excess", "FLPForYear", "deprecisationArray","productId"));
 
 		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 		}.getType();
@@ -72,6 +74,9 @@ public final class LoanCalculatorCommandFromApiJsonDeserializer {
         
 		final String locale = this.fromApiJsonHelper.extractStringNamed("locale", element);
 		baseDataValidator.reset().parameter("locale").value(locale).notBlank();
+		
+		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", element);
+		baseDataValidator.reset().parameter("productId").value(productId).notBlank();
 				
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}

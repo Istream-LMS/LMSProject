@@ -1208,4 +1208,290 @@ public class LoanAccountData {
         return data.getBorrowerCycleNumber() == loanCycleNumber && data.getValueConditionType().equals(LoanProductValueConditionType.EQUAL);
     }
 
+	public Long getId() {
+		return id;
+	}
+
+	public String getAccountNo() {
+		return accountNo;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public LoanStatusEnumData getStatus() {
+		return status;
+	}
+
+	public Long getClientId() {
+		return clientId;
+	}
+
+	public String getClientName() {
+		return clientName;
+	}
+
+	public Long getClientOfficeId() {
+		return clientOfficeId;
+	}
+
+	public GroupGeneralData getGroup() {
+		return group;
+	}
+
+	public Long getLoanProductId() {
+		return loanProductId;
+	}
+
+	public String getLoanProductName() {
+		return loanProductName;
+	}
+
+	public String getLoanProductDescription() {
+		return loanProductDescription;
+	}
+
+	public Long getFundId() {
+		return fundId;
+	}
+
+	public String getFundName() {
+		return fundName;
+	}
+
+	public Long getLoanPurposeId() {
+		return loanPurposeId;
+	}
+
+	public String getLoanPurposeName() {
+		return loanPurposeName;
+	}
+
+	public Long getLoanOfficerId() {
+		return loanOfficerId;
+	}
+
+	public String getLoanOfficerName() {
+		return loanOfficerName;
+	}
+
+	public EnumOptionData getLoanType() {
+		return loanType;
+	}
+
+	public CurrencyData getCurrency() {
+		return currency;
+	}
+
+	public Integer getTermFrequency() {
+		return termFrequency;
+	}
+
+	public EnumOptionData getTermPeriodFrequencyType() {
+		return termPeriodFrequencyType;
+	}
+
+	public Integer getNumberOfRepayments() {
+		return numberOfRepayments;
+	}
+
+	public Integer getRepaymentEvery() {
+		return repaymentEvery;
+	}
+
+	public EnumOptionData getRepaymentFrequencyType() {
+		return repaymentFrequencyType;
+	}
+
+	public BigDecimal getInterestRatePerPeriod() {
+		return interestRatePerPeriod;
+	}
+
+	public EnumOptionData getInterestRateFrequencyType() {
+		return interestRateFrequencyType;
+	}
+
+	public BigDecimal getAnnualInterestRate() {
+		return annualInterestRate;
+	}
+
+	public EnumOptionData getAmortizationType() {
+		return amortizationType;
+	}
+
+	public EnumOptionData getInterestType() {
+		return interestType;
+	}
+
+	public EnumOptionData getInterestCalculationPeriodType() {
+		return interestCalculationPeriodType;
+	}
+
+	public BigDecimal getInArrearsTolerance() {
+		return inArrearsTolerance;
+	}
+
+	public Long getTransactionProcessingStrategyId() {
+		return transactionProcessingStrategyId;
+	}
+
+	public String getTransactionProcessingStrategyName() {
+		return transactionProcessingStrategyName;
+	}
+
+	public Integer getGraceOnPrincipalPayment() {
+		return graceOnPrincipalPayment;
+	}
+
+	public Integer getGraceOnInterestPayment() {
+		return graceOnInterestPayment;
+	}
+
+	public Integer getGraceOnInterestCharged() {
+		return graceOnInterestCharged;
+	}
+
+	public LocalDate getInterestChargedFromDate() {
+		return interestChargedFromDate;
+	}
+
+	public LocalDate getExpectedFirstRepaymentOnDate() {
+		return expectedFirstRepaymentOnDate;
+	}
+
+	public Boolean getSyncDisbursementWithMeeting() {
+		return syncDisbursementWithMeeting;
+	}
+
+	public LoanApplicationTimelineData getTimeline() {
+		return timeline;
+	}
+
+	public LoanSummaryData getSummary() {
+		return summary;
+	}
+
+	public LoanScheduleData getRepaymentSchedule() {
+		return repaymentSchedule;
+	}
+
+	public Collection<LoanTransactionData> getTransactions() {
+		return transactions;
+	}
+
+	public Collection<LoanChargeData> getCharges() {
+		return charges;
+	}
+
+	public Collection<CollateralData> getCollateral() {
+		return collateral;
+	}
+
+	public Collection<GuarantorData> getGuarantors() {
+		return guarantors;
+	}
+
+	public CalendarData getMeeting() {
+		return meeting;
+	}
+
+	public Collection<NoteData> getNotes() {
+		return notes;
+	}
+
+	public Collection<InsuranceData> getInsurences() {
+		return insurences;
+	}
+
+	public Collection<LoanProductData> getProductOptions() {
+		return productOptions;
+	}
+
+	public Collection<StaffData> getLoanOfficerOptions() {
+		return loanOfficerOptions;
+	}
+
+	public Collection<CodeValueData> getLoanPurposeOptions() {
+		return loanPurposeOptions;
+	}
+
+	public Collection<FundData> getFundOptions() {
+		return fundOptions;
+	}
+
+	public Collection<EnumOptionData> getTermFrequencyTypeOptions() {
+		return termFrequencyTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getRepaymentFrequencyTypeOptions() {
+		return repaymentFrequencyTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getInterestRateFrequencyTypeOptions() {
+		return interestRateFrequencyTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getAmortizationTypeOptions() {
+		return amortizationTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getInterestTypeOptions() {
+		return interestTypeOptions;
+	}
+
+	public Collection<EnumOptionData> getInterestCalculationPeriodTypeOptions() {
+		return interestCalculationPeriodTypeOptions;
+	}
+
+	public Collection<TransactionProcessingStrategyData> getTransactionProcessingStrategyOptions() {
+		return transactionProcessingStrategyOptions;
+	}
+
+	public Collection<ChargeData> getChargeOptions() {
+		return chargeOptions;
+	}
+
+	public Collection<CodeValueData> getLoanCollateralOptions() {
+		return loanCollateralOptions;
+	}
+
+	public Collection<CalendarData> getCalendarOptions() {
+		return calendarOptions;
+	}
+
+	public BigDecimal getFeeChargesAtDisbursementCharged() {
+		return feeChargesAtDisbursementCharged;
+	}
+
+	public BigDecimal getTotalOverpaid() {
+		return totalOverpaid;
+	}
+
+	public Integer getLoanCounter() {
+		return loanCounter;
+	}
+
+	public Integer getLoanProductCounter() {
+		return loanProductCounter;
+	}
+
+	public PortfolioAccountData getLinkedAccount() {
+		return linkedAccount;
+	}
+
+	public Collection<PortfolioAccountData> getAccountLinkingOptions() {
+		return accountLinkingOptions;
+	}
+
+	public Collection<TaxMapData> getTaxMapData() {
+		return taxMapData;
+	}
+
+	public Collection<LoanTaxData> getTaxes() {
+		return taxes;
+	}
+    
+    
+
 }
