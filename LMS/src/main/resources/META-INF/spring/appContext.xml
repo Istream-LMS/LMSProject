@@ -41,7 +41,9 @@
 										  org.mifosplatform.template.service.*,
 										  org.mifosplatform.useradministration.*,
 										  org.mifosplatform.finance.*,
-										  org.mifosplatform.crm.*">
+										  org.mifosplatform.crm.*,
+										  org.mifosplatform.logistics.*,
+										  org.mifosplatform.chargecode.*">
 										  
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
@@ -60,6 +62,7 @@
     <jpa:repositories base-package="org.mifosplatform.template.domain" />
     <jpa:repositories base-package="org.mifosplatform.finance.*" />
     <jpa:repositories base-package="org.mifosplatform.crm.*" />
+    <jpa:repositories base-package="org.mifosplatform.logistics.*.domain" />
 
     <import resource="infrastructure.xml" />
 		
