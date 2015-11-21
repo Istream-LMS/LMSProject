@@ -14,6 +14,7 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.organisation.feemaster.domain.FeeMaster;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
 import org.mifosplatform.organisation.holiday.domain.HolidayStatusType;
@@ -36,6 +37,7 @@ import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanFeeMaster;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
@@ -43,6 +45,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleG
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeAssembler;
+import org.mifosplatform.portfolio.loanaccount.service.LoanFeeMasterAssembler;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -71,6 +74,7 @@ public class LoanScheduleAssembler {
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
+    private final LoanFeeMasterAssembler loanFeeMasterAssembler;
 
     @Autowired
     public LoanScheduleAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
@@ -79,7 +83,7 @@ public class LoanScheduleAssembler {
             final LoanChargeAssembler loanChargeAssembler, final CalendarRepository calendarRepository,
             final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
             final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
-            final WorkingDaysRepositoryWrapper workingDaysRepository) {
+            final WorkingDaysRepositoryWrapper workingDaysRepository,final LoanFeeMasterAssembler loanFeeMasterAssembler) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -92,6 +96,7 @@ public class LoanScheduleAssembler {
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.workingDaysRepository = workingDaysRepository;
+        this.loanFeeMasterAssembler = loanFeeMasterAssembler;
     }
     //madhav
     public LoanApplicationTerms assembleLoanTermsLease(final JsonElement element) {
@@ -242,22 +247,23 @@ public class LoanScheduleAssembler {
        // final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         //madhav
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element);
-        
+        //final Set<LoanFeeMaster> loanDeposits = this.loanFeeMasterAssembler.fromParsedJson(element);
+        //dgfsgdfgs
         BigDecimal principal=null;
         principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         BigDecimal resudualAmount=null;
         if(loanCharges!=null)
         for(LoanCharge charges:loanCharges){
-        Charge charge=charges.getCharge();
-        //System.out.println(charge.getChargeTime());
-        if(charge.getChargeTime().equals(new Integer(10))){	
+	        Charge charge=charges.getCharge();
+	        //System.out.println(charge.getChargeTime());
+	        if(charge.getChargeTime().equals(new Integer(10))){	
         	  BigDecimal principalbyhun= principal.divide(new BigDecimal(100));
         	   resudualAmount=principalbyhun.multiply(charges.getPercentage());
-       principal =principal.subtract(resudualAmount);
-   
-                 }		
+        	   //principal =principal.subtract(resudualAmount);
+	        }		
         }
-        final Money principalMoney = Money.of(currency, principal);
+        
+       final Money principalMoney = Money.of(currency, principal);
 
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);

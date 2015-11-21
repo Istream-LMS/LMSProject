@@ -47,6 +47,7 @@ public final class LoanApplicationTerms {
      */
     private final Integer principalGrace;
     private BigDecimal residualAmount;
+    private BigDecimal depositAmount;
     /**
      * Integer representing the number of 'repayment frequencies' or
      * installments where 'grace' should apply to the payment of interest in a
@@ -545,6 +546,14 @@ public final class LoanApplicationTerms {
 	public void setResidualAmount(BigDecimal residualAmount) {
 		this.residualAmount = residualAmount;
 	}
+	
+	public BigDecimal getDepositAmount() {
+		return depositAmount;
+	}
+
+	public void setDepositAmount(BigDecimal depositAmount) {
+		this.depositAmount = depositAmount;
+	}
 
 	private BigDecimal periodicInterestRate(final PaymentPeriodsInOneYearCalculator calculator, final MathContext mc) {
 
@@ -844,4 +853,5 @@ public final class LoanApplicationTerms {
     public Money getPrincipal() {
         return this.principal;
     }
+
 }

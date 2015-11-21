@@ -8,10 +8,12 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -248,6 +250,29 @@ public class LoanCharge extends AbstractPersistable<Long> {
         }
         this.amountOrPercentage = chargeAmount;
         if(this.loan!=null && isInstalmentFee()){
+        	
+			/*final Collection<LoanInstallmentCharge> remove = new HashSet<LoanInstallmentCharge>();
+            final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
+            if (this.loanInstallmentCharge.isEmpty()) {
+                this.loanInstallmentCharge.addAll(chargePerInstallments);
+            } else {
+                int index = 0;
+                final LoanInstallmentCharge[] loanChargePerInstallments = new LoanInstallmentCharge[chargePerInstallments.size()];
+                final LoanInstallmentCharge[] loanChargePerInstallmentArray = chargePerInstallments.toArray(loanChargePerInstallments);
+                for (final LoanInstallmentCharge chargePerInstallment : this.loanInstallmentCharge) {
+                    if (index == loanChargePerInstallmentArray.length) {
+                        remove.add(chargePerInstallment);
+                        chargePerInstallment.updateInstallment(null);
+                    } else {
+                        chargePerInstallment.copyFrom(loanChargePerInstallmentArray[index++]);
+                    }
+                }
+                this.loanInstallmentCharge.removeAll(remove);
+                while (index < loanChargePerInstallmentArray.length - 1) {
+                    this.loanInstallmentCharge.add(loanChargePerInstallmentArray[index++]);
+                }
+            }*/
+        	
             final Set<LoanInstallmentCharge> chargePerInstallments = this.loan.generateInstallmentLoanCharges(this);
             if(this.loanInstallmentCharge.isEmpty()){
                 this.loanInstallmentCharge.addAll(chargePerInstallments);

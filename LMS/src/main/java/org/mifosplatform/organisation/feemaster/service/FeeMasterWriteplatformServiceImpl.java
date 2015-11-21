@@ -92,7 +92,7 @@ public class FeeMasterWriteplatformServiceImpl implements FeeMasterWriteplatform
 }
 	private FeeMaster retrieveCodeBy(final Long id) {
         final FeeMaster feeMaster = this.feeMasterRepository.findOne(id);
-        if (feeMaster == null) { throw new FeeMasterNotFoundException(id.toString()); }
+        if (feeMaster == null) { throw new FeeMasterNotFoundException(id); }
         return feeMaster;
     }
 	

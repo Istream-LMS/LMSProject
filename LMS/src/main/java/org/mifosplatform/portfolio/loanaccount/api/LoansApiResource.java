@@ -48,6 +48,8 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.taxmapping.data.LoanTaxMapData;
@@ -72,6 +74,7 @@ import org.mifosplatform.portfolio.insurance.data.InsuranceData;
 import org.mifosplatform.portfolio.insurance.service.InsuranceReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanFeeMasterData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTaxData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
@@ -85,6 +88,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleDat
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanFeeMasterDataReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanTaxReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
@@ -150,6 +154,8 @@ public class LoansApiResource {
     private final LoanTaxReadPlatformService loanTaxReadPlatformService;
     private final TaxMapReadPlatformService taxMapReadPlatformService;
     private final DefaultToApiJsonSerializer<LoanTaxMapData> loanTaxMappingApiJsonSerializer;
+    private final LoanFeeMasterDataReadPlatformService loanFeeMasterDataReadPlatformService;
+    private final FeeMasterReadplatformService feeMasterReadPlatformService;
     
 
     @Autowired
@@ -170,7 +176,8 @@ public class LoansApiResource {
             final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
             final InsuranceReadPlatformService insuranceReadPlatformService,final LoanTaxReadPlatformService loanTaxReadPlatformService,
             final TaxMapReadPlatformService taxMapReadPlatformService, 
-            final DefaultToApiJsonSerializer<LoanTaxMapData> loanTaxMappingApiJsonSerializer) {
+            final DefaultToApiJsonSerializer<LoanTaxMapData> loanTaxMappingApiJsonSerializer,final LoanFeeMasterDataReadPlatformService loanFeeMasterDataReadPlatformService,
+            final FeeMasterReadplatformService feeMasterReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -196,6 +203,8 @@ public class LoansApiResource {
         this.loanTaxReadPlatformService=loanTaxReadPlatformService;
         this.taxMapReadPlatformService=taxMapReadPlatformService;
         this.loanTaxMappingApiJsonSerializer = loanTaxMappingApiJsonSerializer;
+        this.loanFeeMasterDataReadPlatformService = loanFeeMasterDataReadPlatformService;
+        this.feeMasterReadPlatformService = feeMasterReadPlatformService;
     }
 
     @GET
@@ -348,6 +357,7 @@ public class LoansApiResource {
         Collection<NoteData> notes = null;
         PortfolioAccountData linkedAccount = null;
         Collection<LoanTaxData> taxes = null;
+        Collection<LoanFeeMasterData> deposits = null;
 
         final Set<String> mandatoryResponseParameters = new HashSet<String>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -355,7 +365,7 @@ public class LoansApiResource {
 
         	 if (associationParameters.contains("all")) {
                  associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "charges", "guarantors", "collateral",
-                         "notes", "linkedAccount", "insurances","taxes"));
+                         "notes", "linkedAccount", "insurances","taxes","deposits"));
              }
             if (associationParameters.contains("guarantors")) {
                 mandatoryResponseParameters.add("guarantors");
@@ -400,6 +410,14 @@ public class LoansApiResource {
             	taxes = this.loanTaxReadPlatformService.retrieveLoanTaxes(loanId);
             	if (CollectionUtils.isEmpty(taxes)) {
             		taxes = null;
+            	}
+            }
+            
+            if (associationParameters.contains("deposits")) {
+            	mandatoryResponseParameters.add("deposits");
+            	deposits = this.loanFeeMasterDataReadPlatformService.retrieveLoanFeeMasterData(loanId);
+            	if (CollectionUtils.isEmpty(deposits)) {
+            		deposits = null;
             	}
             }
 
@@ -447,6 +465,7 @@ public class LoansApiResource {
         Collection<CalendarData> calendarOptions = null;
         Collection<PortfolioAccountData> accountLinkingOptions = null;
         Collection<TaxMapData> taxMapData = null;
+        Collection<FeeMasterData> feeMasterDataOptions = null;
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
@@ -464,6 +483,7 @@ public class LoansApiResource {
             final boolean feeChargesOnly = false;
             chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
             taxMapData = this.taxMapReadPlatformService.retriveTaxMapData();
+            feeMasterDataOptions = this.feeMasterReadPlatformService.retrieveAllData("Deposit");
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
             allowedLoanOfficers = this.loanReadPlatformService.retrieveAllowedLoanOfficers(loanBasicDetails.officeId(),
@@ -498,7 +518,7 @@ public class LoansApiResource {
                 charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
-                loanCollateralOptions, calendarOptions, notes,insurances, accountLinkingOptions, linkedAccount,taxMapData, taxes );
+                loanCollateralOptions, calendarOptions, notes,insurances, accountLinkingOptions, linkedAccount,taxMapData, taxes,feeMasterDataOptions,deposits );
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

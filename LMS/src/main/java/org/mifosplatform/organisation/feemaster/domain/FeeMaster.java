@@ -107,6 +107,26 @@ public class FeeMaster extends AbstractPersistable<Long> {
 	public void setDeleted(char deleted) {
 		this.deleted = deleted;
 	}
+	
+	public Integer getDepositCalculation() {
+		return depositCalculation;
+	}
+	
+	public Integer getDepositTime() {
+		return depositTime;
+	}
+
+	public void setDepositTime(Integer depositTime) {
+		this.depositTime = depositTime;
+	}
+
+	public Integer getDepositOn() {
+		return depositOn;
+	}
+
+	public void setDepositOn(Integer depositOn) {
+		this.depositOn = depositOn;
+	}
 
 	public Map<String, Object> update(JsonCommand command) {
 		
@@ -225,6 +245,11 @@ public class FeeMaster extends AbstractPersistable<Long> {
 		// command.booleanObjectValueOfParameterNamed("isRefundable")?'Y':'N';
 		return new FeeMaster(feeCode, feeDescription, transactionType,
 				depositTimeType,depositCalculationType,depositOn, amount, isRefundable);
+	}
+
+	public boolean isDeleted() {
+		
+		return this.deleted =='Y';
 	}
 
 }
