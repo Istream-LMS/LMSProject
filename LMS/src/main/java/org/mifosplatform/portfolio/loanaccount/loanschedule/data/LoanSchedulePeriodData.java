@@ -108,7 +108,7 @@ public class LoanSchedulePeriodData {
         this.principalPaid = null;
         this.principalWrittenOff = null;
         this.principalOutstanding = null;
-        this.principalLoanBalanceOutstanding = principalDisbursed;
+        this.principalLoanBalanceOutstanding = principalDisbursed == null ? principalDisbursed : principalDisbursed.setScale(2, BigDecimal.ROUND_HALF_UP);
 
         this.interestOriginalDue = null;
         this.interestDue = null;
@@ -205,7 +205,7 @@ public class LoanSchedulePeriodData {
         this.principalPaid = null;
         this.principalWrittenOff = null;
         this.principalOutstanding = null;
-        this.principalLoanBalanceOutstanding = principalDisbursed;
+        this.principalLoanBalanceOutstanding =  principalDisbursed == null ? principalDisbursed : principalDisbursed.setScale(2, BigDecimal.ROUND_HALF_UP);
 
         this.interestOriginalDue = null;
         this.interestDue = null;
