@@ -697,7 +697,58 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 			  }else {
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
 	    	  }
-	    } else {
+	    } else if (wrapper.isSupplierRessource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createSupplierCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateSupplierCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+
+        } else if (wrapper.isItemResource()) {
+			if (wrapper.isCreate()) {
+				handler = applicationContext.getBean("createItemCommandHandler",NewCommandSourceHandler.class);
+			} else if (wrapper.isUpdate()) {
+				handler = applicationContext.getBean("updateItemCommandHandler",NewCommandSourceHandler.class);
+			} else if (wrapper.isDelete()) {
+				handler = applicationContext.getBean("deleteItemCommandHandler",NewCommandSourceHandler.class);
+			}
+		}else if(wrapper.isMRN()){
+			if(wrapper.isMoveItemSale()){
+				handler=applicationContext.getBean("createItemSaleDetailsMoveCommandHandler",NewCommandSourceHandler.class);
+			}
+           if(wrapper.isCreateMRN()){
+               handler = applicationContext.getBean("createMRNDetailsCommandHandler",NewCommandSourceHandler.class);
+              }else if(wrapper.moveMRN()){
+               handler = applicationContext.getBean("createMRNDetailsMoveCommandHandler",NewCommandSourceHandler.class);
+              }
+             }else if (wrapper.isGrnResource()) {
+				if (wrapper.isCreate()){
+					handler = applicationContext.getBean("createInventoryGrnCommandHandler", NewCommandSourceHandler.class);
+				}else if(wrapper.isUpdateOperation()){
+					handler = applicationContext.getBean("editInventoryGrnCommandHandler", NewCommandSourceHandler.class);
+				}
+			}else if (wrapper.isInventoryResource()) {
+	        	if (wrapper.isCreate()) {
+					handler = applicationContext.getBean("createInventoryItemsCommandHandler", NewCommandSourceHandler.class);
+					
+	        	}else if(wrapper.isUpdateInventoryItem()){
+	        		handler = applicationContext.getBean("updateInventoryItemsCommandHandler", NewCommandSourceHandler.class);
+	        		
+	        	}else if(wrapper.isDeleteInventoryItem()){
+	        		handler = applicationContext.getBean("deleteInventoryItemsCommandHandler", NewCommandSourceHandler.class);
+	        		
+	        	}/*else if (wrapper.isDeAllocateHardwareResource()) {
+					handler = applicationContext.getBean("deAllocateItemCommandHandler",NewCommandSourceHandler.class);
+			    }*/
+			}else if(wrapper.isItemSale()){
+			     if(wrapper.isCreate()) {
+			         handler = applicationContext.getBean("createItemSaleCommandHandler",NewCommandSourceHandler.class);
+			     }else {
+			           throw new UnsupportedCommandException(wrapper.commandName());
+			     }
+		   }else {
 
             throw new UnsupportedCommandException(wrapper.commandName());
         }

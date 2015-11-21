@@ -9,4 +9,5 @@ public interface TaxMapRepository extends JpaRepository<TaxMap, Long>,JpaSpecifi
 
 	@Query("from TaxMap taxMap where taxMap.taxCode =:taxCode")
 	TaxMap findByTaxCode(@Param("taxCode") String taxCode);
+
 }

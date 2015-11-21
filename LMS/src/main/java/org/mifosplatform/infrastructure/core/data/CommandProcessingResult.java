@@ -83,7 +83,7 @@ public class CommandProcessingResult {
         this.productId = null;
     }
 
-    private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
+    public CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
             final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
             final Map<String, Object> changesOnly, final Long productId) {
         this.commandId = commandId;

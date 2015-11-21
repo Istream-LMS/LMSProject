@@ -1636,4 +1636,151 @@ public class CommandWrapperBuilder {
 		this.href = "/prospect/"+ prospectId;
 		return this;
 	}
+	public CommandWrapperBuilder createSupplier() {
+		this.actionName = "CREATE";
+		this.entityName = "SUPPLIER";
+		this.entityId = null;
+		this.href = "/supplier";
+		return this;
+	}
+    public CommandWrapperBuilder updateSupplier(Long supplierId) {
+		this.actionName = "UPDATE";
+		this.entityName = "SUPPLIER";
+		this.entityId = supplierId;
+		this.href = "/supplier";
+		return this;
+	}
+
+    public CommandWrapperBuilder createItem() {
+		this.actionName = "CREATE";
+		this.entityName = "ITEM";
+		this.entityId = null;
+		this.href = "/items/template";
+		return this;
+	}
+    public CommandWrapperBuilder updateItem(Long itemId) {
+		this.actionName = "UPDATE";
+		this.entityName = "ITEM";
+		this.entityId = itemId;
+		this.href = "/items/" + itemId;
+		return this;
+	}
+    public CommandWrapperBuilder deleteItem(Long itemId) {
+		this.actionName = "DELETE";
+		this.entityName = "ITEM";
+		this.entityId = itemId;
+		this.href = "/items/" + itemId;
+		return this;
+	}
+    public CommandWrapperBuilder createMRN() {
+		this.actionName = "CREATE";
+		this.entityName = "MRN";
+		this.entityId = null;
+		this.href = "/mrndetails";
+		return this;
+	}
+    public CommandWrapperBuilder moveMRN() {
+		this.actionName = "MOVE";
+		this.entityName = "MRN";
+		this.entityId = null;
+		this.href = "/mrndetails/movemrn/" + clientId;
+		return this;
+	}
+    public CommandWrapperBuilder moveItemSale() {
+		this.actionName = "MOVEITEM";
+		this.entityName = "MRN";
+		this.entityId = null;
+		this.href = "/mrndetails/movemrn/itemsale" + clientId;
+		return this;
+	}
+    public CommandWrapperBuilder createItemSale() {
+		this.actionName = "CREATE";
+		this.entityName = "ITEMSALE";
+		this.href = "/itemsales/";
+		return this;
+	}
+    public CommandWrapperBuilder createGrn() {
+		this.actionName = "CREATE";
+		this.entityName = "GRN";
+		this.entityId = null;
+		this.href = "itemdetails/addgrn";
+		return this;
+	}
+    public CommandWrapperBuilder editGrn(Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "GRN";
+		this.entityId = id;
+		this.href = "itemdetails/editgrn";
+		return this;
+	}
+    public CommandWrapperBuilder createInventoryItem(final Long flag) {
+		this.actionName = "CREATE";
+		this.entityName = "INVENTORY";
+		this.entityId = flag;
+		this.href = "/itemdetails/template";
+		return this;
+	}
+    public CommandWrapperBuilder allocateHardware() {
+		this.actionName = "CREATE";
+		this.entityName = "ALLOCATION";
+		this.entityId = null;
+		this.href = "itemdetails/allocation";
+		return this;
+	}
+    public CommandWrapperBuilder updateInventoryItem(final Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "INVENTORY";
+		this.entityId = id;
+		this.href = "/itemdetails/template";
+		return this;
+	}
+    public CommandWrapperBuilder deleteInventoryItem(final Long id) {
+		this.actionName = "DELETE";
+		this.entityName = "INVENTORY";
+		this.entityId = id;
+		this.href = "/itemdetails" + id;
+		return this;
+	}
+    public CommandWrapperBuilder deAllocate(Long id) {
+		this.actionName = "DEALLOCATE";
+		this.entityName = "INVENTORY";
+		this.entityId = id;
+		this.href = "/itemdetails/template";
+		return this;
+	}
+    public CommandWrapperBuilder createOneTimeSale(Long clientId, String devicesaleTpye) {
+		this.actionName = "CREATE";
+		this.entityName = devicesaleTpye;
+		this.entityId = clientId;
+		this.href = "/onetimesale/template";
+		return this;
+	}
+    public CommandWrapperBuilder cancelOneTimeSale(final Long saleId) {
+		this.actionName = "DELETE";
+		this.entityName = "ONETIMESALE";
+		this.entityId = saleId;
+		this.href = "/onetimesale/"+saleId;
+		return this;
+	}
+    public CommandWrapperBuilder createOwnedHardware(final Long clientId) {
+		this.actionName = "CREATE";
+		this.entityName = "OWNEDHARDWARE";
+		this.entityId = clientId;
+		this.href = "/ownedhardware";
+		return this;
+	}
+    public CommandWrapperBuilder updateOwnedHardware(final Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "OWNEDHARDWARE";
+		this.entityId = id;
+		this.href = "/ownedhardware";
+		return this;
+	}
+    public CommandWrapperBuilder deleteOwnHardware(final Long id) {
+		this.actionName = "DELETE";
+		this.entityName = "OWNEDHARDWARE";
+		this.entityId = id;
+		this.href = "/ownedhardware";
+		return this;
+	}
 }
