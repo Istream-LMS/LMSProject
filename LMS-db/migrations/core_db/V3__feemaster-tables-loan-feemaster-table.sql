@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `m_fee_master` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `fee_code` (`fee_code`),
   UNIQUE KEY `fee_transaction_type` (`transaction_type`)
-) ENGINE=InnoDB AUTO_INCREMENT=54 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `m_product_loan_feemaster` (
   `product_loan_id` bigint(20) NOT NULL,
