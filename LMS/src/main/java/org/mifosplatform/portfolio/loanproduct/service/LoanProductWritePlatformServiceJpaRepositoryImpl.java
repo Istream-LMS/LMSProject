@@ -287,7 +287,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                         final Long id = jsonObject.get("id").getAsLong();
                         
                         final FeeMaster feeMaster = this.feeMasterRepository.findOne(id);
-                        if (feeMaster == null) { throw new FeeMasterNotFoundException(id.toString()); }
+                        if (feeMaster == null) { throw new FeeMasterNotFoundException(id); }
 
                         feeMasterData.add(feeMaster);
                     }

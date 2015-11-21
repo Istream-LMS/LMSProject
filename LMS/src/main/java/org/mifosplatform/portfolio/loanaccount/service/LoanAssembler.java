@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomain
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.organisation.feemaster.domain.FeeMaster;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
 import org.mifosplatform.organisation.holiday.domain.HolidayStatusType;
@@ -42,6 +44,7 @@ import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanFeeMaster;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepositoryWrapper;
@@ -85,6 +88,7 @@ public class LoanAssembler {
     private final HolidayRepository holidayRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
+    private final LoanFeeMasterAssembler loanFeeMasterAssembler;
 
     @Autowired
     public LoanAssembler(final FromJsonHelper fromApiJsonHelper, final LoanRepositoryWrapper loanRepository,
@@ -96,7 +100,7 @@ public class LoanAssembler {
             final CollateralAssembler loanCollateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
-            final WorkingDaysRepositoryWrapper workingDaysRepository) {
+            final WorkingDaysRepositoryWrapper workingDaysRepository,final LoanFeeMasterAssembler loanFeeMasterAssembler) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanRepository = loanRepository;
         this.loanProductRepository = loanProductRepository;
@@ -114,6 +118,7 @@ public class LoanAssembler {
         this.holidayRepository = holidayRepository;
         this.configurationDomainService = configurationDomainService;
         this.workingDaysRepository = workingDaysRepository;
+        this.loanFeeMasterAssembler = loanFeeMasterAssembler;
     }
 
     public Loan assembleFrom(final Long accountId) {
@@ -155,6 +160,7 @@ public class LoanAssembler {
         }
         final Set<LoanCollateral> collateral = this.loanCollateralAssembler.fromParsedJson(element);
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element);
+        final Set<LoanFeeMaster> loanDeposits = this.loanFeeMasterAssembler.fromParsedJson(element);
         for (final LoanCharge loanCharge : loanCharges) {
             if (!loanProduct.hasCurrencyCodeOf(loanCharge.currencyCode())) {
                 final String errorMessage = "Charge and Loan must have the same currency.";
@@ -184,7 +190,7 @@ public class LoanAssembler {
             if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
-                    loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral);
+                    loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral,loanDeposits);
         }
 
         if (groupId != null) {
@@ -193,7 +199,7 @@ public class LoanAssembler {
             if (group.isNotActive()) { throw new GroupNotActiveException(groupId); }
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
-                    loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting);
+                    loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting,loanDeposits);
         }
 
         if (client != null && group != null) {
@@ -202,7 +208,7 @@ public class LoanAssembler {
 
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(),
                     loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges,
-                    syncDisbursementWithMeeting);
+                    syncDisbursementWithMeeting,loanDeposits);
         }
 
         final String externalId = this.fromApiJsonHelper.extractStringNamed("externalId", element);
@@ -224,6 +230,14 @@ public class LoanAssembler {
                 submittedOnDate, externalId, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
         System.out.println("stored==============="+loanApplicationTerms.getResidualAmount());
         loanApplication.setResidualAmount(loanApplicationTerms.getResidualAmount());
+        BigDecimal depositAmount=null;
+        for(LoanFeeMaster deposits:loanDeposits){
+        	FeeMaster deposit=deposits.getFeeMaster();
+        		depositAmount= deposit.getAmount();
+        		
+        }	
+        loanApplicationTerms.setDepositAmount(depositAmount);
+        loanApplication.setDepositAmount(loanApplicationTerms.getDepositAmount());
         return loanApplication;
     }
 

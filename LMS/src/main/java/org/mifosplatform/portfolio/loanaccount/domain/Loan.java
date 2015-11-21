@@ -66,6 +66,8 @@ import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanFeeMasterCommand;
+import org.mifosplatform.portfolio.loanaccount.data.LoanFeeMasterData;
 import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
@@ -235,6 +237,10 @@ public class Loan extends AbstractPersistable<Long> {
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private Set<LoanCharge> charges = new HashSet<LoanCharge>();
+    
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
+    private Set<LoanFeeMaster> deposits = new HashSet<LoanFeeMaster>();
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
@@ -276,41 +282,44 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "residual_amount", nullable = true)
     private BigDecimal residualAmount;
     
+    @Column(name = "deposit_amount", nullable = true)
+    private BigDecimal depositAmount;
+    
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
-            final Set<LoanCollateral> collateral) {
+            final Set<LoanCollateral> collateral,final Set<LoanFeeMaster> loanDeposits) {
         final LoanStatus status = null;
         final Group group = null;
         final Boolean syncDisbursementWithMeeting = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
-                loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting);
+                loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting,loanDeposits);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
-            final Boolean syncDisbursementWithMeeting) {
+            final Boolean syncDisbursementWithMeeting,final Set<LoanFeeMaster> loanDeposits) {
         final LoanStatus status = null;
         final CodeValue loanPurpose = null;
         final Set<LoanCollateral> collateral = null;
         final Client client = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
-                loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting);
+                loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting,loanDeposits);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
             final Integer loanType, final LoanProduct loanProduct, final Fund fund, final Staff officer,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
-            final Boolean syncDisbursementWithMeeting) {
+            final Boolean syncDisbursementWithMeeting,final Set<LoanFeeMaster> loanDeposits) {
         final LoanStatus status = null;
         final CodeValue loanPurpose = null;
         final Set<LoanCollateral> collateral = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
-                loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting);
+                loanRepaymentScheduleDetail, status, loanCharges, collateral, syncDisbursementWithMeeting,loanDeposits);
     }
 
     protected Loan() {
@@ -320,7 +329,7 @@ public class Loan extends AbstractPersistable<Long> {
     private Loan(final String accountNo, final Client client, final Group group, final Integer loanType, final Fund fund,
             final Staff loanOfficer, final CodeValue loanPurpose, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
-            final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting) {
+            final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral, final Boolean syncDisbursementWithMeeting,final Set<LoanFeeMaster> loanDeposits) {
 
         this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
         this.loanRepaymentScheduleDetail.validateRepaymentPeriodWithGraceSettings();
@@ -360,6 +369,12 @@ public class Loan extends AbstractPersistable<Long> {
         this.loanOfficerHistory = null;
 
         this.syncDisbursementWithMeeting = syncDisbursementWithMeeting;
+        
+        if (loanDeposits != null && !loanDeposits.isEmpty()) {
+            this.deposits = associateDepositsWithThisLoan(loanDeposits);
+        } else {
+            this.deposits = null;
+        }
     }
 
     private LoanSummary updateSummaryWithTotalFeeChargesDueAtDisbursement(final BigDecimal feeChargesDueAtDisbursement) {
@@ -390,6 +405,13 @@ public class Loan extends AbstractPersistable<Long> {
         }
         return loanCharges;
     }
+    
+    private Set<LoanFeeMaster> associateDepositsWithThisLoan(final Set<LoanFeeMaster> loanDeposits) {
+    	for (final LoanFeeMaster loanDeposit : loanDeposits) {
+    		loanDeposit.update(this);
+    	}
+    	return loanDeposits;
+    }
 
     
     public LoanProductRelatedDetail getLoanRepaymentScheduleDetail() {
@@ -417,6 +439,13 @@ public class Loan extends AbstractPersistable<Long> {
 		this.residualAmount = residualAmount;
 	}
 	
+	public BigDecimal getDepositAmount() {
+		return depositAmount;
+	}
+
+	public void setDepositAmount(BigDecimal depositAmount) {
+		this.depositAmount = depositAmount;
+	}
 
 	public Integer getLoanStatus() {
 		return loanStatus;
@@ -731,6 +760,19 @@ public class Loan extends AbstractPersistable<Long> {
         }
         return amount;
     }
+    
+    private BigDecimal calculateAmountPercentageAppliedTo(final LoanFeeMaster loanDeposit) {
+        BigDecimal amount = BigDecimal.ZERO;
+        switch (loanDeposit.getDepositCalculation()) {
+        case PERCENT_OF_AMOUNT:
+        	BigDecimal d=getPrincpal().getAmount();
+            amount = getPrincpal().getAmount();
+        break;
+        default:
+        break;
+    }
+        return amount;
+    }
 
     private BigDecimal calculateAmountPercentageAppliedToLease(final LoanCharge loanCharge) {
         BigDecimal amount = BigDecimal.ZERO;
@@ -929,6 +971,22 @@ public class Loan extends AbstractPersistable<Long> {
         setOfLoanCharges().addAll(loanCharges);
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
     }
+    
+    public void updateLoanFeeMaster(final Set<LoanFeeMaster> loanDeposits) {
+        setOfLoanDeposits().clear();
+        for (final LoanFeeMaster loanDeposit : loanDeposits) {
+        	loanDeposit.update(this);
+            final BigDecimal amount = calculateAmountPercentageAppliedTo(loanDeposit);
+            BigDecimal depositAmt = BigDecimal.ZERO;
+            if (loanDeposit.getDepositCalculation().isPercentageBased()) {
+            	depositAmt = loanDeposit.getPercentage();
+            } else {
+            	depositAmt = loanDeposit.getAmount();
+            }
+            loanDeposit.update(depositAmt, amount, BigDecimal.ZERO);
+        }
+        setOfLoanDeposits().addAll(loanDeposits);
+    }
 
     public void updateLoanCollateral(final Set<LoanCollateral> loanCollateral) {
         if (this.collateral == null) {
@@ -996,7 +1054,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public Map<String, Object> loanApplicationModification(final JsonCommand command, final Set<LoanCharge> possiblyModifedLoanCharges,
-            final Set<LoanCollateral> possiblyModifedLoanCollateralItems, final AprCalculator aprCalculator) {
+            final Set<LoanCollateral> possiblyModifedLoanCollateralItems, final AprCalculator aprCalculator,final Set<LoanFeeMaster> possiblyModifedLoanDeposits) {
 
         final Map<String, Object> actualChanges = this.loanRepaymentScheduleDetail.updateLoanApplicationAttributes(command, aprCalculator);
         if (!actualChanges.isEmpty()) {
@@ -1179,7 +1237,6 @@ public class Loan extends AbstractPersistable<Long> {
             if (!possiblyModifedLoanCharges.equals(existingLoanCharges)) {
                 actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
 
-                actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
                 actualChanges.put("recalculateLoanSchedule", true);
 
                 for (final LoanCharge loanCharge : possiblyModifedLoanCharges) {
@@ -1226,6 +1283,29 @@ public class Loan extends AbstractPersistable<Long> {
             actualChanges.put(loanTermFrequencyTypeParamName, newTermPeriodFrequencyType.getValue());
             this.termPeriodFrequencyType = newValue;
         }
+        
+       final String depositsParamName = "depositArray";
+        if (command.parameterExists(depositsParamName)) {
+
+            final Set<LoanFeeMaster> existingLoanDeposits = setOfLoanDeposits();
+
+            if (!possiblyModifedLoanDeposits.equals(existingLoanDeposits)) {
+
+                actualChanges.put(depositsParamName, getLoanDeposit(possiblyModifedLoanDeposits));
+                actualChanges.put("recalculateLoanSchedule", true);
+
+                for (final LoanFeeMaster loanDeposit : possiblyModifedLoanDeposits) {
+                    final BigDecimal amount = calculateAmountPercentageAppliedTo(loanDeposit);
+                    BigDecimal depositAmt = BigDecimal.ZERO;
+                    if (loanDeposit.getDepositCalculation().isPercentageBased()) {
+                    	depositAmt = loanDeposit.getPercentage();
+                    } else {
+                    	depositAmt = loanDeposit.getAmount();
+                    }
+                    loanDeposit.update(depositAmt, amount, BigDecimal.ZERO);
+                }
+            }
+        }
 
         return actualChanges;
     }
@@ -1236,6 +1316,14 @@ public class Loan extends AbstractPersistable<Long> {
             loanCharges = new HashSet<LoanCharge>();
         }
         return loanCharges;
+    }
+    
+    private Set<LoanFeeMaster> setOfLoanDeposits() {
+    	Set<LoanFeeMaster> loanFeeMaster = this.deposits;
+    	if (this.deposits == null) {
+    		loanFeeMaster = new HashSet<LoanFeeMaster>();
+    	}
+    	return loanFeeMaster;
     }
 
     private CollateralData[] listOfLoanCollateralData(final Set<LoanCollateral> setOfLoanCollateral) {
@@ -1267,6 +1355,20 @@ public class Loan extends AbstractPersistable<Long> {
         existingLoanCharges = loanChargesList.toArray(new LoanChargeCommand[loanChargesList.size()]);
 
         return existingLoanCharges;
+    }
+    
+    private LoanFeeMasterCommand[] getLoanDeposit(final Set<LoanFeeMaster> setOfLoanDeposits) {
+
+    	LoanFeeMasterCommand[] existingLoanDeposits = null;
+
+        final List<LoanFeeMasterCommand> loanDepositsList = new ArrayList<LoanFeeMasterCommand>();
+        for (final LoanFeeMaster loandeposit : setOfLoanDeposits) {
+        	loanDepositsList.add(loandeposit.toCommand());
+        }
+
+        existingLoanDeposits = loanDepositsList.toArray(new LoanFeeMasterCommand[loanDepositsList.size()]);
+
+        return existingLoanDeposits;
     }
 
     private void removeFirstDisbursementTransaction() {
@@ -3104,6 +3206,10 @@ public class Loan extends AbstractPersistable<Long> {
     public Set<LoanCharge> charges() {
         return this.charges;
     }
+    
+    public Set<LoanFeeMaster> deposits() {
+    	return this.deposits;
+    }
 
     public Set<LoanInstallmentCharge> generateInstallmentLoanCharges(final LoanCharge loanCharge) {
         final Set<LoanInstallmentCharge> loanChargePerInstallments = new HashSet<LoanInstallmentCharge>();
@@ -3116,11 +3222,17 @@ public class Loan extends AbstractPersistable<Long> {
                     amount = calculateInstallmentChargeAmount(loanCharge.getChargeCalculation(), loanCharge.getPercentage(), installment)
                             .getAmount();
                 }
-                final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
-                loanChargePerInstallments.add(loanInstallmentCharge);
+                if(installment != null && amount != null){
+                	final LoanInstallmentCharge loanInstallmentCharge = new LoanInstallmentCharge(amount, loanCharge, installment);
+                	loanChargePerInstallments.add(loanInstallmentCharge);
+                }
             }
         }
         return loanChargePerInstallments;
+    }
+    
+    public List<LoanRepaymentScheduleInstallment> fetchRepaymentScheduleInstallments() {
+        return this.repaymentScheduleInstallments;
     }
 
 }

@@ -9,7 +9,7 @@ public class FeeMasterNotFoundException extends AbstractPlatformResourceNotFound
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public FeeMasterNotFoundException(String id) {
+	public FeeMasterNotFoundException(Long id) {
 	
 				super("error.msg.fee.master.id.not.found", "Fee Master Id "+id+" not found. ",id);
 				}

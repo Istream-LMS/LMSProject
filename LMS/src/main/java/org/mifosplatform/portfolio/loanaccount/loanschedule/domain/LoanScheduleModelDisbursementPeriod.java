@@ -41,7 +41,7 @@ public final class LoanScheduleModelDisbursementPeriod implements LoanScheduleMo
     @Override
     public LoanSchedulePeriodData toData() {
         return LoanSchedulePeriodData.disbursementOnlyPeriod(this.disbursementDate, this.principalDisbursed.getAmount(),
-                this.chargesDueAtTimeOfDisbursement, false);
+                this.chargesDueAtTimeOfDisbursement, false,null);
     }
 
     @Override

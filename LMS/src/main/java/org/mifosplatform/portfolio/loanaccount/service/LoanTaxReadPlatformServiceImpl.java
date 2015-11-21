@@ -37,7 +37,7 @@ public class LoanTaxReadPlatformServiceImpl implements LoanTaxReadPlatformServic
     private static final class LoanTaxMapper implements RowMapper<LoanTaxData> {
 
         public String schema() {
-            return " ltm.id as Id, ltm.id as loanId, tm.id as taxId, tm.tax_code as taxCode, "
+            return " ltm.id as Id, ltm.loan_id as loanId, tm.id as taxId, tm.tax_code as taxCode, "
                     + "ltm.amount as amount, "
                     + "ltm.start_date as startDate, "
                     + "tm.charge_type as chargeType,tm.tax_type as taxType,tm.rate as rate,tm.tax_inclusive as taxInclusive "
