@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `m_loan_fee_master` (
   `min_cap` decimal(19,6) DEFAULT NULL,
   `max_cap` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- Transaction Type in codes
 INSERT IGNORE INTO m_code VALUES(NULL,'Transaction Type',1);

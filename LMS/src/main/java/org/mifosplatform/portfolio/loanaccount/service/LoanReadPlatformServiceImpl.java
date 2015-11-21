@@ -820,6 +820,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         	 if(rs.next())     {   
         	   
              	depositAmount=rs.getBigDecimal("depositAmount");
+             	if(depositAmount != null) depositAmount = depositAmount.setScale(2,BigDecimal.ROUND_HALF_UP);
              	
              }
   
@@ -935,7 +936,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
                 // update based on current period values
                 this.lastDueDate = dueDate;
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue);
+                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue).setScale(2,BigDecimal.ROUND_HALF_UP);
 
                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate,
                         dueDate, obligationsMetOnDate, complete, principalDue, principalPaid, principalWrittenOff, principalOutstanding,
@@ -970,7 +971,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
             this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
             this.lastDueDate = this.disbursement.disbursementDate();
-            this.outstandingLoanPrincipalBalance = this.disbursement.amount();
+            this.outstandingLoanPrincipalBalance = this.disbursement.amount().setScale(2,BigDecimal.ROUND_HALF_UP);
         }
 
         public String schema2() {
@@ -992,7 +993,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
            if(rs.next())     {   
         	   
              	residualamt=rs.getBigDecimal("amount");
+             	if(residualamt != null) residualamt = residualamt.setScale(2,BigDecimal.ROUND_HALF_UP);
+             	
              	depositAmount=rs.getBigDecimal("depositAmount");
+             	if(depositAmount != null) depositAmount = depositAmount.setScale(2,BigDecimal.ROUND_HALF_UP);
              	
              }
              final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
@@ -1107,7 +1111,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
                 // update based on current period values
                 this.lastDueDate = dueDate;
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue);
+                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue).setScale(2,BigDecimal.ROUND_HALF_UP);
 
                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate,
                         dueDate, obligationsMetOnDate, complete, principalDue, principalPaid, principalWrittenOff, principalOutstanding,

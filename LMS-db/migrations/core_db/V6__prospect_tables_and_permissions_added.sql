@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `m_prospect` (
   `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_id` (`email_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `m_prospect_loan_calculator` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `m_prospect_loan_calculator` (
   `residual_amount_VEP` decimal(19,6) DEFAULT NULL,
   `residual_amount_VIP` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `m_prospect_loan_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS `m_prospect_loan_details` (
   PRIMARY KEY (`id`),
   KEY `fk_prospect_id` (`prospect_id`),
   CONSTRAINT `fk_prospect_id` FOREIGN KEY (`prospect_id`) REFERENCES `m_prospect` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 
 INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('organization', 'CREATE_PROSPECT', 'PROSPECT', 'CREATE', 0);
