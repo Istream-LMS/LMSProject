@@ -729,4 +729,40 @@ public class CommandWrapper {
 	public boolean isConvertToClient() {
 		return this.actionName.equalsIgnoreCase("CONVERTTOCLIENT");
 	}
+	public boolean isSupplierRessource() {
+        return this.entityName.equalsIgnoreCase("SUPPLIER");
+    }
+    public boolean isItemResource() {
+		return this.entityName.equalsIgnoreCase("ITEM");
+	}
+    public boolean isMRN(){
+	      return this.entityName.equalsIgnoreCase("MRN");
+	}
+
+	public boolean isCreateMRN(){
+	   return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("MRN");
+	}
+
+	public boolean moveMRN(){
+		   return this.actionName.equalsIgnoreCase("MOVE") && this.entityName.equalsIgnoreCase("MRN");
+	}
+	
+	public boolean isMoveItemSale(){
+		   return this.actionName.equalsIgnoreCase("MOVEITEM") && this.entityName.equalsIgnoreCase("MRN");
+	}
+	public boolean isGrnResource(){
+		return this.entityName.equalsIgnoreCase("GRN");
+	}
+	public boolean isInventoryResource() {
+		return this.entityName.equalsIgnoreCase("INVENTORY");
+	}
+	public boolean isUpdateInventoryItem(){
+		return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("INVENTORY");
+	}
+	public boolean isItemSale() {
+		return  this.entityName.equalsIgnoreCase("ITEMSALE");
+	}
+	public boolean isDeleteInventoryItem(){
+		return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("INVENTORY");
+	}
 }

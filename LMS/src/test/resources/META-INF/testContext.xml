@@ -17,7 +17,7 @@
     <bean id="dataSource"
         class="org.springframework.jdbc.datasource.DriverManagerDataSource"
         p:driverClassName="com.mysql.jdbc.Driver"
-        p:url="jdbc:mysql://localhost:3306/mifosplatform-tenants"
+        p:url="jdbc:mysql://localhost:3306/LMS-tenants"
         p:username="root"
         p:password="mysql" />
         
@@ -77,6 +77,6 @@
     <jpa:repositories base-package="org.mifosplatform.portfolio.*" />
     <jpa:repositories base-package="org.mifosplatform.template.domain" />
     
-    <jee:jndi-lookup jndi-name="java:comp/env/jdbc/mifosplatform-tenants" id="tenantDataSourceJndi" />
+    <jee:jndi-lookup jndi-name="java:comp/env/jdbc/LMS-tenants" id="tenantDataSourceJndi" />
     
 </beans>
