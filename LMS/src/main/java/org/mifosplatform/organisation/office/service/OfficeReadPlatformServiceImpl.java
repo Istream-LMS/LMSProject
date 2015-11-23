@@ -128,15 +128,11 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
     @Override
     @Cacheable(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')")
-    public Collection<OfficeData> retrieveAllOffices(final boolean includeAllOffices) {
+    public Collection<OfficeData> retrieveAllOffices() {
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = null;
-        if (includeAllOffices) {
-            hierarchySearchString = "." + "%";
-        } else {
-            hierarchySearchString = hierarchy + "%";
-        }
+        final String hierarchySearchString = hierarchy + "%";
+        
         final OfficeMapper rm = new OfficeMapper();
         final String sql = "select " + rm.officeSchema() + "where o.hierarchy like ? order by o.hierarchy";
 

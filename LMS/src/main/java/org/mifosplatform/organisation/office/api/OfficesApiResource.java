@@ -76,7 +76,7 @@ public class OfficesApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-        final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices(onlyManualEntries);
+        final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices();
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, offices, this.RESPONSE_DATA_PARAMETERS);

@@ -47,6 +47,8 @@ import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -136,6 +138,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final PaginationHelper<LoanAccountData> paginationHelper = new PaginationHelper<LoanAccountData>();
     private final LoanMapper loaanLoanMapper = new LoanMapper();
     private final TaxMapReadPlatformService taxMapReadPlatformService;
+    private final FeeMasterReadplatformService feeMasterReadplatformService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
 	private final FromJsonHelper fromApiJsonHelper;
     private static final String LEASE = "LeaseCalculator";
@@ -157,7 +160,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final CodeValueReadPlatformService codeValueReadPlatformService, final RoutingDataSource dataSource,
             final CalendarReadPlatformService calendarReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final TaxMapReadPlatformService taxMapReadPlatformService,final ClientRepositoryWrapper clientRepositoryWrapper,
-            final FromJsonHelper fromApiJsonHelper) {
+            final FeeMasterReadplatformService feeMasterReadplatformService,final FromJsonHelper fromApiJsonHelper) {
         this.context = context;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -172,6 +175,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.calendarReadPlatformService = calendarReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.taxMapReadPlatformService = taxMapReadPlatformService;
+        this.feeMasterReadplatformService = feeMasterReadplatformService;
         this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -798,22 +802,31 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         public String schema() {
 
-            return " ls.loan_id as loanId,l.residual_amount as residualAmount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
+            return " ls.loan_id as loanId,l.residual_amount as residualAmount,lfm.amount as depositAmount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
                     + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
                     + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod "
-                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id";
+                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id " 
+                    + " left join m_loan_fee_master lfm on l.id=lfm.loan_id and lfm.is_deleted = 'N' ";
         }
    
 
         @Override
         public LoanScheduleData extractData(final ResultSet rs) throws SQLException, DataAccessException {
+        	
+        	 BigDecimal depositAmount=null;
+        	 if(rs.next())     {   
+        	   
+             	depositAmount=rs.getBigDecimal("depositAmount");
+             	if(depositAmount != null) depositAmount = depositAmount.setScale(2,BigDecimal.ROUND_HALF_UP);
+             	
+             }
   
              final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
                      this.disbursement.disbursementDate(), this.disbursement.amount(), this.totalFeeChargesDueAtDisbursement,
-                     this.disbursement.isDisbursed());
+                     this.disbursement.isDisbursed(),depositAmount);
             final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
             periods.add(disbursementPeriod);
            rs.previous();
@@ -923,7 +936,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
                 // update based on current period values
                 this.lastDueDate = dueDate;
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue);
+                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue).setScale(2,BigDecimal.ROUND_HALF_UP);
 
                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate,
                         dueDate, obligationsMetOnDate, complete, principalDue, principalPaid, principalWrittenOff, principalOutstanding,
@@ -958,31 +971,37 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
             this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
             this.lastDueDate = this.disbursement.disbursementDate();
-            this.outstandingLoanPrincipalBalance = this.disbursement.amount();
+            this.outstandingLoanPrincipalBalance = this.disbursement.amount().setScale(2,BigDecimal.ROUND_HALF_UP);
         }
 
         public String schema2() {
 
-            return " ls.loan_id as loanId,l.residual_amount as residualAmount,c.amount as amount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
+            return " ls.loan_id as loanId,l.residual_amount as residualAmount,lfm.amount as depositAmount,c.amount as amount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
                     + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
                     + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod "
-                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id join m_loan_charge c on l.id=c.loan_id and c.charge_time_enum=10";
+                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id join m_loan_charge c on l.id=c.loan_id and c.charge_time_enum=10 "
+                    + " left join m_loan_fee_master lfm on l.id=lfm.loan_id and lfm.is_deleted = 'N' ";
         }
 
         @Override
         public LoanScheduleData extractData(final ResultSet rs) throws SQLException, DataAccessException {
         	 BigDecimal residualamt=null;
+        	 BigDecimal depositAmount=null;
            if(rs.next())     {   
         	   
              	residualamt=rs.getBigDecimal("amount");
+             	if(residualamt != null) residualamt = residualamt.setScale(2,BigDecimal.ROUND_HALF_UP);
+             	
+             	depositAmount=rs.getBigDecimal("depositAmount");
+             	if(depositAmount != null) depositAmount = depositAmount.setScale(2,BigDecimal.ROUND_HALF_UP);
              	
              }
              final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
                      this.disbursement.disbursementDate(), this.disbursement.amount(), this.totalFeeChargesDueAtDisbursement,
-                     this.disbursement.isDisbursed(),residualamt);
+                     this.disbursement.isDisbursed(),residualamt,depositAmount);
             final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
             periods.add(disbursementPeriod);
            rs.previous();
@@ -1092,7 +1111,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
                 // update based on current period values
                 this.lastDueDate = dueDate;
-                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue);
+                this.outstandingLoanPrincipalBalance = this.outstandingLoanPrincipalBalance.subtract(principalDue).setScale(2,BigDecimal.ROUND_HALF_UP);
 
                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate,
                         dueDate, obligationsMetOnDate, complete, principalDue, principalPaid, principalWrittenOff, principalOutstanding,
@@ -1290,6 +1309,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
         final Collection<TaxMapData> taxMapData = this.taxMapReadPlatformService.retriveTaxMapData();
+        final Collection<FeeMasterData> feeMasterDataOptions = this.feeMasterReadplatformService.retrieveAllData("Deposit");
         Integer loanCycleCounter = null;
         if (loanProduct.useBorrowerCycle()) {
             if (clientId == null) {
@@ -1301,7 +1321,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions,
-                loanCycleCounter,taxMapData);
+                loanCycleCounter,taxMapData,feeMasterDataOptions);
     }
 
     @Override

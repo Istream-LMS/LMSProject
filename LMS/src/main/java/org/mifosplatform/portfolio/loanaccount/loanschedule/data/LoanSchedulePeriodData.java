@@ -71,27 +71,31 @@ public class LoanSchedulePeriodData {
     private final BigDecimal totalActualCostOfLoanForPeriod;
     @SuppressWarnings("unused")
     private  BigDecimal residualAmount;
+    @SuppressWarnings("unused")
+    private  BigDecimal depositAmount;
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
-            final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
+            final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed,final BigDecimal depositAmount) {
         final Integer periodNumber = Integer.valueOf(0);
         final LocalDate from = null;
         return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed, feeChargesDueAtTimeOfDisbursement,
-                isDisbursed);
+                isDisbursed,depositAmount);
     }
     public static LoanSchedulePeriodData disbursementOnlyPeriod(final LocalDate disbursementDate, final BigDecimal principalDisbursed,
-            final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed,final BigDecimal redidualAmount) {
+            final BigDecimal feeChargesDueAtTimeOfDisbursement, final boolean isDisbursed,final BigDecimal redidualAmount,final BigDecimal depositAmount) {
         final Integer periodNumber = Integer.valueOf(0);
         final LocalDate from = null;
         return new LoanSchedulePeriodData(periodNumber, from, disbursementDate, principalDisbursed, feeChargesDueAtTimeOfDisbursement,
-                isDisbursed,redidualAmount);
+                isDisbursed,redidualAmount,depositAmount);
     }
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final BigDecimal principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement, final boolean isDisbursed,final BigDecimal residualAmount) {
+            final BigDecimal principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement, final boolean isDisbursed,final BigDecimal residualAmount,
+            final BigDecimal depositAmount) {
         this.period = periodNumber;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
         this.obligationsMetOnDate = null;
         this.residualAmount=residualAmount;
+        this.depositAmount=depositAmount;
         this.complete = null;
         if (fromDate != null) {
             this.daysInPeriod = Days.daysBetween(this.fromDate, this.dueDate).getDays();
@@ -104,7 +108,7 @@ public class LoanSchedulePeriodData {
         this.principalPaid = null;
         this.principalWrittenOff = null;
         this.principalOutstanding = null;
-        this.principalLoanBalanceOutstanding = principalDisbursed;
+        this.principalLoanBalanceOutstanding = principalDisbursed == null ? principalDisbursed : principalDisbursed.setScale(2, BigDecimal.ROUND_HALF_UP);
 
         this.interestOriginalDue = null;
         this.interestDue = null;
@@ -184,7 +188,7 @@ public class LoanSchedulePeriodData {
      * disbursement (typically first period)
      */
     private LoanSchedulePeriodData(final Integer periodNumber, final LocalDate fromDate, final LocalDate dueDate,
-            final BigDecimal principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement, final boolean isDisbursed) {
+            final BigDecimal principalDisbursed, final BigDecimal chargesDueAtTimeOfDisbursement, final boolean isDisbursed,final BigDecimal depositAmount) {
         this.period = periodNumber;
         this.fromDate = fromDate;
         this.dueDate = dueDate;
@@ -201,7 +205,7 @@ public class LoanSchedulePeriodData {
         this.principalPaid = null;
         this.principalWrittenOff = null;
         this.principalOutstanding = null;
-        this.principalLoanBalanceOutstanding = principalDisbursed;
+        this.principalLoanBalanceOutstanding =  principalDisbursed == null ? principalDisbursed : principalDisbursed.setScale(2, BigDecimal.ROUND_HALF_UP);
 
         this.interestOriginalDue = null;
         this.interestDue = null;
@@ -243,6 +247,8 @@ public class LoanSchedulePeriodData {
         } else {
             this.totalOverdue = null;
         }
+        
+        this.depositAmount = depositAmount;
     }
 
     /*

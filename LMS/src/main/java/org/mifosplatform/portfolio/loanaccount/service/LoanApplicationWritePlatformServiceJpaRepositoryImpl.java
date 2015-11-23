@@ -49,15 +49,17 @@ import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateM
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanFeeMaster;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanInstallmentCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallmentRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
@@ -114,6 +116,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final AccountAssociationsRepository accountAssociationsRepository;
     private final LoanChargeRepository loanChargeRepository;
     private final LoanReadPlatformService loanReadPlatformService;
+    private final LoanFeeMasterAssembler loanFeeMasterAssembler;
+    private final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -128,7 +132,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
             final SavingsAccountAssembler savingsAccountAssembler, final AccountAssociationsRepository accountAssociationsRepository,
-            final LoanChargeRepository loanChargeRepository, final LoanReadPlatformService loanReadPlatformService) {
+            final LoanChargeRepository loanChargeRepository, final LoanReadPlatformService loanReadPlatformService,
+            final LoanFeeMasterAssembler loanFeeMasterAssembler,final LoanRepaymentScheduleInstallmentRepository repaymentScheduleInstallmentRepository) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -153,6 +158,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.accountAssociationsRepository = accountAssociationsRepository;
         this.loanChargeRepository = loanChargeRepository;
         this.loanReadPlatformService = loanReadPlatformService;
+        this.loanFeeMasterAssembler = loanFeeMasterAssembler;
+        this.repaymentScheduleInstallmentRepository = repaymentScheduleInstallmentRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -271,9 +278,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final Set<LoanCharge> possiblyModifedLoanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
             final Set<LoanCollateral> possiblyModifedLoanCollateralItems = this.loanCollateralAssembler
                     .fromParsedJson(command.parsedJson());
+            
+           final Set<LoanFeeMaster> possiblyModifedLoanDeposits = this.loanFeeMasterAssembler.fromParsedJson(command.parsedJson());
 
             final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
-                    possiblyModifedLoanCollateralItems, this.aprCalculator);
+                    possiblyModifedLoanCollateralItems, this.aprCalculator,possiblyModifedLoanDeposits);
 
             if (changes.containsKey("expectedDisbursementDate")) {
                 this.loanAssembler.validateExpectedDisbursementForHolidayAndNonWorkingDay(existingLoanApplication);
@@ -384,8 +393,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
                 existingLoanApplication.updateLoanCharges(loanCharges);
             }
+            
+            final String depositsParamName = "depositArray";
+            if (changes.containsKey(depositsParamName)) {
+            	final Set<LoanFeeMaster> loanDeposits = this.loanFeeMasterAssembler.fromParsedJson(command.parsedJson());
+            	existingLoanApplication.updateLoanFeeMaster(loanDeposits);
+            }
+            
+            saveAndFlushLoanWithDataIntegrityViolationChecks(existingLoanApplication);
 //madhav need to check
-            this.loanRepository.saveAndFlush(existingLoanApplication);
+            //this.loanRepository.saveAndFlush(existingLoanApplication);
 
             final String submittedOnNote = command.stringValueOfParameterNamed("submittedOnNote");
             if (StringUtils.isNotBlank(submittedOnNote)) {
@@ -714,6 +731,27 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Group group = loan.group();
         if (group != null) {
             if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
+        }
+    }
+    
+    private void saveAndFlushLoanWithDataIntegrityViolationChecks(final Loan loan) {
+        try {
+            List<LoanRepaymentScheduleInstallment> installments = loan.fetchRepaymentScheduleInstallments();
+            for (LoanRepaymentScheduleInstallment installment : installments) {
+                if (installment.getId() == null) {
+                    this.repaymentScheduleInstallmentRepository.save(installment);
+                } 
+            }
+            this.loanRepository.saveAndFlush(loan);
+        } catch (final DataIntegrityViolationException e) {
+            final Throwable realCause = e.getCause();
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.application");
+            if (realCause.getMessage().toLowerCase().contains("external_id_unique")) {
+                baseDataValidator.reset().parameter("externalId").failWithCode("value.must.be.unique");
+            }
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                    "Validation errors exist.", dataValidationErrors); }
         }
     }
 

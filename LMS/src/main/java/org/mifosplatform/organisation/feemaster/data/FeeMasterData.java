@@ -7,6 +7,7 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanFeeMasterData;
 
 public class FeeMasterData {
 
@@ -73,6 +74,13 @@ public class FeeMasterData {
 		this.depositCalculationTypeOptions = depositCalculationTypeOptions;
 		this.depositOnTypeOptions = depositOnTypeOptions;
 	}
+	
+	public LoanFeeMasterData toLoanFeeMasterData() {
+		
+		return LoanFeeMasterData.newLoanFeeMasterData(this.id,this.feeCode, this.feeDescription,this.transactionType,this.depositTimeType,
+				this.depositCalculationType,this.depositOnType,this.amount, this.isRefundable);
+	}
+
 
 	public Long getId() {
 		return id;
