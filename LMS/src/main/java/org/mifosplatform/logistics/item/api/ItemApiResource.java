@@ -54,7 +54,7 @@ public class ItemApiResource {
 	private final DefaultToApiJsonSerializer<ItemData> toApiJsonSerializer;
 	private final PlatformSecurityContext context;
 	private final ItemReadPlatformService itemReadPlatformService;
-	private final org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService mCodeReadPlatformService;
+	private final MCodeReadPlatformService mCodeReadPlatformService;
 	/*private final RegionReadPlatformService regionReadPlatformService;*/ 
 	
 	
@@ -86,10 +86,11 @@ public class ItemApiResource {
 	private ItemData handleTemplateData() {
 		final List<EnumOptionData> itemClassdata = this.itemReadPlatformService.retrieveItemClassType();
 		final List<EnumOptionData> unitTypeData = this.itemReadPlatformService.retrieveUnitTypes();
-		final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
+		//final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
 		Collection<MCodeData> manufacturerDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ITEM_MANUFACTURER);
+		Collection<MCodeData> chargeCodeData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CHARGECODE);
 		/*final List<RegionData> regionDatas = this.regionReadPlatformService.getRegionDetails();*/
-		return new ItemData(itemClassdata, unitTypeData, chargeDatas,manufacturerDatas/*, regionDatas*/);
+		return new ItemData(itemClassdata, unitTypeData, /*chargeDatas,*/manufacturerDatas,chargeCodeData/*, regionDatas*/);
 	}
 	
 	@POST
@@ -126,13 +127,14 @@ public class ItemApiResource {
 		ItemData itemData=this.itemReadPlatformService.retrieveSingleItemDetails(null, itemId,null, false); // If you pass clientId set to 'true' else 'false'
 		final List<EnumOptionData> itemClassdata = this.itemReadPlatformService.retrieveItemClassType();
 		final List<EnumOptionData> unitTypeData = this.itemReadPlatformService.retrieveUnitTypes();
-		final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
+		//final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
 		final List<ItemData> auditDetails = this.itemReadPlatformService.retrieveAuditDetails(itemId);
 		final Collection<MCodeData> manufacturerDatas = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ITEM_MANUFACTURER);
 		/*final List<RegionData> regionDatas = this.regionReadPlatformService.getRegionDetails();*/
 		final List<ItemData> itemPricesDatas = this.itemReadPlatformService.retrieveItemPrice(itemId);
+		Collection<MCodeData> chargeCodeData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CHARGECODE);
    		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-   		itemData=new ItemData(itemData,itemClassdata,unitTypeData,chargeDatas,auditDetails,manufacturerDatas);
+   		itemData=new ItemData(itemData,itemClassdata,unitTypeData/*,chargeDatas*/,chargeCodeData,auditDetails,manufacturerDatas);
    		/*itemData.setRegionDatas(regionDatas);*/
    		itemData.setItemPricesDatas(itemPricesDatas);
    		return this.toApiJsonSerializer.serialize(settings, itemData, RESPONSE_ITEM_DATA_PARAMETERS);
