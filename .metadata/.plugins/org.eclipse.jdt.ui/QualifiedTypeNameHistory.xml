@@ -29,9 +29,6 @@
 <fullyQualifiedTypeName name="java.lang.InternalError"/>
 <fullyQualifiedTypeName name="java.lang.Integer"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
-<fullyQualifiedTypeName name="java.math.BigDecimal"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData"/>
 <fullyQualifiedTypeName name="net.authorize.sim.Fingerprint"/>
 <fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.data.ClientProspectData"/>
@@ -39,4 +36,18 @@
 <fullyQualifiedTypeName name="org.springframework.data.jpa.domain.AbstractPersistable"/>
 <fullyQualifiedTypeName name="java.util.Date"/>
 <fullyQualifiedTypeName name="org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom"/>
+<fullyQualifiedTypeName name="java.util.Locale"/>
+<fullyQualifiedTypeName name="javax.ws.rs.QueryParam"/>
+<fullyQualifiedTypeName name="java.lang.Long"/>
+<fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.domain.ProspectLoanCalculatorRepository"/>
+<fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.domain.ProspectLoanCalculator"/>
+<fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.domain.ProspectLoanDetails"/>
+<fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.domain.ProspectLoanDetailsRepository"/>
+<fullyQualifiedTypeName name="javax.ws.rs.PathParam"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.api.LoansApiResource"/>
+<fullyQualifiedTypeName name="org.springframework.data.repository.query.Param"/>
+<fullyQualifiedTypeName name="java.math.BigDecimal"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 </qualifiedTypeNameHistroy>
