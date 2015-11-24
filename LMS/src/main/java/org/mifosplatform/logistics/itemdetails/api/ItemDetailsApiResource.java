@@ -38,6 +38,7 @@ import org.mifosplatform.logistics.itemdetails.service.ItemDetailsReadPlatformSe
 import org.mifosplatform.logistics.supplier.service.SearchSqlQuery;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +69,7 @@ public class ItemDetailsApiResource {
 	private final GrnReadPlatformService inventoryGrnReadPlatformService;
 	private final ItemDetailsReadPlatformService itemDetailsReadPlatformService;
 	private final DefaultToApiJsonSerializer<ItemDetailsAllocation> toApiJsonSerializerForItemAllocation;
-	private final org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService mCodeReadPlatformService;
+	private final MCodeReadPlatformService mCodeReadPlatformService;
 	private final DefaultToApiJsonSerializer<ItemData> toApiJsonSerializerForItemData;
 	private final OfficeReadPlatformService officeReadPlatformService;
 	
@@ -76,7 +77,7 @@ public class ItemDetailsApiResource {
 	@Autowired
 	public ItemDetailsApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<ItemDetailsData> toApiJsonSerializerForItem,
 			ApiRequestParameterHelper apiRequestParameterHelper,PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-			final GrnReadPlatformService inventoryGrnReadPlatformService,final org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService mCodeReadPlatformService,
+			final GrnReadPlatformService inventoryGrnReadPlatformService,final MCodeReadPlatformService mCodeReadPlatformService,
 			final DefaultToApiJsonSerializer<ItemDetailsAllocation> toApiJsonSerializerForItemAllocation,
 			final DefaultToApiJsonSerializer<ItemSerialNumberData> toApiJsonSerializerForAllocationHardware,
 			final ItemDetailsReadPlatformService itemDetailsReadPlatformService,

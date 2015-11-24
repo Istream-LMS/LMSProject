@@ -17,6 +17,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -199,13 +200,14 @@ public class ItemMaster extends AbstractPersistable<Long>{
 			actualChanges.put(manufacturerParamName, newValue);
 			this.manufacturer = StringUtils.defaultIfEmpty(newValue,null);
 		}
-		/*final String warrantyexpirydateParamName = "warrantyexpirydate";
-		if(command.isChangeInStringParameterNamed(warrantyexpirydateParamName,this.manufacturer)){
-			final String newValue = command.stringValueOfParameterNamed(warrantyexpirydateParamName);
+		
+		final String warrantyexpirydateParamName = "warrantyExpiryDate";
+		if (command.isChangeInLocalDateParameterNamed(warrantyexpirydateParamName,new LocalDate(this.warrantyExpiryDate))) {
+			final LocalDate newValue = command.localDateValueOfParameterNamed(warrantyexpirydateParamName);
 			actualChanges.put(warrantyexpirydateParamName, newValue);
-			this.manufacturer = StringUtils.defaultIfEmpty(newValue,null);
+			this.warrantyExpiryDate = newValue.toDate();
 		}
-		*/
+		
 		return actualChanges;
 	
 	}
@@ -227,7 +229,7 @@ public class ItemMaster extends AbstractPersistable<Long>{
 		final String chargeCodeData=command.stringValueOfParameterNamed("chargeCodeData");
 		final Long reorderLevel=command.longValueOfParameterNamed("reorderLevel");
 		final String manufacturer=command.stringValueOfParameterNamed("manufacturer");
-		final Date warrantyExpiryDate=command.DateValueOfParameterNamed("warrantyexpirydate");
+		final Date warrantyExpiryDate=command.DateValueOfParameterNamed("warrantyExpiryDate");
 		return new ItemMaster(itemCode, itemDescription, itemClass, unitPrice, units, warranty, chargeCodeData, reorderLevel,manufacturer,warrantyExpiryDate);
 	}
 	
