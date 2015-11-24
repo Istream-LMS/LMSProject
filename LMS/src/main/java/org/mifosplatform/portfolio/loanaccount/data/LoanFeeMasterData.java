@@ -52,7 +52,15 @@ public class LoanFeeMasterData {
 		this.depositOnType = depositOnType;
 		this.percentageof = percentageof;
 		this.amountPercentageAppliedTo = amountPercentageAppliedTo;
-		this.amountOrPercentage = amountOrPercentage;
+		if(amountOrPercentage == null){
+            if (depositCalculationType != null && depositCalculationType.getId().intValue() > 1) {
+                this.amountOrPercentage = this.percentageof;
+            } else {
+                this.amountOrPercentage = amount;
+            }
+        }else{
+            this.amountOrPercentage = amountOrPercentage;
+        }
 		this.amount = amount;
 		this.isRefundable = isRefundable ==  null ? "N" : isRefundable;
 
@@ -73,7 +81,15 @@ public class LoanFeeMasterData {
 		this.depositOnType = depositOnType;
 		this.percentageof = percentageof;
 		this.amountPercentageAppliedTo = amountPercentageAppliedTo;
-		this.amountOrPercentage = amountOrPercentage;
+		if(amountOrPercentage == null){
+            if (depositCalculationType != null && depositCalculationType.getId().intValue() > 1) {
+                this.amountOrPercentage = this.percentageof;
+            } else {
+                this.amountOrPercentage = amount;
+            }
+        }else{
+            this.amountOrPercentage = amountOrPercentage;
+        }
 		this.amount = amount;
 		this.isRefundable = isRefundable ==  null ? "N" : isRefundable;
 

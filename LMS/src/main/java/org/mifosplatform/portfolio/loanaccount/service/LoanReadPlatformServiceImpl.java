@@ -802,14 +802,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         public String schema() {
 
-            return " ls.loan_id as loanId,l.residual_amount as residualAmount,lfm.amount as depositAmount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
+            return " ls.loan_id as loanId,l.residual_amount as residualAmount,l.deposit_amount as depositAmount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
                     + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
                     + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod "
-                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id " 
-                    + " left join m_loan_fee_master lfm on l.id=lfm.loan_id and lfm.is_deleted = 'N' ";
+                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id " ;
+                    //+ " left join m_loan_fee_master lfm on l.id=lfm.loan_id and lfm.is_deleted = 'N' ";
         }
    
 
@@ -976,14 +976,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         public String schema2() {
 
-            return " ls.loan_id as loanId,l.residual_amount as residualAmount,lfm.amount as depositAmount,c.amount as amount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
+            return " ls.loan_id as loanId,l.residual_amount as residualAmount,l.deposit_amount as depositAmount,c.amount as amount,ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, ls.obligations_met_on_date as obligationsMetOnDate, ls.completed_derived as complete,"
                     + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
                     + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff, "
                     + " ls.total_paid_in_advance_derived as totalPaidInAdvanceForPeriod, ls.total_paid_late_derived as totalPaidLateForPeriod "
-                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id join m_loan_charge c on l.id=c.loan_id and c.charge_time_enum=10 "
-                    + " left join m_loan_fee_master lfm on l.id=lfm.loan_id and lfm.is_deleted = 'N' ";
+                    + " from m_loan_repayment_schedule ls join m_loan l  on l.id=ls.loan_id join m_loan_charge c on l.id=c.loan_id and c.charge_time_enum=10 ";
+                    //+ " left join m_loan_fee_master lfm on l.id=lfm.loan_id and lfm.is_deleted = 'N' ";
         }
 
         @Override

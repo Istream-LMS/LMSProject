@@ -13,6 +13,7 @@ import org.mifosplatform.organisation.feemaster.domain.FeeMasterRepositoryWrappe
 import org.mifosplatform.organisation.feemaster.exception.LoanFeeMasterNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanFeeMaster;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanFeeMasterRepository;
+import org.mifosplatform.portfolio.loanaccount.exception.DepositsNotAllowMoreThanOneException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -46,6 +47,9 @@ public class LoanFeeMasterAssembler {
             final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
             if (topLevelJsonElement.has("depositArray") && topLevelJsonElement.get("depositArray").isJsonArray()) {
                 final JsonArray array = topLevelJsonElement.get("depositArray").getAsJsonArray();
+                if(array.size() > 1){
+                	throw new DepositsNotAllowMoreThanOneException(array);
+                }
                 for (int i = 0; i < array.size(); i++) {
 
                     final JsonObject loanDepositElement = array.get(i).getAsJsonObject();
