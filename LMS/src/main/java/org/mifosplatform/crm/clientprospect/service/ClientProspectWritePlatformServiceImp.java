@@ -30,6 +30,9 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.feemaster.exception.FeeMasterDefaultCodeNotFoundException;
+import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService;
 import org.mifosplatform.portfolio.loanaccount.api.LoansApiResource;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
@@ -62,6 +65,7 @@ public class ClientProspectWritePlatformServiceImp implements
 	private final ProspectLoanCalculatorRepository prospectLoanCalculatorRepository;
 	private final ProspectLoanDetailsRepository prospectLoanDetailsRepository;
 	private final LoansApiResource loansApiResource;
+	private final FeeMasterReadplatformService feeMasterReadplatformService;
 	
 	private final String dateFormat = "dd MMMM yyyy";
 	private final String locale = "en";
@@ -69,6 +73,9 @@ public class ClientProspectWritePlatformServiceImp implements
 	
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 	private final MathContext mc2 = new MathContext(8, RoundingMode.HALF_UP);
+	
+	private final BigDecimal HUNDERED = new BigDecimal(100);
+	private final String DEFAULT = "Default";
 
 	@Autowired
 	public ClientProspectWritePlatformServiceImp(
@@ -80,7 +87,8 @@ public class ClientProspectWritePlatformServiceImp implements
 			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 			final ProspectLoanCalculatorRepository prospectLoanCalculatorRepository,
 			final ProspectLoanDetailsRepository prospectLoanDetailsRepository,
-			final LoansApiResource loansApiResource) {
+			final LoansApiResource loansApiResource, 
+			final FeeMasterReadplatformService feeMasterReadplatformService) {
 		
 		this.context = context;
 		this.clientProspectJpaRepository = clientProspectJpaRepository;
@@ -91,6 +99,7 @@ public class ClientProspectWritePlatformServiceImp implements
 		this.prospectLoanCalculatorRepository = prospectLoanCalculatorRepository;
 		this.prospectLoanDetailsRepository = prospectLoanDetailsRepository;
 		this.loansApiResource = loansApiResource;
+		this.feeMasterReadplatformService = feeMasterReadplatformService;
 	}
 
 	@Transactional
@@ -238,18 +247,25 @@ public class ClientProspectWritePlatformServiceImp implements
 		
 		String loanType = "individual";
 		
+		Long productId = prospectLoanDetails.getProductId();
+		BigDecimal depositAmount = prospectLoanDetails.getDepositAmount();
+		
 		LoanAccountData newLoanAccount = this.loansApiResource.getTemplate(clientId, null, 
-				prospectLoanDetails.getProductId(), loanType, false);
+				productId, loanType, false);
 		
 		String activationDate = formatter.format(DateUtils.getDateOfTenant());
 		
-		String elementData = returnTaxCharges(newLoanAccount.getTaxes(), prospectLoanDetails.getVehicleCostPrice());
+		BigDecimal vehiclePrice = prospectLoanDetails.getVehicleCostPrice().subtract(depositAmount, mc);
+		
+		String elementData = returnTaxCharges(newLoanAccount.getTaxes(), vehiclePrice);
 		
 		JsonElement element = this.fromApiJsonHelper.parse(elementData);
 		
 		final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("finalAmount", element);
 		
 		JsonArray charges = returnCharges(newLoanAccount.getCharges(), prospectLoanDetails);
+		
+		JsonArray depositCharges = returnDepositCharges(productId, depositAmount);
 		
 		JsonObject object = new JsonObject();
 		
@@ -258,9 +274,11 @@ public class ClientProspectWritePlatformServiceImp implements
 		object.addProperty("productId", newLoanAccount.getLoanProductId());
 		object.addProperty("principal", principal);
 		
-		object.addProperty("loanTermFrequency", newLoanAccount.getTermFrequency());
+		//object.addProperty("loanTermFrequency", newLoanAccount.getTermFrequency());
+		object.addProperty("loanTermFrequency", prospectLoanDetails.getTerm());
 		object.addProperty("loanTermFrequencyType", newLoanAccount.getTermPeriodFrequencyType().getId());
-		object.addProperty("numberOfRepayments", newLoanAccount.getNumberOfRepayments());
+		//object.addProperty("numberOfRepayments", newLoanAccount.getNumberOfRepayments());
+		object.addProperty("numberOfRepayments", prospectLoanDetails.getTerm());
 		object.addProperty("repaymentEvery", newLoanAccount.getRepaymentEvery());
 		object.addProperty("repaymentFrequencyType", newLoanAccount.getRepaymentFrequencyType().getId());
 		object.addProperty("interestRatePerPeriod", newLoanAccount.getInterestRatePerPeriod());
@@ -276,6 +294,7 @@ public class ClientProspectWritePlatformServiceImp implements
 		object.addProperty("submittedOnDate", activationDate);
 		
 		object.add("charges", charges);
+		object.add("depositArray", depositCharges);
 		
 		String loanJsonString = this.loansApiResource.calculateLoanScheduleOrSubmitLoanApplication(null, null, object.toString());
 		
@@ -296,6 +315,36 @@ public class ClientProspectWritePlatformServiceImp implements
 		return loanId;
 	}
 	
+	private JsonArray returnDepositCharges(Long productId, BigDecimal depositAmount) {
+		
+		final Collection<FeeMasterData> feeMasterData = this.feeMasterReadplatformService.retrieveLoanProductFeeMasterData(productId);
+		
+		if(null == feeMasterData || feeMasterData.isEmpty()) {
+			
+			FeeMasterData feeMaster = this.feeMasterReadplatformService.retrieveSingleFeeMasterDetails(DEFAULT);
+			
+			if(null == feeMaster) {
+				throw new FeeMasterDefaultCodeNotFoundException(DEFAULT);
+			}
+			
+			feeMasterData.add(feeMaster);
+		}
+		
+		JsonArray array = new JsonArray();
+		
+		for (FeeMasterData feeMaster : feeMasterData) {
+			
+			JsonObject object = new JsonObject();
+			
+			object.addProperty("depositId", feeMaster.getId());
+			object.addProperty("amount", depositAmount);
+			
+			array.add(object);
+		}
+		
+		return array;
+	}
+
 	//{"principal":150000,"locale":"en","taxes":[{"id":38,"type":"Percentage","taxValue":13.043478}]}
 	private String returnTaxCharges(Collection<LoanTaxData> taxes, BigDecimal principle) {
 		
@@ -365,6 +414,9 @@ public class ClientProspectWritePlatformServiceImp implements
 		
 		BigDecimal cof = divideAtCalc(prospectLoanDetails.getCof(), key);
 		BigDecimal maintenance = divideAtCalc(prospectLoanDetails.getMaintenance(), key);
+		BigDecimal comprehensiveInsurance = divideAtCalc(prospectLoanDetails.getInsurance(), key);
+		BigDecimal replacementTyres = divideAtCalc(prospectLoanDetails.getReplacementTyres(), key);
+		BigDecimal residualCostVEP = prospectLoanDetails.getResidualCostVEP().multiply(HUNDERED);
 		
 		JsonArray array = new JsonArray();
 		
@@ -377,6 +429,12 @@ public class ClientProspectWritePlatformServiceImp implements
 				obj.addProperty("amount", cof);
 			} else if(chargesData.getName().equalsIgnoreCase("Maintenance charge")) {		
 				obj.addProperty("amount", maintenance);
+			} else if(chargesData.getName().equalsIgnoreCase("Comprehensive_Insurance")) {		
+				obj.addProperty("amount", comprehensiveInsurance);
+			} else if(chargesData.getName().equalsIgnoreCase("Replacement_Tyres")) {		
+				obj.addProperty("amount", replacementTyres);
+			} else if(chargesData.getName().equalsIgnoreCase("Residual_Amt")) {		
+				obj.addProperty("amount", residualCostVEP);
 			} else {
 				obj.addProperty("amount", chargesData.getAmount());
 			}
