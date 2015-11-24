@@ -6,13 +6,14 @@ import java.util.List;
 
 import org.mifosplatform.chargecode.data.ChargesData;
 import org.mifosplatform.logistics.item.data.ItemData;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 
 public class AgentItemSaleData {
 
 	private final Collection<OfficeData> officeDatas;
 	private final List<ItemData> itemDatas;
-	private final List<ChargesData> chargeDatas;
+	private final Collection<MCodeData> chargeCodeData;
 	private final Long id;
 	private final Long itemId;
 	private final Long agentId;
@@ -24,24 +25,24 @@ public class AgentItemSaleData {
 	private final BigDecimal tax;
 
 	public static AgentItemSaleData instance(final AgentItemSaleData itemSaleData,final Collection<OfficeData> officeDatas,
-			final List<ItemData> itemDatas, final List<ChargesData> chargesDatas) {
+			final List<ItemData> itemDatas, final Collection<MCodeData> chargeCodeData) {
 
 		return new AgentItemSaleData(itemSaleData.id, itemSaleData.itemId,itemSaleData.agentId, itemSaleData.itemName,
 				itemSaleData.agentName, itemSaleData.orderQunatity,itemSaleData.chargeAmount, itemSaleData.tax,
-				itemSaleData.invoiceAmount, officeDatas, itemDatas,chargesDatas);
+				itemSaleData.invoiceAmount, officeDatas, itemDatas,chargeCodeData);
 	}
 
-	public static AgentItemSaleData withTemplateData(final Collection<OfficeData> officeDatas, final List<ItemData> itemDatas,final List<ChargesData> chargesDatas) {
+	public static AgentItemSaleData withTemplateData(final Collection<OfficeData> officeDatas, final List<ItemData> itemDatas,final Collection<MCodeData> chargeCodeData) {
 
 		return new AgentItemSaleData(null, null, null, null, null, null, null,
-				           null, null, officeDatas, itemDatas, chargesDatas);
+				           null, null, officeDatas, itemDatas, chargeCodeData);
 	}
 
 	public AgentItemSaleData(final Long id, final Long itemId, final Long agentId,
 			final String itemName, final String agentName, final Long orderQunatity,
 			final BigDecimal chargeAmount, final BigDecimal tax, final BigDecimal invoiceAmount,
 			final Collection<OfficeData> officeDatas, final List<ItemData> itemDatas,
-			final List<ChargesData> chargesDatas) {
+			final Collection<MCodeData> chargeCodeData) {
 
 		this.id = id;
 		this.itemId = itemId;
@@ -54,7 +55,7 @@ public class AgentItemSaleData {
 		this.tax = tax;
 		this.officeDatas = officeDatas;
 		this.itemDatas = itemDatas;
-		this.chargeDatas = chargesDatas;
+		this.chargeCodeData = chargeCodeData;
 
 	}
 
@@ -102,8 +103,8 @@ public class AgentItemSaleData {
 		return tax;
 	}
 
-	public List<ChargesData> getChargeDatas() {
-		return chargeDatas;
+	public Collection<MCodeData> getChargeDatas() {
+		return chargeCodeData;
 	}
 
 }

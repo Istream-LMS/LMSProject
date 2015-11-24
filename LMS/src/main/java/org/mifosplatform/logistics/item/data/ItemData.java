@@ -39,8 +39,9 @@ public class ItemData {
 	private String price;
 	private List<ItemData> itemPricesDatas;
 	private Long reorderLevel;
-	private Collection<org.mifosplatform.organisation.mcodevalues.data.MCodeData> manufacturerDatas;
+	private Collection<MCodeData> manufacturerDatas;
 	private String manufacturer;
+	private Collection<MCodeData> chargeCodeData;
 	/*private List<FeeMasterData> feeMasterData;
 	private Collection<InventoryGrnData> grnData;*/
 	
@@ -87,24 +88,34 @@ public class ItemData {
 	
 	}
 
-	public ItemData(List<EnumOptionData> itemClassdata,List<EnumOptionData> unitTypeData, List<ChargesData> chargeDatas/*, List<RegionData> regionDatas*/, Collection<MCodeData> manufacturerDatas) {
+	public ItemData(List<EnumOptionData> itemClassdata,List<EnumOptionData> unitTypeData/*, List<ChargesData> chargeDatas*//*, List<RegionData> regionDatas*/, Collection<MCodeData> manufacturerDatas,
+			Collection<MCodeData> chargeCodeData) {
      this.itemClassData=itemClassdata;
      this.unitData=unitTypeData;
-     this.chargesData=chargeDatas;
+     /*this.chargesData=chargeDatas;*/
      this.manufacturerDatas=manufacturerDatas;
+     this.chargeCodeData=chargeCodeData;
      /*this.regionDatas = regionDatas;*/
 	}
 
-	public Collection<org.mifosplatform.organisation.mcodevalues.data.MCodeData> getManufacturerDatas() {
+	public Collection<MCodeData> getChargeCodeData() {
+		return chargeCodeData;
+	}
+
+	public void setChargeCodeData(Collection<MCodeData> chargeCodeData) {
+		this.chargeCodeData = chargeCodeData;
+	}
+
+	public Collection<MCodeData> getManufacturerDatas() {
 		return manufacturerDatas;
 	}
 
-	public void setManufacturerDatas(Collection<org.mifosplatform.organisation.mcodevalues.data.MCodeData> manufacturerDatas) {
+	public void setManufacturerDatas(Collection<MCodeData> manufacturerDatas) {
 		this.manufacturerDatas = manufacturerDatas;
 	}
 
 	public ItemData(ItemData itemData, List<EnumOptionData> itemClassdata,
-			List<EnumOptionData> unitTypeData,List<ChargesData> chargeDatas,List<ItemData> auditDetails,Collection<org.mifosplatform.organisation.mcodevalues.data.MCodeData> manufacturerDatas) {
+			List<EnumOptionData> unitTypeData,Collection<MCodeData> chargeCodeData,List<ItemData> auditDetails,Collection<MCodeData> manufacturerDatas) {
 		this.id=itemData.getId();
 		this.itemCode=itemData.getItemCode();
 		this.units=itemData.getUnits();
@@ -113,7 +124,8 @@ public class ItemData {
 		this.itemDescription=itemData.getItemDescription();
 		this.warranty=itemData.getWarranty();
 		this.itemClass=itemData.getItemClass();
-		this.chargesData=chargeDatas;
+		//this.chargesData=chargeDatas;
+		this.chargeCodeData=chargeCodeData;
 		this.unitData=unitTypeData;
 		this.itemClassData=itemClassdata;
 		this.auditDetails=auditDetails;

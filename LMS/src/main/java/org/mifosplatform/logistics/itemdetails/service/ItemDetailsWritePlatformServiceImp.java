@@ -126,10 +126,10 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			ItemMaster items = this.itemMasterRepository.findOne(item);
 			Boolean isSerialRequired = true;
 			Long quantity = command.longValueOfParameterNamed("quantity");
-			if(UnitEnumType.TUBE.toString().equalsIgnoreCase(items.getUnits()) ||
+			/*if(UnitEnumType.TUBE.toString().equalsIgnoreCase(items.getUnits()) ||
 					UnitEnumType.GALLON.toString().equalsIgnoreCase(items.getUnits())){
 				isSerialRequired = false;
-			}
+			}*/
 			
 			inventoryItemCommandFromApiJsonDeserializer.validateForSerialNumber(command.json(), isSerialRequired);
 			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper, isSerialRequired);

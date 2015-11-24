@@ -30,6 +30,9 @@ import org.mifosplatform.logistics.agent.data.AgentItemSaleData;
 import org.mifosplatform.logistics.agent.service.ItemSaleReadPlatformService;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +58,14 @@ public class ItemSaleAPiResource {
 	private final ItemReadPlatformService itemReadPlatformService;
 	private final ItemSaleReadPlatformService  agentReadPlatformService;
 	private final PlatformSecurityContext context;
+	private final MCodeReadPlatformService mCodeReadPlatformService;
 	
 	@Autowired
 	public ItemSaleAPiResource(final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
 			final ApiRequestParameterHelper apiRequestParameterHelper,final DefaultToApiJsonSerializer<AgentItemSaleData> apiJsonSerializer,
 			final PlatformSecurityContext context,final OfficeReadPlatformService officeReadPlatformService,
-			final ItemReadPlatformService itemReadPlatformService,final ItemSaleReadPlatformService  agentReadPlatformService)
+			final ItemReadPlatformService itemReadPlatformService,final ItemSaleReadPlatformService  agentReadPlatformService,
+			final MCodeReadPlatformService mCodeReadPlatformService)
 	{
 		
 		this.context=context;
@@ -70,7 +75,7 @@ public class ItemSaleAPiResource {
 		this.officeReadPlatformService=officeReadPlatformService;
 		this.itemReadPlatformService=itemReadPlatformService;
 		this.agentReadPlatformService=agentReadPlatformService;
-	
+		this.mCodeReadPlatformService=mCodeReadPlatformService;
 	}
 	
 /**
@@ -110,11 +115,12 @@ private AgentItemSaleData handleAgentTemplateData(AgentItemSaleData  itemSaleDat
 	
 	final Collection<OfficeData> officeDatas=this.officeReadPlatformService.retrieveAllOffices();
 	final List<ItemData> itemDatas=this.itemReadPlatformService.retrieveAllItems();
-	final List<ChargesData> chargesDatas=this.itemReadPlatformService.retrieveChargeCode();
+	/*final List<MCodeData> chargesDatas=this.itemReadPlatformService.retrieveChargeCode();*/
+	Collection<MCodeData> chargeCodeData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CHARGECODE);
 	if(itemSaleData == null){
-	return  AgentItemSaleData.withTemplateData(officeDatas,itemDatas,chargesDatas);
+	return  AgentItemSaleData.withTemplateData(officeDatas,itemDatas,chargeCodeData);
 	}else{
-		return AgentItemSaleData.instance(itemSaleData, officeDatas, itemDatas,chargesDatas);
+		return AgentItemSaleData.instance(itemSaleData, officeDatas, itemDatas,chargeCodeData);
 
 	}
 }
