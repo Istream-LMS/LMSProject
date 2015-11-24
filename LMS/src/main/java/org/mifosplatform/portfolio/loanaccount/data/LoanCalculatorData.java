@@ -42,8 +42,11 @@ public class LoanCalculatorData {
 	private BigDecimal mileage;
 	private BigDecimal excess;
 	
-	private BigDecimal financialLeasePayoutForYear;
-	private BigDecimal financialLeasePayout;
+	/*private BigDecimal financialLeasePayoutForYear;
+	private BigDecimal financialLeasePayout;*/
+	
+	private BigDecimal payoutAdminChargesForYear;
+	private BigDecimal payoutAdminCharges;
 
 	private BigDecimal accountWDV;
 	private BigDecimal taxWDV;
@@ -70,8 +73,11 @@ public class LoanCalculatorData {
 		this.accountWDV = awAmount;
 		this.taxWDV = twAmount;
 		this.mileage = mileage;
-		this.financialLeasePayoutForYear = fLPForYear;
-		this.financialLeasePayout = financialLeasePayout;
+		/*this.financialLeasePayoutForYear = fLPForYear;
+		this.financialLeasePayout = financialLeasePayout;*/
+		
+		this.payoutAdminChargesForYear = fLPForYear;
+		this.payoutAdminCharges = financialLeasePayout;
 	}
 
 	public LoanCalculatorData(BigDecimal coiForYear, BigDecimal cofForYear,
@@ -348,21 +354,20 @@ public class LoanCalculatorData {
 		this.excess = excess;
 	}
 
-	public BigDecimal getFinancialLeasePayoutForYear() {
-		return financialLeasePayoutForYear;
+	public BigDecimal getPayoutAdminChargesForYear() {
+		return payoutAdminChargesForYear;
 	}
 
-	public void setFinancialLeasePayoutForYear(
-			BigDecimal financialLeasePayoutForYear) {
-		this.financialLeasePayoutForYear = financialLeasePayoutForYear;
+	public void setPayoutAdminChargesForYear(BigDecimal payoutAdminChargesForYear) {
+		this.payoutAdminChargesForYear = payoutAdminChargesForYear;
 	}
 
-	public BigDecimal getFinancialLeasePayout() {
-		return financialLeasePayout;
+	public BigDecimal getPayoutAdminCharges() {
+		return payoutAdminCharges;
 	}
 
-	public void setFinancialLeasePayout(BigDecimal financialLeasePayout) {
-		this.financialLeasePayout = financialLeasePayout;
+	public void setPayoutAdminCharges(BigDecimal payoutAdminCharges) {
+		this.payoutAdminCharges = payoutAdminCharges;
 	}
 
 	public BigDecimal getAccountWDV() {
