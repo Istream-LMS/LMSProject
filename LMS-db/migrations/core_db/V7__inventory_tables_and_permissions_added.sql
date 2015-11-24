@@ -238,6 +238,3 @@ INSERT IGNORE INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_na
 
 
 
-
-
-

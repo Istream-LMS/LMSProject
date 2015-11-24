@@ -33,7 +33,7 @@ public final class AgentItemSaleCommandFromApiJsonDeserializer {
      */
 
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("agentId","itemId","purchaseDate","orderQuantity",
-    		"chargeAmount","taxPercantage","dateFormat","locale","chargeCode","unitPrice","purchaseFrom","purchaseBy"));
+    		"chargeAmount","taxPercantage","dateFormat","locale","chargeCode","unitPrice","purchaseFrom","purchaseBy","chargeCodeData"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -61,8 +61,8 @@ public final class AgentItemSaleCommandFromApiJsonDeserializer {
         final String itemId = fromApiJsonHelper.extractStringNamed("itemId", element);
         baseDataValidator.reset().parameter("itemId").value(itemId).notNull();
         
-        final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
-        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notNull();
+        final String chargeCodeData = fromApiJsonHelper.extractStringNamed("chargeCodeData", element);
+        baseDataValidator.reset().parameter("chargeCodeData").value(chargeCodeData).notNull();
 
         final Long orderQuantity = fromApiJsonHelper.extractLongNamed("orderQuantity", element);
         baseDataValidator.reset().parameter("orderQuantity").value(orderQuantity).notNull().integerGreaterThanZero();

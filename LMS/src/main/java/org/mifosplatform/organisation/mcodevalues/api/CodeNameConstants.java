@@ -78,6 +78,7 @@ public static final String CODE_PROPERTY_FLOOR = "Level/Floor";
 public static final String CODE_PROPERTY_UNIT = "Unit Codes";
 public static final String CODE_PROPERTY_BUILDING = "Building Codes";
 public static final String CODE_ITEM_MANUFACTURER = "Manufacturer Codes";
+public static final String CODE_CHARGECODE = "Charge Codes";
 
 
 

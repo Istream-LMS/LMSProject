@@ -28,7 +28,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	 
 	
 	 	Set<String> supportedParameters = new HashSet<String>(Arrays.asList("itemCode","itemDescription","units","chargeCode","locale","unitPrice","warranty","itemClass",
-	 			"reorderLevel","chargeCode", "itemPrices", "regionId", "price", "removeItemPrices","manufacturer","warrantyexpirydate","dateFormat"));
+	 			"reorderLevel","chargeCode", "itemPrices", "regionId", "price", "removeItemPrices","manufacturer","warrantyexpirydate","dateFormat","chargeCodeData"));
 	    private final FromJsonHelper fromApiJsonHelper;
 
 	    @Autowired
@@ -51,7 +51,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	        final String itemCode = fromApiJsonHelper.extractStringNamed("itemCode", element);
 	        final String itemDescription = fromApiJsonHelper.extractStringNamed("itemDescription", element);
 	        final String itemClass = fromApiJsonHelper.extractStringNamed("itemClass", element);
-	        final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode",element);
+	        final String chargeCodeData = fromApiJsonHelper.extractStringNamed("chargeCodeData",element);
 	        final String units = fromApiJsonHelper.extractStringNamed("units", element);
 	       /* final Integer w = fromApiJsonHelper.extractIntegerNamed("warranty", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
 	        Long warranty = null;
@@ -68,7 +68,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	        
 	        baseDataValidator.reset().parameter("itemCode").value(itemCode).notBlank().notExceedingLengthOf(10);
 	        baseDataValidator.reset().parameter("itemDescription").value(itemDescription).notBlank();
-	        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notNull().notExceedingLengthOf(10);
+	        baseDataValidator.reset().parameter("chargeCodeData").value(chargeCodeData).notNull().notExceedingLengthOf(10);
 	        baseDataValidator.reset().parameter("warranty").value(warranty).notNull().notExceedingLengthOf(2);
 			baseDataValidator.reset().parameter("itemClass").value(itemClass).notBlank();
 			baseDataValidator.reset().parameter("units").value(units).notBlank();

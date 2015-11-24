@@ -224,11 +224,11 @@ public class ItemMaster extends AbstractPersistable<Long>{
 		final BigDecimal unitPrice=command.bigDecimalValueOfParameterNamed("unitPrice");
 		final String units=command.stringValueOfParameterNamed("units");
 		final Long warranty=command.longValueOfParameterNamed("warranty");
-		final String chargeCode=command.stringValueOfParameterNamed("chargeCode");
+		final String chargeCodeData=command.stringValueOfParameterNamed("chargeCodeData");
 		final Long reorderLevel=command.longValueOfParameterNamed("reorderLevel");
 		final String manufacturer=command.stringValueOfParameterNamed("manufacturer");
 		final Date warrantyExpiryDate=command.DateValueOfParameterNamed("warrantyexpirydate");
-		return new ItemMaster(itemCode, itemDescription, itemClass, unitPrice, units, warranty, chargeCode, reorderLevel,manufacturer,warrantyExpiryDate);
+		return new ItemMaster(itemCode, itemDescription, itemClass, unitPrice, units, warranty, chargeCodeData, reorderLevel,manufacturer,warrantyExpiryDate);
 	}
 	
 	public void addItemPrices(final ItemPrice itemPrice) {
