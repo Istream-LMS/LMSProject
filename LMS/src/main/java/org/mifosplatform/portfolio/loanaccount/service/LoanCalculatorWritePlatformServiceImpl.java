@@ -49,6 +49,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	//private final int payTerms[] = { 12, 24, 36, 48, 60 };
 
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+	private final MathContext mc1 = new MathContext(2, RoundingMode.HALF_EVEN);
 	private final MathContext mc2 = new MathContext(8, RoundingMode.HALF_UP);
 
 	private TaxMap accountWDV;
@@ -102,12 +103,18 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final BigDecimal interest = getValue("interestRatePerPeriod", parsedJson);
 		final BigDecimal costOfFund = getValue("costOfFund", parsedJson);
 		final BigDecimal maintenance = getValue("maintenance", parsedJson);
-		final BigDecimal mileage = getValue("mileage", parsedJson);
+		BigDecimal mileage = getValue("mileage", parsedJson);
 		final BigDecimal excess = getValue("excess", parsedJson);
 		final BigDecimal fLPForYear = getValue("FLPForYear", parsedJson);	
 		final BigDecimal replacementTyresForYear = getValue("replacementTyres", parsedJson);
 		final BigDecimal comprehensiveInsuranceForYear = getValue("comprehensiveInsurance", parsedJson);
 		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", parsedJson);
+		
+		mileage = divideAtCalc(mileage, new BigDecimal(payTerms.length));
+		//mileage = mileage.round(mc1);
+		
+		/*{"productId":16,"principal":150000,"interestRatePerPeriod":8,"deposit":0,"mileage":2500,"excess":0.39,
+			"FLPForYear":500,"costOfFund":"4004.76","maintenance":"4042.86","locale":"en","payTerms":[12,24,36,48,60]}*/
 		
 		JsonArray deprecisationArray = this.fromApiJsonHelper.extractJsonArrayNamed("deprecisationArray", parsedJson);
 
@@ -230,15 +237,15 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		vatWDV = getTaxMapData(VAT);
 	}
 	
-	private BigDecimal divideAtCalc(BigDecimal residual, BigDecimal value) {
+	private BigDecimal divideAtCalc(BigDecimal dividend, BigDecimal divisor) {
 		
 		try {
-			if(isGreaterThanZero(residual)) {
-				return residual.divide(value, mc);
+			if(isGreaterThanZero(dividend)) {
+				return dividend.divide(divisor, mc);
 			}
 			return BigDecimal.ZERO;
 		} catch (ArithmeticException e) {
-			return residual.divide(value, mc2);
+			return dividend.divide(divisor, mc2);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
