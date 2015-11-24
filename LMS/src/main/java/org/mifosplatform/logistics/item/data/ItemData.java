@@ -42,11 +42,12 @@ public class ItemData {
 	private Collection<MCodeData> manufacturerDatas;
 	private String manufacturer;
 	private Collection<MCodeData> chargeCodeData;
+	private Date warrantyExpiryDate;
 	/*private List<FeeMasterData> feeMasterData;
 	private Collection<InventoryGrnData> grnData;*/
 	
 	public ItemData(Long id, String itemCode, String itemDesc,String itemClass,String units,   String chargeCode, int warranty, BigDecimal unitPrice,
-			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel,String manufacturer) {
+			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel,String manufacturer, Date warrantyExpiryDate) {
 		
 		this.id=id;
 		this.itemCode=itemCode;
@@ -61,6 +62,7 @@ public class ItemData {
 		this.totalItems=totalItems;
 		this.reorderLevel = reorderLevel;
 		this.manufacturer = manufacturer;
+		this.warrantyExpiryDate = warrantyExpiryDate;
 	}
 
 	public String getManufacturer() {
@@ -132,6 +134,7 @@ public class ItemData {
 		this.reorderLevel = itemData.getReorderLevel();
 		this.manufacturerDatas=manufacturerDatas;
 		this.manufacturer = itemData.getManufacturer();
+		this.warrantyExpiryDate = itemData.getWarrantyExpiryDate();
 		
 	}
 
@@ -270,6 +273,14 @@ public class ItemData {
 	public void setUnitPrice(BigDecimal itemprice) {
 	    this.unitPrice = itemprice;
 
+	}
+
+	public Date getWarrantyExpiryDate() {
+		return warrantyExpiryDate;
+	}
+
+	public void setWarrantyExpiryDate(Date warrantyExpiryDate) {
+		this.warrantyExpiryDate = warrantyExpiryDate;
 	}
 
 	/*public List<FeeMasterData> getFeeMasterData() {
