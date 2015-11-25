@@ -8,7 +8,8 @@ IF NOT EXISTS (
      and TABLE_NAME = 'm_tax_mapping'
      and TABLE_SCHEMA = DATABASE())THEN
 ALTER TABLE `m_tax_mapping` ADD COLUMN `end_date` datetime NULL  DEFAULT NULL AFTER `start_date`,
- ADD COLUMN `is_new`  tinyint(1) DEFAULT '1' AFTER `tax_inclusive`;
+ ADD COLUMN `is_new`  tinyint(1) DEFAULT '1' AFTER `tax_inclusive`,
+ DROP INDEX `tax_code_UNIQUE` ;
 
 END IF;
 END //
