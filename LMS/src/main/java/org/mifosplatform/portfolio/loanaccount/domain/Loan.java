@@ -986,6 +986,9 @@ public class Loan extends AbstractPersistable<Long> {
             loanDeposit.update(depositAmt, amount, BigDecimal.ZERO);
         }
         setOfLoanDeposits().addAll(loanDeposits);
+        if(!loanDeposits.isEmpty()){
+        	this.setDepositAmount(loanDeposits.iterator().next().getAmount());
+        }
     }
 
     public void updateLoanCollateral(final Set<LoanCollateral> loanCollateral) {
@@ -1288,7 +1291,7 @@ public class Loan extends AbstractPersistable<Long> {
         if (command.parameterExists(depositsParamName)) {
 
             final Set<LoanFeeMaster> existingLoanDeposits = setOfLoanDeposits();
-
+            
             if (!possiblyModifedLoanDeposits.equals(existingLoanDeposits)) {
 
                 actualChanges.put(depositsParamName, getLoanDeposit(possiblyModifedLoanDeposits));
