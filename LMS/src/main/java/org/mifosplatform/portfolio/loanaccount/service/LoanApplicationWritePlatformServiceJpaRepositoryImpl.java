@@ -398,6 +398,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(depositsParamName)) {
             	final Set<LoanFeeMaster> loanDeposits = this.loanFeeMasterAssembler.fromParsedJson(command.parsedJson());
             	existingLoanApplication.updateLoanFeeMaster(loanDeposits);
+            }else{
+            	if(!possiblyModifedLoanDeposits.isEmpty()){
+            		existingLoanApplication.setDepositAmount(possiblyModifedLoanDeposits.iterator().next().getAmount());
+            	}
+            }
+            if(possiblyModifedLoanDeposits.isEmpty()){
+            	existingLoanApplication.setDepositAmount(null);
             }
             
             saveAndFlushLoanWithDataIntegrityViolationChecks(existingLoanApplication);
