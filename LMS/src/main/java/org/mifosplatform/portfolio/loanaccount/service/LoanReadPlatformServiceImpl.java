@@ -1308,7 +1308,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 .retrieveCodeValuesByCode("LeaseCollateral");
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-        final Collection<TaxMapData> taxMapData = this.taxMapReadPlatformService.retriveTaxMapData();
+        final Collection<TaxMapData> taxMapData = this.taxMapReadPlatformService.retriveTaxMapData(true);
         final Collection<FeeMasterData> feeMasterDataOptions = this.feeMasterReadplatformService.retrieveAllData("Deposit");
         Integer loanCycleCounter = null;
         if (loanProduct.useBorrowerCycle()) {

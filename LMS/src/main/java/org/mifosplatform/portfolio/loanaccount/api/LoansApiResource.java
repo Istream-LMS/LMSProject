@@ -491,7 +491,7 @@ public class LoansApiResource {
             repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
             final boolean feeChargesOnly = false;
             chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-            taxMapData = this.taxMapReadPlatformService.retriveTaxMapData();
+            taxMapData = this.taxMapReadPlatformService.retriveTaxMapData(true);
             feeMasterDataOptions = this.feeMasterReadPlatformService.retrieveAllData("Deposit");
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 

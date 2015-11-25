@@ -1,15 +1,11 @@
 package org.mifosplatform.organisation.taxmapping.service;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
-import org.mifosplatform.organisation.taxmapping.domain.LoanTaxMap;
-import org.mifosplatform.organisation.taxmapping.domain.LoanTaxMapRepository;
-import org.mifosplatform.organisation.taxmapping.domain.TaxMap;
-import org.mifosplatform.organisation.taxmapping.domain.TaxMapRepository;
-import org.mifosplatform.organisation.taxmapping.serialization.TaxMapCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -17,6 +13,16 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.taxmapping.data.LoanProductTaxData;
+import org.mifosplatform.organisation.taxmapping.domain.LoanTaxMap;
+import org.mifosplatform.organisation.taxmapping.domain.LoanTaxMapRepository;
+import org.mifosplatform.organisation.taxmapping.domain.TaxMap;
+import org.mifosplatform.organisation.taxmapping.domain.TaxMapRepository;
+import org.mifosplatform.organisation.taxmapping.serialization.TaxMapCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
+import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,18 +49,23 @@ public class TaxMapWritePlatformServiceImp implements TaxMapWritePlatformService
 	private final LoanScheduleCalculationPlatformService calculationPlatformService;
 	private final FromJsonHelper fromJsonHelper;
 	private final LoanTaxMapRepository loanTaxMapRepository;
+	private final LoanProductRepository loanProductRepository;
+	private final LoanProductReadPlatformService loanProductReadPlatformService;
 	
 	@Autowired
 	public TaxMapWritePlatformServiceImp(final PlatformSecurityContext context,final TaxMapRepository taxMapRepository,
 			final TaxMapCommandFromApiJsonDeserializer apiJsonDeserializer,final LoanScheduleCalculationPlatformService calculationPlatformService,
-			final FromJsonHelper fromJsonHelper,final LoanTaxMapRepository loanTaxMapRepository){
+			final FromJsonHelper fromJsonHelper,final LoanTaxMapRepository loanTaxMapRepository,
+			final LoanProductRepository loanProductRepository,
+			final LoanProductReadPlatformService loanProductReadPlatformService){
 		this.context = context;
 		this.taxMapRepository = taxMapRepository;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.calculationPlatformService = calculationPlatformService;
 		this.fromJsonHelper = fromJsonHelper;
 		this.loanTaxMapRepository = loanTaxMapRepository;
-		
+		this.loanProductRepository = loanProductRepository;
+		this.loanProductReadPlatformService = loanProductReadPlatformService;
 	}
 	
 	/* (non-Javadoc)
@@ -63,12 +74,51 @@ public class TaxMapWritePlatformServiceImp implements TaxMapWritePlatformService
 	@Transactional
 	@Override
 	public CommandProcessingResult createTaxMap(final JsonCommand command){
+		
 		TaxMap  taxmap = null;
 		try{
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command);
+			
+			String taxMapString = command.stringValueOfParameterNamed("taxCode");
+			
+			TaxMap oldTaxmap = this.taxMapRepository.findByTaxCode(taxMapString);
+			
+			if(null != oldTaxmap) {
+				oldTaxmap.setEndDate(new Date());
+				oldTaxmap.setIsNew(0);
+				this.taxMapRepository.save(oldTaxmap);
+			}
+		
 			taxmap = TaxMap.fromJson(command);
 			this.taxMapRepository.save(taxmap);
+			
+			if(null == oldTaxmap) {
+				return new CommandProcessingResultBuilder().withEntityId(taxmap.getId()).build();
+			}
+			
+			Collection<LoanProductTaxData> productDatas = this.loanProductReadPlatformService.retrieveLoanProductIds(oldTaxmap.getId());
+			
+			for (LoanProductTaxData productData : productDatas) {
+
+				LoanProduct loanProduct = this.loanProductRepository.findOne(productData.getProductId());
+
+				Collection<TaxMap> taxMaps = loanProduct.getTaxes();
+
+				for (TaxMap taxMapData : taxMaps) {
+
+					if (taxMapData.getId() == oldTaxmap.getId()) {
+						taxMaps.remove(taxMapData);
+						break;
+					}
+				}
+
+				taxMaps.add(taxmap);
+				loanProduct.updateTaxes(taxMaps);
+
+				this.loanProductRepository.save(loanProduct);
+			}
+			
 		}catch(final DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));

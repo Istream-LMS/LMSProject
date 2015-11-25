@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.organisation.taxmapping.data.LoanProductTaxData;
 import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
 import org.mifosplatform.organisation.taxmapping.service.TaxMapReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -337,6 +338,36 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+    }
+
+	@Override
+	public Collection<LoanProductTaxData> retrieveLoanProductIds(Long taxId) {
+		
+		try {
+			
+			this.context.authenticatedUser();
+			
+			LoanProductTaxDataMapper mapper = new LoanProductTaxDataMapper();
+			
+			String sql = "Select lp.product_loan_id as productId, lp.tax_id as taxId from m_product_loan_tax lp where lp.tax_id=" + taxId ;
+			
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		
+		} catch (Exception e) {
+			return null;
+		}	
+	}
+	
+	private static final class LoanProductTaxDataMapper implements RowMapper<LoanProductTaxData> {
+
+        @Override
+        public LoanProductTaxData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+            final Long productId = rs.getLong("productId");
+            final Long taxId = rs.getLong("taxId");
+
+            return new LoanProductTaxData(productId, taxId);
+        }
     }
 
 }

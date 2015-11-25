@@ -245,7 +245,7 @@ public class LoanProductsApiResource {
             chargeOptions = null;
         }
         
-        List<TaxMapData> taxMapData = this.taxMapReadPlatformService.retriveTaxMapData();
+        List<TaxMapData> taxMapData = this.taxMapReadPlatformService.retriveTaxMapData(true);
         if(taxMapData.isEmpty()){
         	taxMapData = null;
         }

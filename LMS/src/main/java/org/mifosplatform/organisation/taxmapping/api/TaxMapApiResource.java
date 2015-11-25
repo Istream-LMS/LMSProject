@@ -96,10 +96,10 @@ public class TaxMapApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retriveTaxDetailsForChargeCode(@Context final UriInfo uriInfo) {
+	public String retriveTaxDetailsForChargeCode(@QueryParam("isNew") final boolean isNew, @Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final List<TaxMapData> taxMapData = taxMapReadPlatformService.retriveTaxMapData();
+		final List<TaxMapData> taxMapData = taxMapReadPlatformService.retriveTaxMapData(isNew);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializer.serialize(settings, taxMapData,RESPONSE_TAXMAPPING_PARAMETERS);
 	}
