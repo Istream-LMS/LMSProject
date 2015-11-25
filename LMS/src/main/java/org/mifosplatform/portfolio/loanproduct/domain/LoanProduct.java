@@ -833,4 +833,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return borrowerCycleVariations;
     }
 
+	public Collection<TaxMap> getTaxes() {
+		return taxes;
+	}
+    
+    
+
 }

@@ -11,7 +11,7 @@ import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
  */
 public interface TaxMapReadPlatformService {
 
-	List<TaxMapData> retriveTaxMapData();
+	List<TaxMapData> retriveTaxMapData(boolean isNew);
 
 	TaxMapData retrievedSingleTaxMapData(Long id);
 	

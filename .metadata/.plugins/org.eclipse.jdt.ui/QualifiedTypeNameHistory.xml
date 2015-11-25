@@ -46,8 +46,11 @@
 <fullyQualifiedTypeName name="javax.ws.rs.PathParam"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.api.LoansApiResource"/>
 <fullyQualifiedTypeName name="org.springframework.data.repository.query.Param"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 <fullyQualifiedTypeName name="java.math.BigDecimal"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.data.FeeMasterData"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.exception.FeeMasterDefaultCodeNotFoundException"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 </qualifiedTypeNameHistroy>
