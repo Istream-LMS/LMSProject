@@ -40,10 +40,16 @@ public class TaxMapReadPlatformServiceImp implements TaxMapReadPlatformService {
 	 * based on charge code
 	 */
 	@Override
-	public List<TaxMapData> retriveTaxMapData() {
+	public List<TaxMapData> retriveTaxMapData(final boolean isNew) {
 
 		final TaxMapDataMapper mapper = new TaxMapDataMapper();
-		final String sql = "Select " + mapper.schema();
+		
+		String sql = "Select " + mapper.schema();
+		
+		if(isNew) {
+			sql = sql + " where tm.is_new=1";
+		}
+		
 		return jdbcTemplate.query(sql,mapper,new Object[]{});
 	}
 
@@ -71,7 +77,7 @@ public class TaxMapReadPlatformServiceImp implements TaxMapReadPlatformService {
 		public String schema(){
 			
 			return "tm.id AS id,tm.charge_type AS chargeType,tm.tax_code AS taxCode,tm.start_date AS startDate,tm.tax_type as taxType,"
-				+ "tm.rate AS rate,tm.tax_inclusive as taxInclusive FROM m_tax_mapping tm ";
+				+ "tm.rate AS rate,tm.tax_inclusive as taxInclusive,tm.end_date as endDate FROM m_tax_mapping tm ";
 		}
 		
 		 public String loanProductTaxSchema() {
@@ -88,8 +94,10 @@ public class TaxMapReadPlatformServiceImp implements TaxMapReadPlatformService {
 			final String taxType = rs.getString("taxType");
 			final BigDecimal rate = rs.getBigDecimal("rate");
 			final Integer taxInclusive = rs.getInt("taxInclusive");
+			final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
+			
 			return new TaxMapData(id, chargeType, taxCode, startDate, taxType,
-					              rate, taxInclusive);
+					              rate, taxInclusive, endDate);
 		}
 
 	}
