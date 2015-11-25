@@ -231,11 +231,14 @@ public class LoanAssembler {
         System.out.println("stored==============="+loanApplicationTerms.getResidualAmount());
         loanApplication.setResidualAmount(loanApplicationTerms.getResidualAmount());
         BigDecimal depositAmount=null;
-        for(LoanFeeMaster deposits:loanDeposits){
+        /*for(LoanFeeMaster deposits:loanDeposits){
         	FeeMaster deposit=deposits.getFeeMaster();
         		depositAmount= deposit.getAmount();
         		
-        }	
+        }*/	
+        if(!loanDeposits.isEmpty()){
+        	depositAmount = loanDeposits.iterator().next().getAmount();
+        }
         loanApplicationTerms.setDepositAmount(depositAmount);
         loanApplication.setDepositAmount(loanApplicationTerms.getDepositAmount());
         return loanApplication;

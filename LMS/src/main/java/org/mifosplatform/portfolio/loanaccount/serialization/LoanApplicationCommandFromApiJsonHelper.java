@@ -270,7 +270,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
                     baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount).notNull()
-                            .positiveAmount();
+                            .zeroOrPositiveAmount();
 
                     this.fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
                 }
@@ -585,7 +585,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
                     final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
                     baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount).notNull()
-                            .positiveAmount();
+                            .zeroOrPositiveAmount();
 
                     this.fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
                 }

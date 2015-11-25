@@ -123,7 +123,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notBlank().notExceedingLengthOf(3);
 
         final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
-        baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+        baseDataValidator.reset().parameter("amount").value(amount).notNull().zeroOrPositiveAmount();
 
         if (this.fromApiJsonHelper.parameterExists("penalty", element)) {
             final Boolean penalty = this.fromApiJsonHelper.extractBooleanNamed("penalty", element);
@@ -170,7 +170,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         if (this.fromApiJsonHelper.parameterExists("amount", element)) {
             final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element.getAsJsonObject());
-            baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
+            baseDataValidator.reset().parameter("amount").value(amount).notNull().zeroOrPositiveAmount();
         }
 
         if (this.fromApiJsonHelper.parameterExists("minCap", element)) {
