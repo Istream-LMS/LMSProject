@@ -343,14 +343,19 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 	@Override
 	public Collection<LoanProductTaxData> retrieveLoanProductIds(Long taxId) {
 		
-		this.context.authenticatedUser();
+		try {
+			
+			this.context.authenticatedUser();
+			
+			LoanProductTaxDataMapper mapper = new LoanProductTaxDataMapper();
+			
+			String sql = "Select lp.product_loan_id as productId, lp.tax_id as taxId from m_product_loan_tax lp where lp.tax_id=" + taxId ;
+			
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		
-		LoanProductTaxDataMapper mapper = new LoanProductTaxDataMapper();
-		
-		String sql = "Select lp.product_loan_id as productId, lp.tax_id as taxId from m_product_loan_tax lp where lp.tax_id=" + taxId ;
-		
-		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
-		
+		} catch (Exception e) {
+			return null;
+		}	
 	}
 	
 	private static final class LoanProductTaxDataMapper implements RowMapper<LoanProductTaxData> {

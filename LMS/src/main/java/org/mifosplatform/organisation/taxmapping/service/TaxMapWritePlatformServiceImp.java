@@ -93,8 +93,12 @@ public class TaxMapWritePlatformServiceImp implements TaxMapWritePlatformService
 			taxmap = TaxMap.fromJson(command);
 			this.taxMapRepository.save(taxmap);
 			
+			if(null == oldTaxmap) {
+				return new CommandProcessingResultBuilder().withEntityId(taxmap.getId()).build();
+			}
+			
 			Collection<LoanProductTaxData> productDatas = this.loanProductReadPlatformService.retrieveLoanProductIds(oldTaxmap.getId());
-
+			
 			for (LoanProductTaxData productData : productDatas) {
 
 				LoanProduct loanProduct = this.loanProductRepository.findOne(productData.getProductId());
