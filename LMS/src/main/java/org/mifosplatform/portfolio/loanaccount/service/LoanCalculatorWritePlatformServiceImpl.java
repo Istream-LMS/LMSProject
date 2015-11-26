@@ -49,7 +49,6 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	//private final int payTerms[] = { 12, 24, 36, 48, 60 };
 
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
-	private final MathContext mc1 = new MathContext(2, RoundingMode.HALF_EVEN);
 	private final MathContext mc2 = new MathContext(8, RoundingMode.HALF_UP);
 
 	private TaxMap accountWDV;
@@ -122,6 +121,12 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			deprecisationArray = new JsonArray();
 		}
 		
+		JsonArray residualArray = this.fromApiJsonHelper.extractJsonArrayNamed("residualArray", parsedJson);
+
+		if(null == residualArray) {
+			residualArray = new JsonArray();
+		}
+		
 		if(null == entityId) {
 			entityId = new Long(0);
 		}
@@ -153,9 +158,21 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			final BigDecimal payterm = new BigDecimal(keyPayTerm);
 			final BigDecimal percent = divideAtCalc(payterm, TWELVE);
 			
+			BigDecimal residualVep = null;
+			
+			for (JsonElement element : residualArray) {
+				
+				String key = this.fromApiJsonHelper.extractStringNamed("key", element);
+				
+				if (payTerm.equalsIgnoreCase(key)) {
+					residualVep = getValue("residualVep", element);
+				}
+				
+			}
+			
 			LoanCalculatorData loanCalculatorData = generateCalculation(
 					keyPayTerm, totalPrincipal, accountWDVRate, taxWDVRate, vatRate, 
-					processingAmount, mileage, fLPForYear, percent);
+					processingAmount, mileage, fLPForYear, percent, residualVep);
 			
 			//final BigDecimal totalcoi, final BigDecimal totalCof, final BigDecimal totalMaintenances, 
 			//final BigDecimal totalReplacementTyres, final BigDecimal totalComprehensiveInsurance
@@ -173,7 +190,12 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				
 				if (payTerm.equalsIgnoreCase(key)) {
 					
-					final BigDecimal subdeprecisation = divideAtCalc(getValue("deprecisation", element), HUNDERED) ;
+					BigDecimal subdeprecisation = divideAtCalc(getValue("deprecisation", element), HUNDERED) ;
+					
+					if(null != residualVep) {
+						subdeprecisation = loanCalculatorData.getResidualDeprecisation();
+					}
+					
 					final BigDecimal subCOF = getValue("costOfFund", element);
 					final BigDecimal subMaintenance = getValue("maintenance", element);
 					final BigDecimal subReplacementTyresForYear = getValue("replacementTyres", element);
@@ -259,7 +281,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private LoanCalculatorData generateCalculation(final int key, final BigDecimal retailPrice, 
 			final BigDecimal accountWDVRate, final BigDecimal taxWDVRate, 
 			final BigDecimal vatRate, final BigDecimal processingAmount, final BigDecimal mileage, 
-			final BigDecimal fLPForYear, BigDecimal keyPercent) {
+			final BigDecimal fLPForYear, BigDecimal keyPercent, BigDecimal residualVep) {
 
 		BigDecimal vatAmount = retailPrice.multiply(vatRate, mc); // (1)
 		BigDecimal purchasePrice = retailPrice.subtract(vatAmount, mc);// (2)
@@ -270,8 +292,12 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		BigDecimal awAmount = processingAmount.multiply(ONE.subtract(amountawRateVal, mc), mc);// (3) //=B18*(1-E69*D15/12)
 		BigDecimal twAmount = processingAmount.multiply(ONE.subtract(amounttwRateVal, mc), mc);// (4) //=B18*(1-E70*D15/12)
 		
-        BigDecimal residual = awAmount.add(twAmount, mc);
-        BigDecimal residualAmountVEP = divideAtCalc(residual, TWO);// (5) //D45=(D55+D56) /2
+		BigDecimal residualAmountVEP = residualVep;
+		
+		if(null == residualAmountVEP) {
+			BigDecimal residual = awAmount.add(twAmount, mc);
+	        residualAmountVEP = divideAtCalc(residual, TWO);// (5) //D45=(D55+D56) /2
+		}
 		
 		BigDecimal residualAmountVIP = residualAmountVEP.multiply(ONEHALF, mc);// (6) //=D45*1.15
 		
