@@ -451,23 +451,38 @@ public class ClientProspectWritePlatformServiceImp implements
 		try {
 			context.authenticatedUser();
 			this.clientProspectCommandFromApiJsonDeserializer.validateForCreate(command.json());
-
 			final ClientProspect pros = retrieveCodeBy(command.entityId());
 			final Map<String, Object> changes = pros.update(command);
+			
+			this.clientProspectJpaRepository.save(pros);
 			
 			if (command.parameterExists("prospectLoanCalculatorId")) {
 
 				Long loanCalcId = command.longValueOfParameterNamed("prospectLoanCalculatorId");
 				ProspectLoanCalculator prospectLoanCalculator = this.prospectLoanCalculatorRepository.findOne(loanCalcId);
 
-				ProspectLoanDetails prospectLoanDetails = ProspectLoanDetails.createData(pros, prospectLoanCalculator);
-				this.prospectLoanDetailsRepository.save(prospectLoanDetails);
+				ProspectLoanDetails prospectLoanDetails = this.prospectLoanDetailsRepository.findByProspectId(pros);
+				this.prospectLoanDetailsRepository.delete(prospectLoanDetails);
+				
+				ProspectLoanDetails newProspectLoanDetails = ProspectLoanDetails.createData(pros, prospectLoanCalculator);		
+				this.prospectLoanDetailsRepository.save(newProspectLoanDetails);
 			}
 			
-			if (!changes.isEmpty()) {
-				this.clientProspectJpaRepository.save(pros);
-			}
+			/*ProspectLoanDetails prospectLoanDetails = this.prospectLoanDetailsRepository.findByProspectId(pros);
+			final Map<String, Object> prospectchanges = prospectLoanDetails.updateDetails(command);
+			this.prospectLoanDetailsRepository.save(prospectLoanDetails);*/
+			
+				/*if (command.parameterExists("prospectLoanCalculatorId")) {
 
+					Long loanCalcId = command.longValueOfParameterNamed("prospectLoanCalculatorId");
+					ProspectLoanCalculator prospectLoanCalculator = this.prospectLoanCalculatorRepository.findOne(loanCalcId);
+
+					//ProspectLoanDetails prospectLoanDetails = ProspectLoanDetails.createData(pros, prospectLoanCalculator);
+					ProspectLoanDetails prospectLoanDetails = this.prospectLoanDetailsRepository.findOne(command.entityId());
+					this.prospectLoanDetailsRepository.save(prospectLoanDetails);
+				}*/
+				
+			
 			return new CommandProcessingResultBuilder() //
 					.withCommandId(command.commandId()) //
 					.withEntityId(pros.getId()) //

@@ -191,6 +191,24 @@ public class ClientProspectApiResource {
 		final CommandProcessingResult result = commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return apiJsonSerializer.serialize(result);
 	}
+	@GET
+	@Path("{prospectId}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public String getSingleClient(@Context final UriInfo uriInfo,
+			@PathParam("prospectId") final Long prospectId) {
+
+		AppUser user = context.authenticatedUser();
+		user.validateHasReadPermission(RESOURCETYPE);
+		final ClientProspectData clientData = clientProspectReadPlatformService.retriveSingleClient(prospectId, user.getId());
+		final Collection<MCodeData> sourceOfPublicityData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SOURCE_TYPE);
+		//final Collection<ProspectPlanCodeData> planData = clientProspectReadPlatformService.retrivePlans();
+		//clientData.setPlanData(planData);
+		clientData.setSourceOfPublicityData(sourceOfPublicityData);
+		
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.apiJsonSerializerString.serialize(settings, clientData, PROSPECT_RESPONSE_DATA_PARAMETER);
+	}
 	
 	/**
 	 * calling for specific Prospect
