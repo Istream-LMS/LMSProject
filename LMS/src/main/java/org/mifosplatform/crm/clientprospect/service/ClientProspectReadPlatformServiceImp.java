@@ -171,7 +171,7 @@ public class ClientProspectReadPlatformServiceImp implements
 			String mobileNumber = rs.getString("mobileNumber");
 			String emailId = rs.getString("emailId");
 			String sourceOfPublicity = rs.getString("sourceOfPublicity");
-			String preferredPlan = rs.getString("preferredPlan");
+			String preferredLoanProduct = rs.getString("preferredLoanProduct");
 			Date preferredCallingTime = rs.getDate("preferredCallingTime");
 			String address = rs.getString("address");
 			String status = rs.getString("status");
@@ -180,7 +180,7 @@ public class ClientProspectReadPlatformServiceImp implements
 			String note = rs.getString("note");
 			
 			return new ClientProspectData(id, firstName, middleName, lastName, mobileNumber, emailId, 
-					sourceOfPublicity, preferredCallingTime, address, tin, preferredPlan, status, isDeleted, note);
+					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note);
 		}
 
 		public String query() {
@@ -188,9 +188,9 @@ public class ClientProspectReadPlatformServiceImp implements
 			// "p.id as id, p.prospect_type as prospectType, p.first_name as firstName, p.middle_name as middleName, p.last_name as lastName, p.home_phone_number as homePhoneNumber, p.work_phone_number as workPhoneNumber, p.mobile_number as mobileNumber, p.emailId as emailId, p.source_of_publicity as sourceOfPublicity, p.preferred_plan as preferredPlan, p.preferred_calling_time as preferredCallingTime, p.address as address, p.street_area as streetArea, p.city_district as cityDistrict, p.state as state, p.country as country, p.status as status, p.status_remark as statusRemark, p.is_deleted as isDeleted, (select notes FROM b_prospect_detail pd where pd.prospect_id =p.id and pd.id=(select max(id) from b_prospect_detail where b_prospect_detail.prospect_id = p.id)) as note";
 			String sql = "p.id as id, p.first_name as firstName, p.middle_name as middleName, p.last_name as lastName, "
 					+ "p.mobile_no as mobileNumber, p.email_id as emailId, p.source_of_publicity as sourceOfPublicity, "
-					+ "p.preferred_plan as preferredPlan, p.preferred_calling_time as preferredCallingTime, "
+					+ "p.preferred_loan_product as preferredLoanProduct, p.preferred_calling_time as preferredCallingTime, "
 					+ "p.address as address, p.status as status, p.tin as tin, p.is_deleted as isDeleted, p.note as note"
-					+ " from b_prospect p ";
+					+ " from m_prospect p ";
 
 			return sql;
 		}
@@ -267,8 +267,8 @@ public class ClientProspectReadPlatformServiceImp implements
 		context.authenticatedUser();
 		final EditClientProspectMapper rowMapper = new EditClientProspectMapper();
 		final String sql = "select " + rowMapper.query()
-				+ " from b_prospect p where id=? and p.createdby_id=?";
-		return jdbcTemplate.queryForObject(sql, rowMapper, new Object[] { id, userId });
+				+ " from m_prospect p where id=?";
+		return jdbcTemplate.queryForObject(sql, rowMapper, new Object[] { id });
 	}
 
 	public class EditClientProspectMapper implements
@@ -285,7 +285,7 @@ public class ClientProspectReadPlatformServiceImp implements
 			String mobileNumber = rs.getString("mobileNumber");
 			String emailId = rs.getString("emailId");
 			String sourceOfPublicity = rs.getString("sourceOfPublicity");
-			String preferred_loan_product = rs.getString("preferred_loan_product");
+			String preferredLoanProduct = rs.getString("preferredLoanProduct");
 			Date preferredCallingTime = rs.getTimestamp("preferredCallingTime");
 			String note = rs.getString("note");
 			String address = rs.getString("address");
@@ -297,19 +297,17 @@ public class ClientProspectReadPlatformServiceImp implements
 			
 			
 			return new ClientProspectData(id, firstName, middleName, lastName, mobileNumber, emailId, 
-					sourceOfPublicity, preferredCallingTime, address, tin, preferred_loan_product, status, isDeleted, note);
+					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note);
 		}
 
 		public String query() {
 			
-			return "p.id as id, p.prospect_type as prospectType, p.zip_code as zipCode, " +
-					"p.first_name as firstName, p.middle_name as middleName, p.last_name as lastName, " +
-					"p.home_phone_number as homePhoneNumber, p.work_phone_number as workPhoneNumber, " +
-					"p.mobile_number as mobileNumber, p.email_id as emailId, p.source_of_publicity as sourceOfPublicity, " +
+			return	"p.id as id,p.first_name as firstName, p.middle_name as middleName, p.last_name as lastName, " +
+					"p.mobile_no as mobileNumber, p.email_id as emailId, p.source_of_publicity as sourceOfPublicity, " +
 					"p.preferred_loan_product as preferredLoanProduct, p.preferred_calling_time as preferredCallingTime, " +
-					"p.address as address, p.street_area as streetArea, p.city_district as cityDistrict, " +
-					"p.state as state, p.country as country, p.status as status, p.status_remark as statusRemark, " +
-					"p.is_deleted as isDeleted, p.note as note";
+					"p.address as address,p.status as status , p.tin as tin, p.note as note," +
+					"p.is_deleted as isDeleted";
 		}
 	}
+					
 }
