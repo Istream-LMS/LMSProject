@@ -1783,4 +1783,12 @@ public class CommandWrapperBuilder {
 		this.href = "/ownedhardware";
 		return this;
 	}
+
+	public CommandWrapperBuilder updateProspect(Long prospectId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PROSPECT";
+		this.entityId = prospectId;
+		this.href = "/prospect";
+		return this;
+	}
 }

@@ -454,7 +454,16 @@ public class ClientProspectWritePlatformServiceImp implements
 
 			final ClientProspect pros = retrieveCodeBy(command.entityId());
 			final Map<String, Object> changes = pros.update(command);
+			
+			if (command.parameterExists("prospectLoanCalculatorId")) {
 
+				Long loanCalcId = command.longValueOfParameterNamed("prospectLoanCalculatorId");
+				ProspectLoanCalculator prospectLoanCalculator = this.prospectLoanCalculatorRepository.findOne(loanCalcId);
+
+				ProspectLoanDetails prospectLoanDetails = ProspectLoanDetails.createData(pros, prospectLoanCalculator);
+				this.prospectLoanDetailsRepository.save(prospectLoanDetails);
+			}
+			
 			if (!changes.isEmpty()) {
 				this.clientProspectJpaRepository.save(pros);
 			}

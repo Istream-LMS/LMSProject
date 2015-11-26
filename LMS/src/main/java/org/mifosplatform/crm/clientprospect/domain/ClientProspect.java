@@ -321,26 +321,19 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 		// prospectType","firstName","middleName","lastName","homePhoneNumber","workPhoneNumber","mobileNumber","emailId",
 		// "sourceOfPublicity","preferredCallingTime","note","address","streetArea","cityDistrict","state
 		// ","country","locale","preferredPlan","status","statusRemark","callStatus","assignedTo","notes","isDeleted","zipCode"
-
-		final String prospectType = "prospectType";
+		
+		
 		final String firstName = "firstName";
 		final String middleName = "middleName";
 		final String lastName = "lastName";
-		final String homePhoneNumber = "homePhoneNumber";
-		final String workPhoneNumber = "workPhoneNumber";
 		final String mobileNumber = "mobileNumber";
 		final String emailId = "emailId";
 		final String address = "address";
-		final String streetArea = "streetArea";
-		final String cityDistrict = "cityDistrict";
-		final String state = "state";
-		final String country = "country";
-		final String zipCode = "zipCode";
 		final String sourceOfPublicity = "sourceOfPublicity";
-		final String preferredPlan = "preferredPlan";
 		final String preferredCallingTime = "preferredCallingTime";
+		final String preferredLoanProduct = "preferredLoanProduct";
 		final String note = "note";
-		final String sourceOther = "sourceOther";
+		final String tin = "tin";
 
 		
 		if (command.isChangeInStringParameterNamed(firstName, this.firstName)) {
@@ -387,9 +380,7 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 		 * this.sourceOfPublicity = newValue; }
 		 */
 
-		if (command.isChangeInStringParameterNamed(sourceOfPublicity, this.sourceOfPublicity)
-				|| command.isChangeInStringParameterNamed(sourceOther, this.sourceOfPublicity)) {
-			
+		if (command.isChangeInStringParameterNamed(sourceOfPublicity, this.sourceOfPublicity)) {
 			final String newValue = command.stringValueOfParameterNamed("sourceOfPublicity");
 			if (newValue.equalsIgnoreCase("Other")) {
 				final String otherSource = command.stringValueOfParameterNamed("sourceOther");
@@ -401,7 +392,7 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 			}
 		}
 
-		if (command.isChangeInStringParameterNamed(preferredPlan, this.preferredLoanProduct)) {
+		if (command.isChangeInStringParameterNamed(preferredLoanProduct, this.preferredLoanProduct)) {
 			final String newValue = command.stringValueOfParameterNamed("preferredLoanProduct");
 			actualChanges.put(preferredLoanProduct, newValue);
 			this.preferredLoanProduct = newValue;
@@ -428,6 +419,11 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 			final String newValue = command.stringValueOfParameterNamed("note");
 			actualChanges.put(note, newValue);
 			this.note = newValue;
+		}
+		if (command.isChangeInStringParameterNamed(note, this.tin)) {
+			final String newValue = command.stringValueOfParameterNamed("tin");
+			actualChanges.put(tin, newValue);
+			this.tin = newValue;
 		}
 
 		return actualChanges;
