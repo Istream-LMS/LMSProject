@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanproduct.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.organisation.taxmapping.data.LoanProductTaxData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductBorrowerCycleVariationData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
@@ -27,4 +28,6 @@ public interface LoanProductReadPlatformService {
     Collection<LoanProductData> retrieveAllowedProductsForMix(Long productId);
 
     Collection<LoanProductBorrowerCycleVariationData> retrieveLoanProductBorrowerCycleVariations(Long loanProductId);
+    
+    Collection<LoanProductTaxData> retrieveLoanProductIds(Long taxId);
 }

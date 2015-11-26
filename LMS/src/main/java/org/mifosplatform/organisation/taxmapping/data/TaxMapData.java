@@ -16,6 +16,7 @@ public class TaxMapData {
 	private String taxType;
 	private BigDecimal rate;
 	private Integer taxInclusive;
+	private LocalDate endDate;
 	
 	private Collection<MCodeData> taxTypeData;
 	private Collection<MCodeData> chargeTypeData;
@@ -25,6 +26,7 @@ public class TaxMapData {
 
 	public TaxMapData( final String chargeType,final String taxCode,final LocalDate startDate,
 			final String taxType, final BigDecimal rate,final Integer taxInclusive) {
+		
 		this.chargeType = chargeType;
 		this.taxCode = taxCode;
 		this.startDate = startDate;
@@ -34,7 +36,8 @@ public class TaxMapData {
 	}
 
 	public TaxMapData(final Long id, final String chargeType, final String taxCode,  final LocalDate startDate,
-			final String taxType, final BigDecimal rate,final Integer taxInclusive){
+			final String taxType, final BigDecimal rate,final Integer taxInclusive, LocalDate endDate){
+		
 		this.id = id;
 		this.chargeType = chargeType;
 		this.taxCode = taxCode;
@@ -42,6 +45,7 @@ public class TaxMapData {
 		this.taxType = taxType;
 		this.rate = rate;
 		this.taxInclusive = taxInclusive;
+		this.endDate = endDate;
 	}
 
 	public TaxMapData(final Collection<MCodeData> taxTypeData,final Collection<MCodeData> chargeTypeData) {

@@ -3,26 +3,26 @@
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="312" key="DIALOG_WIDTH"/>
 		<item value="307" key="DIALOG_Y_ORIGIN"/>
+		<item value="878" key="DIALOG_X_ORIGIN"/>
 		<item value="437" key="DIALOG_HEIGHT"/>
-		<item value="713" key="DIALOG_X_ORIGIN"/>
 		<item value="1|Ubuntu|11.0|0|GTK|1|" key="DIALOG_FONT_NAME"/>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="true" key="wrap"/>
-		<item value="false" key="isRegEx"/>
 		<item value="false" key="casesensitive"/>
+		<item value="false" key="isRegEx"/>
 		<item value="false" key="incremental"/>
 		<item value="false" key="wholeword"/>
-		<item value="JsonObject" key="selection"/>
+		<item value="financialleasepayout" key="selection"/>
 		<list key="findhistory">
+			<item value="financialleasepayout"/>
+			<item value="financialLeasePayoutForYear"/>
+			<item value="financialLeasePayout "/>
+			<item value="financialLease  payout "/>
+			<item value="financial lease  payout "/>
+			<item value="deposits"/>
 			<item value="jsonObject"/>
 			<item value="productId"/>
-			<item value="ProductId"/>
-			<item value="scope.formData"/>
-			<item value="scope.jsonData"/>
-			<item value="save"/>
-			<item value="scope.productId"/>
-			<item value="mc"/>
 		</list>
 		<list key="replacehistory">
 			<item value="emailId"/>

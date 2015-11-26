@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface TaxMapRepository extends JpaRepository<TaxMap, Long>,JpaSpecificationExecutor<TaxMap> {
 
-	@Query("from TaxMap taxMap where taxMap.taxCode =:taxCode")
+	@Query("from TaxMap taxMap where taxMap.taxCode =:taxCode and taxMap.isNew = 1")
 	TaxMap findByTaxCode(@Param("taxCode") String taxCode);
 
 }

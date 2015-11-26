@@ -39,10 +39,16 @@ public class TaxMap extends AbstractPersistable<Long> {
 
 	@Column(name = "tax_inclusive")
 	Integer taxInclusive;
+	
+	@Column(name = "end_date")
+	private Date endDate;
+	
+	@Column(name = "is_new")
+	Integer isNew = 1;
 
 	public TaxMap() {
 	}
-
+	
 	public TaxMap(final String chargeType, final String taxCode,
 			final LocalDate startDate, final String taxType, final BigDecimal rate,
 			final Integer taxInclusive) {
@@ -72,8 +78,7 @@ public class TaxMap extends AbstractPersistable<Long> {
 			tax = 0;
 		}
 
-		return new TaxMap(chargeType, taxCode, startDate, taxType,
-				rate, tax);
+		return new TaxMap(chargeType, taxCode, startDate, taxType, rate, tax);
 	}
 
 	public Map<String, Object> update(JsonCommand command) {
@@ -188,6 +193,22 @@ public class TaxMap extends AbstractPersistable<Long> {
 
 	public void setTaxInclusive(Integer taxInclusive) {
 		this.taxInclusive = taxInclusive;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public Integer getIsNew() {
+		return isNew;
+	}
+
+	public void setIsNew(Integer isNew) {
+		this.isNew = isNew;
 	}
 
 }
