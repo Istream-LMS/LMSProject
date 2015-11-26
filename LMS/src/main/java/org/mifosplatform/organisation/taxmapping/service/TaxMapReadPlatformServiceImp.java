@@ -47,8 +47,10 @@ public class TaxMapReadPlatformServiceImp implements TaxMapReadPlatformService {
 		String sql = "Select " + mapper.schema();
 		
 		if(isNew) {
-			sql = sql + " where tm.is_new=1";
+			sql = sql + " where tm.is_new=1 ";
 		}
+		
+		sql += " order by tm.end_date asc ";
 		
 		return jdbcTemplate.query(sql,mapper,new Object[]{});
 	}
@@ -76,7 +78,7 @@ public class TaxMapReadPlatformServiceImp implements TaxMapReadPlatformService {
 		
 		public String schema(){
 			
-			return "tm.id AS id,tm.charge_type AS chargeType,tm.tax_code AS taxCode,tm.start_date AS startDate,tm.tax_type as taxType,"
+			return " tm.id AS id,tm.charge_type AS chargeType,tm.tax_code AS taxCode,tm.start_date AS startDate,tm.tax_type as taxType,"
 				+ "tm.rate AS rate,tm.tax_inclusive as taxInclusive,tm.end_date as endDate FROM m_tax_mapping tm ";
 		}
 		

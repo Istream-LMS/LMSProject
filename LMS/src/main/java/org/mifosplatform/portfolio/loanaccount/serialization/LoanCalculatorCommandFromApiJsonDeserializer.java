@@ -46,9 +46,9 @@ public final class LoanCalculatorCommandFromApiJsonDeserializer {
 		}
 
 		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("principal", 
-				"interestRatePerPeriod", "costOfFund", "locale", "dateFormat", "maintenance","payTerms", 
-				"deposit", "mileage", "excess", "FLPForYear", "deprecisationArray","productId",
-				"replacementTyres","comprehensiveInsurance"));
+				"interestRatePerPeriod", "costOfFund", "locale", "dateFormat", "maintenance", "payTerms", 
+				"deposit", "mileage", "excess", "FLPForYear", "deprecisationArray", "productId",
+				"replacementTyres", "comprehensiveInsurance", "residualArray"));
 
 		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 		}.getType();

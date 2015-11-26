@@ -38,6 +38,7 @@ public class TenantDatabaseUpgradeService {
                 final Flyway flyway = new Flyway();
                 flyway.setDataSource(tenant.databaseURL(), tenant.getSchemaUsername(), tenant.getSchemaPassword());
                 flyway.setLocations("sql");
+                flyway.repair();
                 flyway.setOutOfOrder(true);
                 flyway.migrate();
             }
