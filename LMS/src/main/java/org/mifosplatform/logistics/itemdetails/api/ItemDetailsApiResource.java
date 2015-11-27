@@ -136,11 +136,11 @@ public class ItemDetailsApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retriveItemDetails(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch, 
 			         @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset,
-			         @QueryParam("officeName") final String officeName, @QueryParam("itemCode") final String itemCode) {
+			         @QueryParam("officeName") final String officeName, @QueryParam("itemCode") final String itemCode,@QueryParam("manufacturer") final String manufacturer) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final SearchSqlQuery searchItemDetails =SearchSqlQuery.forSearch(sqlSearch, offset,limit );
-		final Page<ItemDetailsData> clientDatafinal = this.itemDetailsReadPlatformService.retriveAllItemDetails(searchItemDetails,officeName,itemCode);
+		final Page<ItemDetailsData> clientDatafinal = this.itemDetailsReadPlatformService.retriveAllItemDetails(searchItemDetails,officeName,itemCode,manufacturer);
 		return this.toApiJsonSerializerForItem.serialize(clientDatafinal);
 	}
 
