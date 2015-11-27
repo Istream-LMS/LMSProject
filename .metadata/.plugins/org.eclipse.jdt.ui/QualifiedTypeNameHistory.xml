@@ -34,7 +34,6 @@
 <fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.data.ClientProspectData"/>
 <fullyQualifiedTypeName name="javax.persistence.OneToOne"/>
 <fullyQualifiedTypeName name="org.springframework.data.jpa.domain.AbstractPersistable"/>
-<fullyQualifiedTypeName name="java.util.Date"/>
 <fullyQualifiedTypeName name="org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom"/>
 <fullyQualifiedTypeName name="java.util.Locale"/>
 <fullyQualifiedTypeName name="javax.ws.rs.QueryParam"/>
@@ -53,4 +52,8 @@
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.exception.FeeMasterDefaultCodeNotFoundException"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.domain.ProductLoanTax"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.data.LoanProductTaxData"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService"/>
 </qualifiedTypeNameHistroy>

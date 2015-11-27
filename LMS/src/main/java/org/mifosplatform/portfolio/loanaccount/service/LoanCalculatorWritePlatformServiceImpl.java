@@ -45,11 +45,8 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private final BigDecimal HUNDERED = new BigDecimal(100);
 	private final BigDecimal ONE = BigDecimal.ONE;
 	private final BigDecimal ZERO = BigDecimal.ZERO;
-	
-	//private final int payTerms[] = { 12, 24, 36, 48, 60 };
 
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
-	private final MathContext mc1 = new MathContext(2, RoundingMode.HALF_EVEN);
 	private final MathContext mc2 = new MathContext(8, RoundingMode.HALF_UP);
 
 	private TaxMap accountWDV;
@@ -111,15 +108,17 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", parsedJson);
 		
 		mileage = divideAtCalc(mileage, new BigDecimal(payTerms.length));
-		//mileage = mileage.round(mc1);
-		
-		/*{"productId":16,"principal":150000,"interestRatePerPeriod":8,"deposit":0,"mileage":2500,"excess":0.39,
-			"FLPForYear":500,"costOfFund":"4004.76","maintenance":"4042.86","locale":"en","payTerms":[12,24,36,48,60]}*/
 		
 		JsonArray deprecisationArray = this.fromApiJsonHelper.extractJsonArrayNamed("deprecisationArray", parsedJson);
 
 		if(null == deprecisationArray) {
 			deprecisationArray = new JsonArray();
+		}
+		
+		JsonArray residualArray = this.fromApiJsonHelper.extractJsonArrayNamed("residualArray", parsedJson);
+
+		if(null == residualArray) {
+			residualArray = new JsonArray();
 		}
 		
 		if(null == entityId) {
@@ -153,9 +152,21 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			final BigDecimal payterm = new BigDecimal(keyPayTerm);
 			final BigDecimal percent = divideAtCalc(payterm, TWELVE);
 			
+			BigDecimal residualVep = null;
+			
+			for (JsonElement element : residualArray) {
+				
+				String key = this.fromApiJsonHelper.extractStringNamed("key", element);
+				
+				if (payTerm.equalsIgnoreCase(key)) {
+					residualVep = getValue("residualVep", element);
+				}
+				
+			}
+			
 			LoanCalculatorData loanCalculatorData = generateCalculation(
 					keyPayTerm, totalPrincipal, accountWDVRate, taxWDVRate, vatRate, 
-					processingAmount, mileage, fLPForYear, percent);
+					processingAmount, mileage, fLPForYear, percent, residualVep);
 			
 			//final BigDecimal totalcoi, final BigDecimal totalCof, final BigDecimal totalMaintenances, 
 			//final BigDecimal totalReplacementTyres, final BigDecimal totalComprehensiveInsurance
@@ -183,8 +194,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 							subCOF, subMaintenance, subReplacementTyresForYear, subComprehensiveInsuranceForYear, loanCalculatorData,
 							totalcoi, totalCof, totalMaintenances, totalReplacementTyres, totalComprehensiveInsurance);
 				}
-			}
-			
+			}		
 			
 			totalcoi = totalcoi.add(loanCalculatorData.getCoiForYear(), mc);
 			totalCof = totalCof.add(loanCalculatorData.getCofForYear(), mc);
@@ -259,7 +269,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private LoanCalculatorData generateCalculation(final int key, final BigDecimal retailPrice, 
 			final BigDecimal accountWDVRate, final BigDecimal taxWDVRate, 
 			final BigDecimal vatRate, final BigDecimal processingAmount, final BigDecimal mileage, 
-			final BigDecimal fLPForYear, BigDecimal keyPercent) {
+			final BigDecimal fLPForYear, BigDecimal keyPercent, BigDecimal residualVep) {
 
 		BigDecimal vatAmount = retailPrice.multiply(vatRate, mc); // (1)
 		BigDecimal purchasePrice = retailPrice.subtract(vatAmount, mc);// (2)
@@ -270,9 +280,13 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		BigDecimal awAmount = processingAmount.multiply(ONE.subtract(amountawRateVal, mc), mc);// (3) //=B18*(1-E69*D15/12)
 		BigDecimal twAmount = processingAmount.multiply(ONE.subtract(amounttwRateVal, mc), mc);// (4) //=B18*(1-E70*D15/12)
 		
-        BigDecimal residual = awAmount.add(twAmount, mc);
-        BigDecimal residualAmountVEP = divideAtCalc(residual, TWO);// (5) //D45=(D55+D56) /2
+		BigDecimal residualAmountVEP = residualVep;
 		
+		if(null == residualVep) {
+			BigDecimal residual = awAmount.add(twAmount, mc);
+	        residualAmountVEP = divideAtCalc(residual, TWO);// (5) //D45=(D55+D56) /2
+		}
+        
 		BigDecimal residualAmountVIP = residualAmountVEP.multiply(ONEHALF, mc);// (6) //=D45*1.15
 		
 		BigDecimal residualCost = divideAtCalc(residualAmountVEP, processingAmount);// (7) //=D45/B18
