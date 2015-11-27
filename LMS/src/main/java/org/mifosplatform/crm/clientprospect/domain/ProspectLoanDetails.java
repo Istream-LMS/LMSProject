@@ -1,6 +1,12 @@
 package org.mifosplatform.crm.clientprospect.domain;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +14,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -192,9 +200,4 @@ public class ProspectLoanDetails extends AbstractPersistable<Long> {
 	public String getLocation() {
 		return location;
 	}
-	
-	
-	
-	
-	
 }

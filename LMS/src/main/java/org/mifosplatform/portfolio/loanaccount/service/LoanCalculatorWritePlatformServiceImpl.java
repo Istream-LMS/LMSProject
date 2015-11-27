@@ -184,7 +184,12 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				
 				if (payTerm.equalsIgnoreCase(key)) {
 					
-					final BigDecimal subdeprecisation = divideAtCalc(getValue("deprecisation", element), HUNDERED) ;
+					BigDecimal subdeprecisation = divideAtCalc(getValue("deprecisation", element), HUNDERED) ;
+					
+					if(null != residualVep) {
+						subdeprecisation = loanCalculatorData.getResidualDeprecisation();
+					}
+					
 					final BigDecimal subCOF = getValue("costOfFund", element);
 					final BigDecimal subMaintenance = getValue("maintenance", element);
 					final BigDecimal subReplacementTyresForYear = getValue("replacementTyres", element);
@@ -282,7 +287,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		
 		BigDecimal residualAmountVEP = residualVep;
 		
-		if(null == residualVep) {
+		if(null == residualAmountVEP) {
 			BigDecimal residual = awAmount.add(twAmount, mc);
 	        residualAmountVEP = divideAtCalc(residual, TWO);// (5) //D45=(D55+D56) /2
 		}

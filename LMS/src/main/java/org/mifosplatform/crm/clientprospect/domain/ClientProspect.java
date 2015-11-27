@@ -318,63 +318,52 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 	public Map<String, Object> update(final JsonCommand command) {
 		Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
 
-		// prospectType","firstName","middleName","lastName","homePhoneNumber","workPhoneNumber","mobileNumber","emailId",
-		// "sourceOfPublicity","preferredCallingTime","note","address","streetArea","cityDistrict","state
-		// ","country","locale","preferredPlan","status","statusRemark","callStatus","assignedTo","notes","isDeleted","zipCode"
-
-		final String prospectType = "prospectType";
+		
 		final String firstName = "firstName";
 		final String middleName = "middleName";
 		final String lastName = "lastName";
-		final String homePhoneNumber = "homePhoneNumber";
-		final String workPhoneNumber = "workPhoneNumber";
 		final String mobileNumber = "mobileNumber";
 		final String emailId = "emailId";
 		final String address = "address";
-		final String streetArea = "streetArea";
-		final String cityDistrict = "cityDistrict";
-		final String state = "state";
-		final String country = "country";
-		final String zipCode = "zipCode";
 		final String sourceOfPublicity = "sourceOfPublicity";
-		final String preferredPlan = "preferredPlan";
 		final String preferredCallingTime = "preferredCallingTime";
+		final String preferredLoanProduct = "preferredLoanProduct";
 		final String note = "note";
-		final String sourceOther = "sourceOther";
+		final String tin = "tin";
 
 		
 		if (command.isChangeInStringParameterNamed(firstName, this.firstName)) {
-			final String newValue = command.stringValueOfParameterNamed("firstName");
+			final String newValue = command.stringValueOfParameterNamed(firstName);
 			actualChanges.put(firstName, newValue);
 			this.firstName = newValue;
 		}
 		
 		if (command.isChangeInStringParameterNamed(middleName, this.middleName)) {
-			final String newValue = command.stringValueOfParameterNamed("middleName");
+			final String newValue = command.stringValueOfParameterNamed(middleName);
 			actualChanges.put(middleName, newValue);
 			this.middleName = newValue;
 		}
 		
 		if (command.isChangeInStringParameterNamed(lastName, this.lastName)) {
-			final String newValue = command.stringValueOfParameterNamed("lastName");
+			final String newValue = command.stringValueOfParameterNamed(lastName);
 			actualChanges.put(lastName, newValue);
 			this.lastName = newValue;
 		}
 		
 		if (command.isChangeInStringParameterNamed(mobileNumber, this.mobileNumber)) {
-			final String newValue = command.stringValueOfParameterNamed("mobileNumber");
+			final String newValue = command.stringValueOfParameterNamed(mobileNumber);
 			actualChanges.put(mobileNumber, newValue);
 			this.mobileNumber = newValue;
 		}
 		
 		if (command.isChangeInStringParameterNamed(emailId, this.emailId)) {
-			final String newValue = command.stringValueOfParameterNamed("emailId");
+			final String newValue = command.stringValueOfParameterNamed(emailId);
 			actualChanges.put(emailId, newValue);
 			this.emailId = newValue;
 		}
 		
 		if (command.isChangeInStringParameterNamed(address, this.address)) {
-			final String newValue = command.stringValueOfParameterNamed("address");
+			final String newValue = command.stringValueOfParameterNamed(address);
 			actualChanges.put(address, newValue);
 			this.address = newValue;
 		}
@@ -387,10 +376,8 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 		 * this.sourceOfPublicity = newValue; }
 		 */
 
-		if (command.isChangeInStringParameterNamed(sourceOfPublicity, this.sourceOfPublicity)
-				|| command.isChangeInStringParameterNamed(sourceOther, this.sourceOfPublicity)) {
-			
-			final String newValue = command.stringValueOfParameterNamed("sourceOfPublicity");
+		if (command.isChangeInStringParameterNamed(sourceOfPublicity, this.sourceOfPublicity)) {
+			final String newValue = command.stringValueOfParameterNamed(sourceOfPublicity);
 			if (newValue.equalsIgnoreCase("Other")) {
 				final String otherSource = command.stringValueOfParameterNamed("sourceOther");
 				actualChanges.put(sourceOfPublicity, otherSource);
@@ -401,8 +388,8 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 			}
 		}
 
-		if (command.isChangeInStringParameterNamed(preferredPlan, this.preferredLoanProduct)) {
-			final String newValue = command.stringValueOfParameterNamed("preferredLoanProduct");
+		if (command.isChangeInStringParameterNamed(preferredLoanProduct, this.preferredLoanProduct)) {
+			final String newValue = command.stringValueOfParameterNamed(preferredLoanProduct);
 			actualChanges.put(preferredLoanProduct, newValue);
 			this.preferredLoanProduct = newValue;
 		}
@@ -410,7 +397,7 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 		if (command.isChangeInStringParameterNamed(preferredCallingTime,
 				this.preferredCallingTime.toString())) {
 
-			final String startDateString = command.stringValueOfParameterNamed("preferredCallingTime");
+			final String startDateString = command.stringValueOfParameterNamed(preferredCallingTime);
 			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date newValue;
 			try {
@@ -418,16 +405,21 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 			} catch (ParseException pe) {
 				throw new PlatformDataIntegrityException(
 						"invalid.date.and.time.format",
-						"invalid.date.and.time.format", "preferredCallingTime");
+						"invalid.date.and.time.format", preferredCallingTime);
 			}
 			actualChanges.put(preferredCallingTime, newValue);
 			this.preferredCallingTime = newValue;
 		}
 		
 		if (command.isChangeInStringParameterNamed(note, this.note)) {
-			final String newValue = command.stringValueOfParameterNamed("note");
+			final String newValue = command.stringValueOfParameterNamed(note);
 			actualChanges.put(note, newValue);
 			this.note = newValue;
+		}
+		if (command.isChangeInStringParameterNamed(note, this.tin)) {
+			final String newValue = command.stringValueOfParameterNamed(note);
+			actualChanges.put(tin, newValue);
+			this.tin = newValue;
 		}
 
 		return actualChanges;

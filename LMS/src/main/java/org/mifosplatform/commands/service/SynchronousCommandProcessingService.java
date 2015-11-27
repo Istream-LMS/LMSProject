@@ -692,7 +692,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	    }else if(wrapper.isProspect()){
 	    	  if(wrapper.isCreate()){
 	    		  handler = applicationContext.getBean("createProspectCommandHandler",NewCommandSourceHandler.class);
-	    	  }else if(wrapper.isConvertToClient()) {
+	    	  }else if(wrapper.isUpdate()) {
+					 handler = applicationContext.getBean("updateProspectCommandHandler",NewCommandSourceHandler.class);
+			  }else if(wrapper.isConvertToClient()) {
 					 handler = applicationContext.getBean("convertProspectToClientCommandHandler",NewCommandSourceHandler.class);
 			  }else {
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
