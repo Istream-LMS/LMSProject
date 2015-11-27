@@ -178,9 +178,10 @@ public class ClientProspectReadPlatformServiceImp implements
 			String tin = rs.getString("tin");
 			String isDeleted = rs.getString("isDeleted");
 			String note = rs.getString("note");
+			String location = rs.getString("location");
 			
 			return new ClientProspectData(id, firstName, middleName, lastName, mobileNumber, emailId, 
-					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note);
+					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note,location);
 		}
 
 		public String query() {
@@ -189,7 +190,8 @@ public class ClientProspectReadPlatformServiceImp implements
 			String sql = "p.id as id, p.first_name as firstName, p.middle_name as middleName, p.last_name as lastName, "
 					+ "p.mobile_no as mobileNumber, p.email_id as emailId, p.source_of_publicity as sourceOfPublicity, "
 					+ "p.preferred_loan_product as preferredLoanProduct, p.preferred_calling_time as preferredCallingTime, "
-					+ "p.address as address, p.status as status, p.tin as tin, p.is_deleted as isDeleted, p.note as note"
+					+ "p.address as address, p.status as status, p.tin as tin, p.is_deleted as isDeleted, p.note as note," 
+					+ " p.location as location "
 					+ " from m_prospect p ";
 
 			return sql;
@@ -212,13 +214,14 @@ public class ClientProspectReadPlatformServiceImp implements
 			String preferredLoanProduct = rs.getString("preferredLoanProduct");
 			Date preferredCallingTime = rs.getDate("preferredCallingTime");
 			String note = rs.getString("note");
+			String location = rs.getString("location");
 			String address = rs.getString("address");
 			String status = rs.getString("status");
 			String tin = rs.getString("tin");
 			String isDeleted = rs.getString("isDeleted");
 			
 			return new ClientProspectData(id, firstName, middleName, lastName, mobileNumber, emailId, 
-					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note);
+					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note,location);
 		}
 
 		public String query() {
@@ -227,7 +230,7 @@ public class ClientProspectReadPlatformServiceImp implements
 					+ "p.first_name as firstName, p.middle_name as middleName, p.last_name as lastName, "
 					+ "p.mobile_no as mobileNumber, p.email_id as emailId, p.source_of_publicity as sourceOfPublicity, "
 					+ "p.preferred_loan_product as preferredLoanProduct, p.preferred_calling_time as preferredCallingTime, "
-					+ "p.address as address, p.status as status, p.tin as tin, p.note as note,"
+					+ "p.address as address, p.status as status, p.tin as tin, p.note as note,p.location as location, "
 					+ "p.is_deleted as isDeleted from m_prospect p ";
 			return sql;
 		}
@@ -288,6 +291,7 @@ public class ClientProspectReadPlatformServiceImp implements
 			String preferredLoanProduct = rs.getString("preferredLoanProduct");
 			Date preferredCallingTime = rs.getTimestamp("preferredCallingTime");
 			String note = rs.getString("note");
+			String location = rs.getString("location");
 			String address = rs.getString("address");
 			
 			String status = rs.getString("status");
@@ -297,7 +301,7 @@ public class ClientProspectReadPlatformServiceImp implements
 			
 			
 			return new ClientProspectData(id, firstName, middleName, lastName, mobileNumber, emailId, 
-					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note);
+					sourceOfPublicity, preferredCallingTime, address, tin, preferredLoanProduct, status, isDeleted, note,location);
 		}
 
 		public String query() {
@@ -305,7 +309,7 @@ public class ClientProspectReadPlatformServiceImp implements
 			return	"p.id as id,p.first_name as firstName, p.middle_name as middleName, p.last_name as lastName, " +
 					"p.mobile_no as mobileNumber, p.email_id as emailId, p.source_of_publicity as sourceOfPublicity, " +
 					"p.preferred_loan_product as preferredLoanProduct, p.preferred_calling_time as preferredCallingTime, " +
-					"p.address as address,p.status as status , p.tin as tin, p.note as note," +
+					"p.address as address,p.status as status , p.tin as tin, p.note as note,p.location as location, " +
 					"p.is_deleted as isDeleted";
 		}
 	}
