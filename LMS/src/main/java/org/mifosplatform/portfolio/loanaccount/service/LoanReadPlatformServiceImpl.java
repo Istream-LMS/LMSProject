@@ -143,7 +143,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private final FromJsonHelper fromApiJsonHelper;
     private static final String LEASE = "LeaseCalculator";
     private static final String DATEFORMAT = "ddMMyyhhmmss";
-    private static final String XLSX_FILE_EXTENSION = ".xlsx";
+    private static final String XLSX_FILE_EXTENSION = ".xls";
     private SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
     private static final String UNDERSCORE = "_";
     private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);

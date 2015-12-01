@@ -773,13 +773,19 @@ public class LoansApiResource {
     		entityId = new Long(1);
 		}
     	
-    	final JsonElement parsedJson = this.fromJsonHelper.parse(apiRequestBodyAsJson);
-    	JsonCommand command = JsonCommand.from(null, parsedJson,null, null, null, null, null, null, null,
-    									null, null, null, null, null, null, null);
+    	final JsonElement jsonElement = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+    	JsonCommand command = new JsonCommand(null, jsonElement.toString(),jsonElement, fromJsonHelper, null, null, null, null, null, null, null, null, null, null, null,null, null);
     	
-    	CommandProcessingResult result = loanCalculatorWritePlatformService.createLoanCalculator(entityId, command);
+    	CommandProcessingResult result = this.loanCalculatorWritePlatformService.createLoanCalculator(entityId, command);
     	
-    	String fileName = this.loanReadPlatformService.exportToExcel(result.toString());
+ 		entityId = result.resourceId() == null ? 0 : result.resourceId();
+         
+         Map<String, Object> changes = result.getChanges();        
+         	
+         JsonObject object = this.fromJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 	
+         object.addProperty("prospectLoanCalculatorId", entityId);       	
+    	
+    	String fileName = this.loanReadPlatformService.exportToExcel(object.toString());
     	
     	File file = new File(fileName);
         
@@ -787,10 +793,10 @@ public class LoansApiResource {
         	throw new LeaseScreenReportFileNotFoundException(fileName);
         }
         
-        JsonElement element = this.fromJsonHelper.parse(result.toString());
+        JsonElement element = this.fromJsonHelper.parse(object.toString());
         Long prospectLoanCalculatorId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
         
-        JsonObject object = new JsonObject();
+        object = new JsonObject();
         object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator, "").trim());
         object.addProperty("prospectLoanCalculatorId", prospectLoanCalculatorId);
         return object.toString();       
