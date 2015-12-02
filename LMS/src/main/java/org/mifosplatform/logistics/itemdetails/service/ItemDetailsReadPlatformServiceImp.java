@@ -81,7 +81,7 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 		
 	}
 
-	public Page<ItemDetailsData> retriveAllItemDetails(SearchSqlQuery searchItemDetails,String officeName,String itemCode) {	
+	public Page<ItemDetailsData> retriveAllItemDetails(SearchSqlQuery searchItemDetails,String officeName,String itemCode,String manufacturer) {	
 		// TODO Auto-generated method stub
 		final AppUser user = this.context.authenticatedUser();
 		
@@ -114,6 +114,10 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 	    if(itemCode != null){
 	    	itemCode = itemCode.trim();
 	    	extraCriteria += " and master.item_description like '%"+itemCode+"%' ";
+	    }
+	    if(manufacturer != null){
+	    	manufacturer = manufacturer.trim();
+	    	extraCriteria += " and master.manufacturer like '%"+manufacturer+"%' ";
 	    }
 	    
             sqlBuilder.append(extraCriteria);
