@@ -48,8 +48,8 @@ public class LoanRePaymentScreenPdf {
 			new File(fileLocation).mkdirs();
 		}
 
-		System.out.println(fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
-				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION);
+//		System.out.println(fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
+//				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION);
 
 		return fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
 				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION;
@@ -63,11 +63,20 @@ public class LoanRePaymentScreenPdf {
 		int y = 0, height = 570, finalHeight = 0, count = 0;
 		PdfWriter docWriter = null;
 		
-		Document doc = new Document();	
-		initializeFonts();
+		Document doc = null;
+
+		if (null == emailId) {
+			emailId = "";
+		}
+
+		if (null == phoneNumber) {
+			phoneNumber = "";
+		}
 
 		try {			
 
+			doc = new Document();
+			initializeFonts();
 			path = getFileLocation(loanId);
 			docWriter = PdfWriter.getInstance(doc, new FileOutputStream(path));
 			doc.addCreationDate();

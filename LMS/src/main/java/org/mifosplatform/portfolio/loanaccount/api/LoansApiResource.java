@@ -38,6 +38,7 @@ import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -87,6 +88,7 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorReadPl
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanCalculatorWritePlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanFeeMasterDataReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
@@ -157,6 +159,7 @@ public class LoansApiResource {
     private final DefaultToApiJsonSerializer<LoanTaxMapData> loanTaxMappingApiJsonSerializer;
     private final LoanFeeMasterDataReadPlatformService loanFeeMasterDataReadPlatformService;
     private final FeeMasterReadplatformService feeMasterReadPlatformService;
+    private final LoanCalculatorWritePlatformService loanCalculatorWritePlatformService;
     
 
     @Autowired
@@ -178,7 +181,7 @@ public class LoansApiResource {
             final InsuranceReadPlatformService insuranceReadPlatformService,final LoanTaxReadPlatformService loanTaxReadPlatformService,
             final TaxMapReadPlatformService taxMapReadPlatformService, 
             final DefaultToApiJsonSerializer<LoanTaxMapData> loanTaxMappingApiJsonSerializer,final LoanFeeMasterDataReadPlatformService loanFeeMasterDataReadPlatformService,
-            final FeeMasterReadplatformService feeMasterReadPlatformService) {
+            final FeeMasterReadplatformService feeMasterReadPlatformService,final LoanCalculatorWritePlatformService loanCalculatorWritePlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -206,6 +209,7 @@ public class LoansApiResource {
         this.loanTaxMappingApiJsonSerializer = loanTaxMappingApiJsonSerializer;
         this.loanFeeMasterDataReadPlatformService = loanFeeMasterDataReadPlatformService;
         this.feeMasterReadPlatformService = feeMasterReadPlatformService;
+        this.loanCalculatorWritePlatformService = loanCalculatorWritePlatformService;
     }
     
     public LoanAccountData getTemplate(Long clientId, Long groupId, Long productId, 
@@ -763,9 +767,25 @@ public class LoansApiResource {
     	
     	this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
     	
-    	String jsonString = loanCalculator(apiRequestBodyAsJson, commandParam);
+    	Long entityId = new Long(0);
     	
-    	String fileName = this.loanReadPlatformService.exportToExcel(jsonString);
+    	if (null != commandParam && commandParam.equalsIgnoreCase(PROSPECT)) {
+    		entityId = new Long(1);
+		}
+    	
+    	final JsonElement jsonElement = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+    	JsonCommand command = new JsonCommand(null, jsonElement.toString(),jsonElement, fromJsonHelper, null, null, null, null, null, null, null, null, null, null, null,null, null);
+    	
+    	CommandProcessingResult result = this.loanCalculatorWritePlatformService.createLoanCalculator(entityId, command);
+    	
+ 		entityId = result.resourceId() == null ? 0 : result.resourceId();
+         
+         Map<String, Object> changes = result.getChanges();        
+         	
+         JsonObject object = this.fromJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 	
+         object.addProperty("prospectLoanCalculatorId", entityId);       	
+    	
+    	String fileName = this.loanReadPlatformService.exportToExcel(object.toString());
     	
     	File file = new File(fileName);
         
@@ -773,12 +793,12 @@ public class LoansApiResource {
         	throw new LeaseScreenReportFileNotFoundException(fileName);
         }
         
-        JsonElement element = this.fromJsonHelper.parse(jsonString);
-        Long entityId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
+        JsonElement element = this.fromJsonHelper.parse(object.toString());
+        Long prospectLoanCalculatorId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
         
-        JsonObject object = new JsonObject();
+        object = new JsonObject();
         object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator, "").trim());
-        object.addProperty("prospectLoanCalculatorId", entityId);
+        object.addProperty("prospectLoanCalculatorId", prospectLoanCalculatorId);
         return object.toString();       
     }
     
