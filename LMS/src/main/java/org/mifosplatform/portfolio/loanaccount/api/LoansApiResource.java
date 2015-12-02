@@ -106,6 +106,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -324,6 +325,7 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response printleaseScreenReport(@PathParam("loanId") final Long loanId) {
+    	
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         String fileName = loanReadPlatformService.printLeaseScreenReportDoc(loanId);
         
@@ -616,27 +618,84 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String calculateLoanScheduleOrSubmitLoanApplication(@QueryParam("command") final String commandParam,
-            @Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
+			@Context final UriInfo uriInfo, final String apiRequestBodyAsJson) {
 
-        if (is(commandParam, "calculateLoanSchedule")) {
+		String testApiRequestBodyAsJson = calculateTax(apiRequestBodyAsJson, commandParam);
 
-            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
-            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
+		final JsonElement parsedQuery = this.fromJsonHelper.parse(testApiRequestBodyAsJson);
 
-            final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
+		JsonArray taxArray = this.fromJsonHelper.extractJsonArrayNamed("taxArray", parsedQuery);
 
-            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            return this.loanScheduleToApiJsonSerializer.serialize(settings, loanSchedule.toData(), new HashSet<String>());
-        }
+		if (is(commandParam, "calculateLoanSchedule")) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanApplication().withJson(apiRequestBodyAsJson).build();
+			final JsonQuery query = JsonQuery.from(testApiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+			final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+			loanSchedule.setTaxesAsString(taxArray.toString());
 
-    @PUT
+			final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+			return this.loanScheduleToApiJsonSerializer.serialize(settings, loanSchedule.toData(), new HashSet<String>());
+		}
+
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanApplication().withJson(testApiRequestBodyAsJson).build();
+
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+		if (null != result && result.getLoanId() > 0) {
+
+			JsonObject object = new JsonObject();
+			object.addProperty("loanId", result.getLoanId());
+			object.add("taxArray", taxArray);
+			updateLoanTaxMapping(object.toString());
+		}
+		
+		return this.toApiJsonSerializer.serialize(result);
+	}
+
+    private String calculateTax(String apiRequestBodyAsJson, String commandParam) {
+		
+    	 Long flag = new Long(1);
+    	 
+    	 if (is(commandParam, "calculateLoanSchedule")) {
+    		 flag = new Long(0);
+    	 }
+    	 
+    	JsonElement element = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+    	
+    	BigDecimal principal = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
+    	String locale = this.fromJsonHelper.extractStringNamed("locale", element);
+    	JsonArray taxes = this.fromJsonHelper.extractJsonArrayNamed("taxes", element);
+    
+    	JsonObject object = new JsonObject();
+    	
+    	object.addProperty("principal", principal);
+    	object.addProperty("locale", locale);
+    	object.add("taxes", taxes);
+    	
+    	String returnOutput = calculateTaxForLoanApplication(flag, object.toString());
+    	
+    	object = element.getAsJsonObject();
+    	
+    	element = this.fromJsonHelper.parse(returnOutput);
+    	
+    	returnOutput = this.fromJsonHelper.extractStringNamed("resourceIdentifier", element);
+    	
+    	element = this.fromJsonHelper.parse(returnOutput);
+    	
+    	JsonArray taxArray = this.fromJsonHelper.extractJsonArrayNamed("taxArray", element);
+    	BigDecimal finalAmount = this.fromJsonHelper.extractBigDecimalWithLocaleNamed("finalAmount", element);
+    	 	
+    	object.addProperty("principal", finalAmount);
+    	object.add("taxArray", taxArray);
+    	
+    	object.remove("taxes");
+    	
+		return object.toString();
+	}
+
+	@PUT
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -763,44 +822,34 @@ public class LoansApiResource {
     @Path("calculator/export")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String exportToXlsx(final String apiRequestBodyAsJson, @QueryParam("command") final String commandParam) {
-    	
-    	this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
-    	
-    	Long entityId = new Long(0);
-    	
-    	if (null != commandParam && commandParam.equalsIgnoreCase(PROSPECT)) {
-    		entityId = new Long(1);
+	public String exportToXlsx(final String apiRequestBodyAsJson,
+			@QueryParam("command") final String commandParam) {
+
+		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+
+		String result = this.loanCalculatorWritePlatformService.exportToXls(apiRequestBodyAsJson, commandParam);
+
+		String fileName = this.loanReadPlatformService.exportToExcel(result);
+
+		File file = new File(fileName);
+
+		if (!file.exists()) {
+			throw new LeaseScreenReportFileNotFoundException(fileName);
 		}
-    	
-    	final JsonElement jsonElement = this.fromJsonHelper.parse(apiRequestBodyAsJson);
-    	JsonCommand command = new JsonCommand(null, jsonElement.toString(),jsonElement, fromJsonHelper, null, null, null, null, null, null, null, null, null, null, null,null, null);
-    	
-    	CommandProcessingResult result = this.loanCalculatorWritePlatformService.createLoanCalculator(entityId, command);
-    	
- 		entityId = result.resourceId() == null ? 0 : result.resourceId();
-         
-         Map<String, Object> changes = result.getChanges();        
-         	
-         JsonObject object = this.fromJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 	
-         object.addProperty("prospectLoanCalculatorId", entityId);       	
-    	
-    	String fileName = this.loanReadPlatformService.exportToExcel(object.toString());
-    	
-    	File file = new File(fileName);
-        
-        if(!file.exists()) {
-        	throw new LeaseScreenReportFileNotFoundException(fileName);
-        }
-        
-        JsonElement element = this.fromJsonHelper.parse(object.toString());
-        Long prospectLoanCalculatorId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
-        
-        object = new JsonObject();
-        object.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator, "").trim());
-        object.addProperty("prospectLoanCalculatorId", prospectLoanCalculatorId);
-        return object.toString();       
-    }
+
+		JsonElement element = this.fromJsonHelper.parse(result);
+
+		Long prospectLoanCalculatorId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
+
+		JsonObject jsonObject = new JsonObject();
+
+		jsonObject.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR 
+				+ File.separator + LEASE + File.separator, "").trim());
+		
+		jsonObject.addProperty("prospectLoanCalculatorId", prospectLoanCalculatorId);
+
+		return jsonObject.toString();
+	}
     
     @GET
     @Path("calculator/export")

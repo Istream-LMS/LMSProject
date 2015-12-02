@@ -74,7 +74,6 @@ public class LoanRePaymentScreenPdf {
 		}
 
 		try {			
-
 			doc = new Document();
 			initializeFonts();
 			path = getFileLocation(loanId);

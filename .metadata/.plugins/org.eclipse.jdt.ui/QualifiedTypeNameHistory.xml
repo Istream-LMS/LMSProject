@@ -24,7 +24,6 @@
 <fullyQualifiedTypeName name="net.sf.json.JSONObject"/>
 <fullyQualifiedTypeName name="org.json.JSONArray"/>
 <fullyQualifiedTypeName name="org.json.JSONObject"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonParser"/>
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.lang.InternalError"/>
 <fullyQualifiedTypeName name="java.lang.Integer"/>
@@ -34,11 +33,9 @@
 <fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.data.ClientProspectData"/>
 <fullyQualifiedTypeName name="javax.persistence.OneToOne"/>
 <fullyQualifiedTypeName name="org.springframework.data.jpa.domain.AbstractPersistable"/>
-<fullyQualifiedTypeName name="java.util.Date"/>
 <fullyQualifiedTypeName name="org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom"/>
 <fullyQualifiedTypeName name="java.util.Locale"/>
 <fullyQualifiedTypeName name="javax.ws.rs.QueryParam"/>
-<fullyQualifiedTypeName name="java.lang.Long"/>
 <fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.domain.ProspectLoanCalculatorRepository"/>
 <fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.domain.ProspectLoanCalculator"/>
 <fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.domain.ProspectLoanDetails"/>
@@ -46,11 +43,17 @@
 <fullyQualifiedTypeName name="javax.ws.rs.PathParam"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.api.LoansApiResource"/>
 <fullyQualifiedTypeName name="org.springframework.data.repository.query.Param"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
 <fullyQualifiedTypeName name="java.math.BigDecimal"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.data.FeeMasterData"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.exception.FeeMasterDefaultCodeNotFoundException"/>
+<fullyQualifiedTypeName name="java.util.Date"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.domain.ProductLoanTax"/>
+<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.data.LoanProductTaxData"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonParser"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
+<fullyQualifiedTypeName name="java.lang.Long"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 </qualifiedTypeNameHistroy>
