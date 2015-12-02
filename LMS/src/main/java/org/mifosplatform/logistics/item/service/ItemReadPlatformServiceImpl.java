@@ -7,7 +7,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -179,7 +181,7 @@ private static final class SalesDataMapper implements
 		final Long totalItems = rs.getLong("totalItems");
 		final Long reorderLevel = rs.getLong("reorderLevel");
 		final String manufacturer = rs.getString("manufacturer");
-		final Date warrantyExpiryDate = rs.getDate("warrantyExpiryDate");
+		final LocalDate warrantyExpiryDate = JdbcSupport.getLocalDate(rs, "warrantyExpiryDate");
 		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel,manufacturer,warrantyExpiryDate);
 
 

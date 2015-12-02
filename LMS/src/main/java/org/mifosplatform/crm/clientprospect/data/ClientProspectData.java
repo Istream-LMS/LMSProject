@@ -29,6 +29,7 @@ public class ClientProspectData {
 	private Collection<ProspectProductData> productData;
 	private String tin;
 	private String note;
+	private String location;
 
 	public ClientProspectData() {
 
@@ -38,7 +39,7 @@ public class ClientProspectData {
 			final String mobileNumber, final String emailId,
 			final String sourceOfPublicity, final Date preferredCallingTime,
 			final String address, final String tin, final String preferredLoanProduct,
-			final String status, final String isDeleted, String note) {
+			final String status, final String isDeleted, String note,final String location) {
 		
 		this.id = id;
 		this.firstName = firstName;
@@ -54,6 +55,7 @@ public class ClientProspectData {
 		this.status = status;
 		this.isDeleted = isDeleted;
 		this.note = note;
+		this.location = location;
 		
 	}
 

@@ -48,6 +48,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 	private final MathContext mc2 = new MathContext(8, RoundingMode.HALF_UP);
+	private static final String PROSPECT = "Prospect";
 
 	private TaxMap accountWDV;
 	private TaxMap taxWDV;
@@ -98,8 +99,8 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final BigDecimal deposit = getValue("deposit", parsedJson);
 		final BigDecimal principal = getValue("principal", parsedJson);
 		final BigDecimal interest = getValue("interestRatePerPeriod", parsedJson);
-		final BigDecimal costOfFund = getValue("costOfFund", parsedJson);
-		final BigDecimal maintenance = getValue("maintenance", parsedJson);
+		BigDecimal costOfFund = getValue("costOfFund", parsedJson);
+		BigDecimal maintenance = getValue("maintenance", parsedJson);
 		BigDecimal mileage = getValue("mileage", parsedJson);
 		final BigDecimal excess = getValue("excess", parsedJson);
 		final BigDecimal fLPForYear = getValue("FLPForYear", parsedJson);	
@@ -108,6 +109,8 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", parsedJson);
 		
 		mileage = divideAtCalc(mileage, new BigDecimal(payTerms.length));
+		costOfFund = divideAtCalc(costOfFund, new BigDecimal(payTerms.length));
+		maintenance = divideAtCalc(maintenance, new BigDecimal(payTerms.length));
 		
 		JsonArray deprecisationArray = this.fromApiJsonHelper.extractJsonArrayNamed("deprecisationArray", parsedJson);
 
@@ -398,6 +401,32 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				totalwoMaintenance, totalMaintenance, rateWOMaintenance,
 				costWOMaintenance, rateWithMaintenance, quoteWOMaintenance,
 				quoteWMaintenance, residualDeprecisation, loanCalculatorData);
+	}
+
+	@Override
+	public String exportToXls(String apiRequestBodyAsJson, String commandParam) {
+		
+		Long entityId = new Long(0);
+    	
+    	if (null != commandParam && commandParam.equalsIgnoreCase(PROSPECT)) {
+    		entityId = new Long(1);
+		}
+    	
+		final JsonElement jsonElement = this.fromApiJsonHelper.parse(apiRequestBodyAsJson);
+    	
+    	JsonCommand command = new JsonCommand(null, jsonElement.toString(),jsonElement, fromApiJsonHelper, null, null, null, null, null, null, null, null, null, null, null,null, null);
+    	
+    	CommandProcessingResult result = createLoanCalculator(entityId, command);
+    	
+ 		entityId = result.resourceId() == null ? 0 : result.resourceId();
+         
+         Map<String, Object> changes = result.getChanges(); 
+         
+         JsonObject object = this.fromApiJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 	
+         
+         object.addProperty("prospectLoanCalculatorId", entityId);      
+		
+		return object.toString();
 	}
 	
 	

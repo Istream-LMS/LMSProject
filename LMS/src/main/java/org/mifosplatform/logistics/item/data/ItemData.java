@@ -42,12 +42,12 @@ public class ItemData {
 	private Collection<MCodeData> manufacturerDatas;
 	private String manufacturer;
 	private Collection<MCodeData> chargeCodeData;
-	private Date warrantyExpiryDate;
+	private LocalDate warrantyExpiryDate;
 	/*private List<FeeMasterData> feeMasterData;
 	private Collection<InventoryGrnData> grnData;*/
 	
 	public ItemData(Long id, String itemCode, String itemDesc,String itemClass,String units,   String chargeCode, int warranty, BigDecimal unitPrice,
-			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel,String manufacturer, Date warrantyExpiryDate) {
+			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel,String manufacturer, LocalDate warrantyExpiryDate) {
 		
 		this.id=id;
 		this.itemCode=itemCode;
@@ -275,11 +275,11 @@ public class ItemData {
 
 	}
 
-	public Date getWarrantyExpiryDate() {
+	public LocalDate getWarrantyExpiryDate() {
 		return warrantyExpiryDate;
 	}
 
-	public void setWarrantyExpiryDate(Date warrantyExpiryDate) {
+	public void setWarrantyExpiryDate(LocalDate warrantyExpiryDate) {
 		this.warrantyExpiryDate = warrantyExpiryDate;
 	}
 
