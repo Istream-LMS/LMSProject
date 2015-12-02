@@ -31,6 +31,7 @@ public final class LoanScheduleModel {
     private final BigDecimal totalPenaltyChargesCharged;
     private final BigDecimal totalRepaymentExpected;
     private final BigDecimal totalOutstanding;
+    private String taxesAsString;
 
     public static LoanScheduleModel from(final Collection<LoanScheduleModelPeriod> periods, final ApplicationCurrency applicationCurrency,
             final int loanTermInDays, final Money principalDisbursed, final BigDecimal totalPrincipalExpected,
@@ -79,10 +80,20 @@ public final class LoanScheduleModel {
         return new LoanScheduleData(currency, periodsData, this.loanTermInDays, this.totalPrincipalDisbursed.getAmount(),
                 this.totalPrincipalExpected, this.totalPrincipalPaid, this.totalInterestCharged, this.totalFeeChargesCharged,
                 this.totalPenaltyChargesCharged, totalWaived, totalWrittenOff, this.totalRepaymentExpected, totalRepayment,
-                totalPaidInAdvance, totalPaidLate, this.totalOutstanding);
+                totalPaidInAdvance, totalPaidLate, this.totalOutstanding, this.taxesAsString);
     }
 
     public Collection<LoanScheduleModelPeriod> getPeriods() {
         return this.periods;
     }
+
+	public String getTaxesAsString() {
+		return taxesAsString;
+	}
+
+	public void setTaxesAsString(String taxesAsString) {
+		this.taxesAsString = taxesAsString;
+	}
+    
+    
 }

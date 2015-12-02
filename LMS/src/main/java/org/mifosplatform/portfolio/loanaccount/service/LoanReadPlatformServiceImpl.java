@@ -143,7 +143,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 	private final FromJsonHelper fromApiJsonHelper;
     private static final String LEASE = "LeaseCalculator";
     private static final String DATEFORMAT = "ddMMyyhhmmss";
-    private static final String XLSX_FILE_EXTENSION = ".xlsx";
+    private static final String XLSX_FILE_EXTENSION = ".xls";
     private SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
     private static final String UNDERSCORE = "_";
     private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
@@ -954,7 +954,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     totalPrincipalExpected.getAmount(), totalPrincipalPaid.getAmount(), totalInterestCharged.getAmount(),
                     totalFeeChargesCharged.getAmount(), totalPenaltyChargesCharged.getAmount(), totalWaived.getAmount(),
                     totalWrittenOff.getAmount(), totalRepaymentExpected.getAmount(), totalRepayment.getAmount(),
-                    totalPaidInAdvance.getAmount(), totalPaidLate.getAmount(), totalOutstanding.getAmount());
+                    totalPaidInAdvance.getAmount(), totalPaidLate.getAmount(), totalOutstanding.getAmount(), null);
         }
     }
 
@@ -1129,7 +1129,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     totalPrincipalExpected.getAmount(), totalPrincipalPaid.getAmount(), totalInterestCharged.getAmount(),
                     totalFeeChargesCharged.getAmount(), totalPenaltyChargesCharged.getAmount(), totalWaived.getAmount(),
                     totalWrittenOff.getAmount(), totalRepaymentExpected.getAmount(), totalRepayment.getAmount(),
-                    totalPaidInAdvance.getAmount(), totalPaidLate.getAmount(), totalOutstanding.getAmount());
+                    totalPaidInAdvance.getAmount(), totalPaidLate.getAmount(), totalOutstanding.getAmount(), null);
         }
     }
 

@@ -137,7 +137,7 @@ dependencies {
                 [group: 'org.quartz-scheduler', name: 'quartz', version: '2.1.7'],
                 [group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.2.1'],
                 [group: 'net.sf.ehcache', name: 'ehcache', version: '2.7.2'],
-                [group: 'com.itextpdf', name: 'itextpdf', version: '5.5.4'],
+                [group: 'com.itextpdf', name: 'itextpdf', version: '5.5.8'],
                 [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12']
                        
  	        )

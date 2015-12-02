@@ -42,6 +42,7 @@ public class LoanScheduleData {
     private final BigDecimal totalPaidLate;
     private final BigDecimal totalOutstanding;
     private  BigDecimal rsidualAmount;
+    private String taxArray;
     /**
      * <code>periods</code> is collection of data objects containing specific
      * information to each period of the loan schedule including disbursement
@@ -54,7 +55,7 @@ public class LoanScheduleData {
             final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
             final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalRepaymentExpected,
             final BigDecimal totalRepayment, final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate,
-            final BigDecimal totalOutstanding) {
+            final BigDecimal totalOutstanding, String taxArray) {
         this.currency = currency;
         this.periods = periods;
         this.loanTermInDays = loanTermInDays;
@@ -71,6 +72,7 @@ public class LoanScheduleData {
         this.totalPaidInAdvance = totalPaidInAdvance;
         this.totalPaidLate = totalPaidLate;
         this.totalOutstanding = totalOutstanding;
+        this.taxArray = taxArray;
     }
 
     public Collection<LoanSchedulePeriodData> getPeriods() {
