@@ -22,12 +22,18 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -59,7 +65,6 @@ import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.organisation.taxmapping.data.LoanTaxMapData;
 import org.mifosplatform.organisation.taxmapping.data.TaxMapData;
 import org.mifosplatform.organisation.taxmapping.service.TaxMapReadPlatformService;
-import org.mifosplatform.organisation.taxmapping.service.TaxMapWritePlatformService;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
@@ -82,6 +87,7 @@ import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorPdfGenerate;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
@@ -99,6 +105,8 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePer
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.OverdueLoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.mifosplatform.portfolio.loanproduct.exception.ExportFileNameNotNullException;
+import org.mifosplatform.portfolio.loanproduct.exception.InvalidDownloadFormatException;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
@@ -113,6 +121,7 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -141,14 +150,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final FeeMasterReadplatformService feeMasterReadplatformService;
     private final ClientRepositoryWrapper clientRepositoryWrapper;
 	private final FromJsonHelper fromApiJsonHelper;
+	
     private static final String LEASE = "LeaseCalculator";
     private static final String DATEFORMAT = "ddMMyyhhmmss";
     private static final String XLSX_FILE_EXTENSION = ".xls";
-    private SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+    private static final String PDF_FILE_EXTENSION = ".pdf";
     private static final String UNDERSCORE = "_";
-    private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
-    private final BigDecimal HUNDERED = new BigDecimal(100);
-
+    private static final String XLSFORMAT = "excel";
+    private static final String PDFFORMAT = "pdf";
+    
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATEFORMAT);
+    private static final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
+    private static final BigDecimal HUNDERED = new BigDecimal(100);
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final LoanRepository loanRepository,
@@ -1539,7 +1552,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		return lsrDoc.createPDF(loanId, repaymentSchedule, name, client.getEmailId(), client.getMobileNo());
 	}
 	
-	private String getFileLocation() {
+	private String getFileLocation(String extension) {
 
 		String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE;
 
@@ -1548,19 +1561,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 			new File(fileLocation).mkdirs();
 		}
 
-		return fileLocation + File.separator + LEASE + UNDERSCORE + dateFormat.format(new Date()) + XLSX_FILE_EXTENSION;
+		return fileLocation + File.separator + LEASE + UNDERSCORE + dateFormat.format(new Date()) + extension;
 	}
 	
-	@Override
-	public String exportToExcel(String changeJson) {
+	private String exportToExcel(String jsonObjectInString) {
 
 		int rownum = 0;
 
-		HSSFWorkbook workbook = new HSSFWorkbook();
-
-		HSSFSheet sheet = workbook.createSheet("Loan_Calculator");
-
-		JsonObject jsonObject = this.fromApiJsonHelper.parse(changeJson).getAsJsonObject();
+		JsonObject jsonObject = this.fromApiJsonHelper.parse(jsonObjectInString).getAsJsonObject();
 
 		JsonArray array = jsonObject.getAsJsonArray("payTerms");
 
@@ -1569,7 +1577,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		Set<Entry<String, JsonElement>> keys = arrayFirstJson.entrySet();
 
 		ArrayList<String> arrayList = new ArrayList<String>();
-
+		
+		HSSFWorkbook workbook = new HSSFWorkbook();
+		HSSFSheet sheet = workbook.createSheet("Loan_Calculator");
+		
 		for (Entry<String, JsonElement> key : keys) {
 
 			String keyval = key.getKey();
@@ -1588,10 +1599,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 				Row row = sheet.getRow(j);
 				String keyName = arrayList.get(j);
+				
 				if (j == 0) {
 					row.createCell(i).setCellValue(Integer.parseInt(jsonObj.get(keyName).toString()));
 				} else {
-					//residualDeprecisation.multiply(HUNDERED, mc)
 					BigDecimal finalValue = jsonObj.get(keyName).getAsBigDecimal();
 					if(keyName.equalsIgnoreCase("residualDeprecisation") || keyName.equalsIgnoreCase("residualCost")) {
 						finalValue = finalValue.multiply(HUNDERED, mc).setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -1606,7 +1617,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
 		try {
 
-			String location = getFileLocation();
+			String location = getFileLocation(XLSX_FILE_EXTENSION);
 			File file = new File(location);
 			file.createNewFile();
 			FileOutputStream out = new FileOutputStream(file);
@@ -1621,6 +1632,45 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 		}
 
 		return null;
+	}
+	
+	@Override
+	public String export(String jsonObjectInString, String commandType) {
+		
+		String response = null;
+		
+		if(null == commandType || commandType.isEmpty()) {
+			
+			commandType = LoanReadPlatformServiceImpl.XLSFORMAT;
+		}
+		
+		if(commandType.equalsIgnoreCase(LoanReadPlatformServiceImpl.XLSFORMAT)) {
+			
+			response = exportToExcel(jsonObjectInString);
+			
+		} else if (commandType.equalsIgnoreCase(LoanReadPlatformServiceImpl.PDFFORMAT)) {
+			
+			String location = getFileLocation(PDF_FILE_EXTENSION);
+			
+			response = exportToPdf(jsonObjectInString, location, fromApiJsonHelper);
+			
+		} else {
+			
+			throw new InvalidDownloadFormatException(commandType);
+		}
+		
+		if(null == response) {
+			throw new ExportFileNameNotNullException();
+		}
+				
+		return response;		
+	}
+
+	private String exportToPdf(String jsonObjectInString, String location,
+			FromJsonHelper fromApiJsonHelper) {
+		
+		LoanCalculatorScreenPdf loanCalculatorScreenPdf = new LoanCalculatorScreenPdf(fromApiJsonHelper);
+		return loanCalculatorScreenPdf.createPDF(jsonObjectInString);
 	}
     
 }

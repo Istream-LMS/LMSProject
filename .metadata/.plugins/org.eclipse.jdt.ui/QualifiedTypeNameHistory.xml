@@ -1,21 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMapRepository"/>
-<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMap"/>
-<fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.domain.TaxMapRepositoryWrapper"/>
-<fullyQualifiedTypeName name="org.apache.commons.collections.map.HashedMap"/>
-<fullyQualifiedTypeName name="org.apache.poi.xssf.usermodel.XSSFWorkbook"/>
-<fullyQualifiedTypeName name="org.apache.poi.xssf.usermodel.XSSFRow"/>
-<fullyQualifiedTypeName name="org.apache.poi.xssf.usermodel.XSSFCell"/>
-<fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.WorkbookFactory"/>
-<fullyQualifiedTypeName name="org.apache.poi.poifs.filesystem.POIFSFileSystem"/>
-<fullyQualifiedTypeName name="java.io.InputStream"/>
 <fullyQualifiedTypeName name="java.io.InputStreamReader"/>
 <fullyQualifiedTypeName name="java.io.FileInputStream"/>
 <fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.Row"/>
 <fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.Cell"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
-<fullyQualifiedTypeName name="java.util.Set"/>
 <fullyQualifiedTypeName name="java.io.FileOutputStream"/>
 <fullyQualifiedTypeName name="java.io.FileNotFoundException"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
@@ -24,11 +13,9 @@
 <fullyQualifiedTypeName name="net.sf.json.JSONObject"/>
 <fullyQualifiedTypeName name="org.json.JSONArray"/>
 <fullyQualifiedTypeName name="org.json.JSONObject"/>
-<fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="java.lang.InternalError"/>
 <fullyQualifiedTypeName name="java.lang.Integer"/>
 <fullyQualifiedTypeName name="java.util.Map"/>
-<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData"/>
 <fullyQualifiedTypeName name="net.authorize.sim.Fingerprint"/>
 <fullyQualifiedTypeName name="org.mifosplatform.crm.clientprospect.data.ClientProspectData"/>
 <fullyQualifiedTypeName name="javax.persistence.OneToOne"/>
@@ -43,7 +30,6 @@
 <fullyQualifiedTypeName name="javax.ws.rs.PathParam"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.api.LoansApiResource"/>
 <fullyQualifiedTypeName name="org.springframework.data.repository.query.Param"/>
-<fullyQualifiedTypeName name="java.math.BigDecimal"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.data.FeeMasterData"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService"/>
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.feemaster.exception.FeeMasterDefaultCodeNotFoundException"/>
@@ -52,8 +38,26 @@
 <fullyQualifiedTypeName name="org.mifosplatform.organisation.taxmapping.data.LoanProductTaxData"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonParser"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
 <fullyQualifiedTypeName name="java.lang.Long"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="com.report.CalculatorBean"/>
+<fullyQualifiedTypeName name="java.lang.Override"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.exception.InvalidDownloadFormatException"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorData"/>
+<fullyQualifiedTypeName name="net.sf.jasperreports.engine.JasperReport"/>
+<fullyQualifiedTypeName name="net.sf.jasperreports.engine.design.JasperDesign"/>
+<fullyQualifiedTypeName name="net.sf.jasperreports.engine.xml.JRXmlLoader"/>
+<fullyQualifiedTypeName name="net.sf.jasperreports.engine.JasperCompileManager"/>
+<fullyQualifiedTypeName name="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
+<fullyQualifiedTypeName name="org.springframework.data.jpa.repository.JpaRepository"/>
+<fullyQualifiedTypeName name="java.math.BigDecimal"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
+<fullyQualifiedTypeName name="java.util.Set"/>
+<fullyQualifiedTypeName name="com.google.common.collect.Multiset.Entry"/>
+<fullyQualifiedTypeName name="org.hibernate.ejb.packaging.Entry"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
+<fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorPdfGenerate"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.exception.ExportFileNameNotNullException"/>
 </qualifiedTypeNameHistroy>

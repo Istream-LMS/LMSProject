@@ -404,7 +404,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	}
 
 	@Override
-	public String exportToXls(String apiRequestBodyAsJson, String commandParam) {
+	public String getExportJsonString(String apiRequestBodyAsJson, String commandParam) {
 		
 		Long entityId = new Long(0);
     	
@@ -424,9 +424,42 @@ public class LoanCalculatorWritePlatformServiceImpl implements
          
          JsonObject object = this.fromApiJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 	
          
-         object.addProperty("prospectLoanCalculatorId", entityId);      
+         object.addProperty("prospectLoanCalculatorId", entityId);  
+         object.addProperty("productName", returnValue(jsonElement, "productName")); 
+         object.addProperty("principal", returnValue("principal", jsonElement));  
+         object.addProperty("cof", returnValue("costOfFund", jsonElement));  
+         object.addProperty("maintenance", returnValue("maintenance", jsonElement));  
+         object.addProperty("interest", returnValue("interestRatePerPeriod", jsonElement));  
+         object.addProperty("deposit", returnValue("deposit", jsonElement));  
+         object.addProperty("locale", returnValue(jsonElement, "locale"));  
 		
 		return object.toString();
+	}
+	
+	private BigDecimal returnValue(String parameter, JsonElement element) {
+		
+		BigDecimal value = BigDecimal.ZERO;
+		
+		if(this.fromApiJsonHelper.parameterExists(parameter, element)) {
+			
+			value = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameter, element);
+			
+			value = value.setScale(2, BigDecimal.ROUND_HALF_UP);
+		}
+		
+		return value;
+	}
+	
+	private String returnValue(JsonElement element, String parameter) {
+		
+		String value = null;
+		
+		if(this.fromApiJsonHelper.parameterExists(parameter, element)) {
+			
+			value = this.fromApiJsonHelper.extractStringNamed(parameter, element);
+		}
+		
+		return value;
 	}
 	
 	
