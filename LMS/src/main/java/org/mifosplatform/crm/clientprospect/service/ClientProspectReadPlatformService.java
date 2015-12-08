@@ -23,7 +23,7 @@ public interface ClientProspectReadPlatformService {
 
 	public ClientProspectData retriveSingleClient(Long id, Long userId);
 
-	public Page<ClientProspectData> retriveClientProspect(SearchSqlQuery searchClientProspect, Long userId);
+	public Page<ClientProspectData> retriveClientProspect(SearchSqlQuery searchClientProspect, Long userId, boolean flag);
 
 	public Collection<ProspectProductData> retriveProducts();
 }

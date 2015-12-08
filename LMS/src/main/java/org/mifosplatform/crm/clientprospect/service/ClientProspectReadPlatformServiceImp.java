@@ -47,13 +47,18 @@ public class ClientProspectReadPlatformServiceImp implements
 		return jdbcTemplate.query(sql, rowMapper);
 	}
 
-	public Page<ClientProspectData> retriveClientProspect(final SearchSqlQuery searchClientProspect, final Long userId) {
+	public Page<ClientProspectData> retriveClientProspect(final SearchSqlQuery searchClientProspect, 
+			final Long userId, final boolean flag) {
 
 		final ClientProspectMapperForNewClient rowMapper = new ClientProspectMapperForNewClient();
 		final StringBuilder sqlBuilder = new StringBuilder(200);
 		sqlBuilder.append("select ").append(rowMapper.query())
-				.append(" where p.is_deleted = 'N' | 'Y' ")
-				.append(" and p.createdby_id = " + userId);
+				.append(" where p.is_deleted = 'N' | 'Y' ");
+		
+		if(flag){
+			sqlBuilder.append(" and p.createdby_id = " + userId);
+		}
+				
 
 		String sqlSearch = searchClientProspect.getSqlSearch();
 			

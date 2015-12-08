@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 @Service
 public class LoanCalculatorWritePlatformServiceImpl implements
@@ -95,7 +96,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		Gson gson = new Gson();
 
 		final JsonElement parsedJson = this.fromApiJsonHelper.parse(command.json());
-		String[] payTerms = this.fromApiJsonHelper.extractArrayNamed("payTerms", parsedJson);
+		JsonArray payTerms = this.fromApiJsonHelper.extractJsonArrayNamed("payTerms", parsedJson);
 		final BigDecimal deposit = getValue("deposit", parsedJson);
 		final BigDecimal principal = getValue("principal", parsedJson);
 		final BigDecimal interest = getValue("interestRatePerPeriod", parsedJson);
@@ -108,9 +109,9 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final BigDecimal comprehensiveInsuranceForYear = getValue("comprehensiveInsurance", parsedJson);
 		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", parsedJson);
 		
-		mileage = divideAtCalc(mileage, new BigDecimal(payTerms.length));
-		costOfFund = divideAtCalc(costOfFund, new BigDecimal(payTerms.length));
-		maintenance = divideAtCalc(maintenance, new BigDecimal(payTerms.length));
+		mileage = divideAtCalc(mileage, new BigDecimal(payTerms.size()));
+		costOfFund = divideAtCalc(costOfFund, new BigDecimal(payTerms.size()));
+		maintenance = divideAtCalc(maintenance, new BigDecimal(payTerms.size()));
 		
 		JsonArray deprecisationArray = this.fromApiJsonHelper.extractJsonArrayNamed("deprecisationArray", parsedJson);
 
@@ -144,14 +145,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				totalResidualAmountVEP = ZERO, totalResidualAmountVIP = ZERO;
 		
 		int keyPayTerm = 0;
-
-		if (payTerms.length == 0) {
-			payTerms = new String[] { "12", "24", "36", "48", "60" };
-		}
 		
-		for (String payTerm : payTerms) {
+		for (JsonElement payTerm : payTerms) {
 
-			keyPayTerm = Integer.parseInt(payTerm);
+			keyPayTerm = payTerm.getAsInt();
 			final BigDecimal payterm = new BigDecimal(keyPayTerm);
 			final BigDecimal percent = divideAtCalc(payterm, TWELVE);
 			
@@ -161,7 +158,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				
 				String key = this.fromApiJsonHelper.extractStringNamed("key", element);
 				
-				if (payTerm.equalsIgnoreCase(key)) {
+				if (payTerm.getAsString().equalsIgnoreCase(key)) {
 					residualVep = getValue("residualVep", element);
 				}
 				
@@ -170,10 +167,6 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			LoanCalculatorData loanCalculatorData = generateCalculation(
 					keyPayTerm, totalPrincipal, accountWDVRate, taxWDVRate, vatRate, 
 					processingAmount, mileage, fLPForYear, percent, residualVep);
-			
-			//final BigDecimal totalcoi, final BigDecimal totalCof, final BigDecimal totalMaintenances, 
-			//final BigDecimal totalReplacementTyres, final BigDecimal totalComprehensiveInsurance
-			
 			
 			calculateTotalAmount(processingAmount, interest, percent, payterm, loanCalculatorData.getResidualDeprecisation(), 
 					costOfFund, maintenance, replacementTyresForYear, comprehensiveInsuranceForYear, loanCalculatorData,
@@ -185,7 +178,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				final BigDecimal keyTerm = new BigDecimal(key);
 				BigDecimal keyPercent = divideAtCalc(keyTerm, TWELVE);
 				
-				if (payTerm.equalsIgnoreCase(key)) {
+				if (payTerm.getAsString().equalsIgnoreCase(key)) {
 					
 					BigDecimal subdeprecisation = divideAtCalc(getValue("deprecisation", element), HUNDERED) ;
 					
@@ -226,6 +219,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		
 		jsonObject.addProperty("principal", principal);
 		jsonObject.add("payTerms", jsonArray);
+		jsonObject.add("keyTerms", payTerms);
 
 		Map<String, Object> withChanges = new HashMap<String, Object>();
 		withChanges.put("data", jsonObject.toString());
