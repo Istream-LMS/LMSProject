@@ -50,7 +50,7 @@ public final class LoanCalculatorCommandFromApiJsonDeserializer {
 				"interestRatePerPeriod", "costOfFund", "locale", "dateFormat", "maintenance", "payTerms", 
 				"deposit", "mileage", "excess", "FLPForYear", "deprecisationArray", "productId",
 				"replacementTyres", "comprehensiveInsurance", "residualArray", "productName",
-				"customerName", "address", "address"));
+				"customerName", "address", "phone"));
 
 		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 		}.getType();
