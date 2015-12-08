@@ -875,7 +875,13 @@ public class LoansApiResource {
         
         final ResponseBuilder response = Response.ok(file);
         response.header("Content-Disposition", "attachment; filename=" + file.getName().replace(" ", "_"));
-        response.header("Content-Type", "application/vnd.ms-excel");
+        
+        
+        if(fileName.contains(".pdf")) {
+            response.header("Content-Type", "application/pdf");
+        } else {
+        	response.header("Content-Type", "application/vnd.ms-excel");
+		}
         
         return response.build();
     }

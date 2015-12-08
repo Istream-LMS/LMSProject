@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="java.io.InputStreamReader"/>
-<fullyQualifiedTypeName name="java.io.FileInputStream"/>
-<fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.Row"/>
-<fullyQualifiedTypeName name="org.apache.poi.ss.usermodel.Cell"/>
 <fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="java.io.FileOutputStream"/>
 <fullyQualifiedTypeName name="java.io.FileNotFoundException"/>
@@ -50,14 +46,18 @@
 <fullyQualifiedTypeName name="net.sf.jasperreports.engine.JasperCompileManager"/>
 <fullyQualifiedTypeName name="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 <fullyQualifiedTypeName name="org.springframework.data.jpa.repository.JpaRepository"/>
-<fullyQualifiedTypeName name="java.math.BigDecimal"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
 <fullyQualifiedTypeName name="java.util.Set"/>
 <fullyQualifiedTypeName name="com.google.common.collect.Multiset.Entry"/>
 <fullyQualifiedTypeName name="org.hibernate.ejb.packaging.Entry"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
-<fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.data.LoanCalculatorPdfGenerate"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanproduct.exception.ExportFileNameNotNullException"/>
+<fullyQualifiedTypeName name="org.springframework.beans.factory.annotation.Autowired"/>
+<fullyQualifiedTypeName name="com.jcraft.jsch.jce.Random"/>
+<fullyQualifiedTypeName name="java.util.Random"/>
+<fullyQualifiedTypeName name="org.mifosplatform.infrastructure.core.serialization.FromJsonHelper"/>
+<fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.service.LoanCalculatorScreenPdf"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
+<fullyQualifiedTypeName name="java.math.BigDecimal"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
 </qualifiedTypeNameHistroy>
