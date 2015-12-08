@@ -495,3 +495,27 @@ org.eclipse.osgi.framework.internal.core.AbstractBundle$BundleStatusException
 	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:42)
 	at org.eclipse.ui.internal.Workbench$54.run(Workbench.java:2402)
 	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:53)
+
+!ENTRY org.eclipse.php.debug.core 4 4 2015-12-08 11:06:46.789
+!MESSAGE The debug port 9000 is in use. Please select a different port for the debugger.
+
+!ENTRY org.eclipse.jface 2 0 2015-12-08 13:23:12.587
+!MESSAGE Keybinding conflicts occurred.  They may interfere with normal accelerator operation.
+!SUBENTRY 1 org.eclipse.jface 2 0 2015-12-08 13:23:12.587
+!MESSAGE A conflict occurred for CTRL+D:
+Binding(CTRL+D,
+	ParameterizedCommand(Command(org.eclipse.debug.ui.commands.eof,EOF,
+		Send end of file,
+		Category(org.eclipse.debug.ui.category.run,Run/Debug,Run/Debug command category,true),
+		org.eclipse.ui.internal.MakeHandlersGo@78d88b,
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.debug.ui.console,,,system)
+Binding(CTRL+D,
+	ParameterizedCommand(Command(org.eclipse.ui.edit.text.delete.line,Delete Line,
+		Delete a line of text,
+		Category(org.eclipse.ui.category.textEditor,Text Editing,Text Editing Commands,true),
+		org.eclipse.ui.internal.MakeHandlersGo@1d0c863,
+		,,true),null),
+	org.eclipse.ui.defaultAcceleratorConfiguration,
+	org.eclipse.ui.textEditorScope,,,system)

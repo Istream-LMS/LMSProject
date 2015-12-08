@@ -116,10 +116,13 @@ public class ClientProspectApiResource {
 	public String retriveProspectsForNewClient(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch, 
 			@QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset) {
 
-		AppUser user = context.authenticatedUser();
+		AppUser user = context.authenticatedUser();	
 		user.validateHasReadPermission(RESOURCETYPE);
+		
+		boolean flag = user.hasNotPermissionForAnyOf("ALL_FUNCTIONS");
+		
 		final SearchSqlQuery clientProspect = SearchSqlQuery.forSearch(sqlSearch, offset, limit);
-		final Page<ClientProspectData> clientProspectData = this.clientProspectReadPlatformService.retriveClientProspect(clientProspect,user.getId());
+		final Page<ClientProspectData> clientProspectData = this.clientProspectReadPlatformService.retriveClientProspect(clientProspect,user.getId(), flag);
 		return this.apiJsonSerializer.serialize(clientProspectData);
 	}
 	

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,8 +34,6 @@ public class LoanCalculatorScreenPdf {
 	private int pageNumber = 0;
 	
 	private static final String DATEFORMAT = "ddMMyyhhmmss";
-	private static final String SIMPLEDATEFORMAT = "dd MMM yyyy";
-	private static final String ZERO = "0";
 	private static final String LEASE = "LeaseCalculator";
 	private static final String PDF_FILE_EXTENSION = ".pdf";
 	private static final String UNDERSCORE = "_";
@@ -48,17 +45,12 @@ public class LoanCalculatorScreenPdf {
 	private static BigDecimal HUNDERED;
 	
 	private static SimpleDateFormat dateFormat;
-	private static SimpleDateFormat simpleDateFormat;
-	
-	private static DecimalFormat decimalFormat;
 	private static Random randomGenerator;
 	
 	private final FromJsonHelper fromApiJsonHelper;
 	
 	static {
 		dateFormat = new SimpleDateFormat(DATEFORMAT);
-		simpleDateFormat = new SimpleDateFormat(SIMPLEDATEFORMAT);
-		decimalFormat = new DecimalFormat(ZERO);
 		randomGenerator = new Random();
 		mc = new MathContext(8, RoundingMode.HALF_EVEN);
 		HUNDERED = new BigDecimal(100);
@@ -86,9 +78,8 @@ public class LoanCalculatorScreenPdf {
 
 	public String createPDF(String jsonObjectInString) {
 
-		boolean beginPage = true;
 		String path = null;
-		int y = 600, height = 570;
+		int y = 600;
 		PdfWriter docWriter = null;
 		
 		Document doc = null;
@@ -111,7 +102,9 @@ public class LoanCalculatorScreenPdf {
 			
 			ArrayList<LoanCalculatorPdfGenerate> data = getPdfData(jsonObject);
 			
-			generateLayout(doc, cb);
+			JsonArray jArray = jsonObject.getAsJsonArray("keyTerms");
+			
+			generateLayout(doc, cb, jArray);
 			generateHeader(doc, cb, jsonElement);
 				
 			for (LoanCalculatorPdfGenerate element : data) {
@@ -142,61 +135,85 @@ public class LoanCalculatorScreenPdf {
 		return path;
 	}
 
-	private void generateLayout(Document doc, PdfContentByte cb) {
+	private void generateLayout(Document doc, PdfContentByte cb, JsonArray jArray) {
 
 		try {
 
 			cb.setLineWidth(1f);
 
-			// Invoice Header box layout
-			cb.rectangle(20, 700, 550, 40);
+			// Invoice Header box For Address
+			cb.rectangle(20, 730, 550, 40);
 
-			cb.moveTo(20, 720);
-			cb.lineTo(570, 720);
+			cb.moveTo(20, 750);
+			cb.lineTo(570, 750);
 			
-			cb.moveTo(120, 740);
-			cb.lineTo(120, 700);
-			cb.moveTo(210, 740);
-			cb.lineTo(210, 700);
-			cb.moveTo(300, 740);
-			cb.lineTo(300, 700);
-			cb.moveTo(400, 740);
-			cb.lineTo(400, 700);
-			cb.moveTo(500, 740);
-			cb.lineTo(500, 700);
+			cb.moveTo(150, 770);
+			cb.lineTo(150, 730);			
+			cb.moveTo(300, 770);
+			cb.lineTo(300, 730);
+			cb.stroke();
+			
+			createHeadings(cb, 40, 755, "Customer Name");
+			createHeadings(cb, 180, 755, "Mobile Number");
+			createHeadings(cb, 350, 755, "Address");
+			
+			// Invoice Header box For Product
+			cb.rectangle(20, 670, 550, 40);
+
+			cb.moveTo(20, 690);
+			cb.lineTo(570, 690);
+			
+			cb.moveTo(120, 710);
+			cb.lineTo(120, 670);
+			cb.moveTo(210, 710);
+			cb.lineTo(210, 670);
+			cb.moveTo(300, 710);
+			cb.lineTo(300, 670);
+			cb.moveTo(400, 710);
+			cb.lineTo(400, 670);
+			cb.moveTo(500, 710);
+			cb.lineTo(500, 670);
 			cb.stroke();
 
 			// Invoice Header box Text Headings
-			createHeadings(cb, 40, 723, "Lease Product");
-			createHeadings(cb, 122, 723, "Vehicle Cost price");
-			createHeadings(cb, 222, 723, "Cof");
-			createHeadings(cb, 302, 723, "Maintenance");
-			createHeadings(cb, 402, 723, "Intrest");
-			createHeadings(cb, 502, 723, "Deposit");
+			createHeadings(cb, 40, 695, "Lease Product");
+			createHeadings(cb, 125, 695, "Vehicle Cost price");
+			createHeadings(cb, 230, 695, "Cof");
+			createHeadings(cb, 310, 695, "Maintenance");
+			createHeadings(cb, 410, 695, "Intrest");
+			createHeadings(cb, 510, 695, "Deposit");
 
 			// Invoice Detail box layout
 			cb.rectangle(20, 50, 550, 600);
 			cb.moveTo(20, 630);
 			cb.lineTo(570, 630);
-			cb.moveTo(180, 50);
-			cb.lineTo(180, 650);
+			cb.moveTo(190, 50);
+			cb.lineTo(190, 650);
 			cb.moveTo(260, 50);
 			cb.lineTo(260, 650);
 			cb.moveTo(330, 50);
 			cb.lineTo(330, 650);
 			cb.moveTo(400, 50);
 			cb.lineTo(400, 650);
-			cb.moveTo(460, 50);
-			cb.lineTo(460, 650);
+			cb.moveTo(470, 50);
+			cb.lineTo(470, 650);
 			cb.stroke();
 
 			// Invoice Detail box Text Headings
 			createHeadings(cb, 22, 633, "Terms");
-			createHeadings(cb, 198, 633, "12");
-			createHeadings(cb, 282, 633, "24");
-			createHeadings(cb, 352, 633, "36");
-			createHeadings(cb, 422, 633, "48");
-			createHeadings(cb, 482, 633, "60");
+			
+			int xAxisVal = 140;
+			
+			for (int i=0; i< jArray.size() && i<5; i++) {
+				xAxisVal =  xAxisVal + 70;
+				createHeadings(cb, xAxisVal, 633, jArray.get(i).getAsString());
+			}
+			
+			
+			/*createHeadings(cb, 280, 633, "24");
+			createHeadings(cb, 350, 633, "36");
+			createHeadings(cb, 420, 633, "48");
+			createHeadings(cb, 490, 633, "60");*/
 
 		}
 
@@ -216,7 +233,7 @@ public class LoanCalculatorScreenPdf {
 			createContent(cb, 328, y, element.getValueFor24().toString(), PdfContentByte.ALIGN_RIGHT);
 			createContent(cb, 392, y, element.getValueFor36().toString(), PdfContentByte.ALIGN_RIGHT);
 			createContent(cb, 450, y, element.getValueFor48().toString(), PdfContentByte.ALIGN_RIGHT);
-			createContent(cb, 510, y, element.getValueFor60().toString(), PdfContentByte.ALIGN_RIGHT);
+			createContent(cb, 520, y, element.getValueFor60().toString(), PdfContentByte.ALIGN_RIGHT);
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -235,12 +252,21 @@ public class LoanCalculatorScreenPdf {
 			BigDecimal interest = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interest", jsonElement);
 			BigDecimal deposit = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("deposit", jsonElement);
 			
-			createHeadings(cb, 22, 705, productName);
-			createHeadings(cb, 130, 705, principal.toString());
-			createHeadings(cb, 210, 705, cof.toString());
-			createHeadings(cb, 310, 705, maintenance.toString());
-			createHeadings(cb, 410, 705, interest.toString());
-			createHeadings(cb, 510, 705, deposit.toString());
+			String customerName = this.fromApiJsonHelper.extractStringNamed("customerName", jsonElement);
+			String address = this.fromApiJsonHelper.extractStringNamed("address", jsonElement);
+			String phoneNo = this.fromApiJsonHelper.extractStringNamed("phone", jsonElement);
+			
+			createHeadings(cb, 30, 675, productName);
+			createHeadings(cb, 140, 675, principal.toString());
+			createHeadings(cb, 230, 675, cof.toString());
+			createHeadings(cb, 330, 675, maintenance.toString());
+			createHeadings(cb, 425, 675, interest.toString());
+			createHeadings(cb, 510, 675, deposit.toString());
+			
+			createHeadings(cb, 40, 735, customerName == null ? "" : customerName);
+			createHeadings(cb, 180, 735, phoneNo == null ? "" : phoneNo);   
+			createHeadings(cb, 330, 735, address == null ? "" : address);
+			   
 		}
 
 		catch (Exception ex) {
