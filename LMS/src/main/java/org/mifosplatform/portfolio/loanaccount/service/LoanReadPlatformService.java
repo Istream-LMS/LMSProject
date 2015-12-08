@@ -82,6 +82,6 @@ public interface LoanReadPlatformService {
 
 	String printLeaseScreenReportDoc(Long loanId);
 
-	String exportToExcel(String changeJson);
+	String export(String jsonObjectInString, String commandType);
 	
 }

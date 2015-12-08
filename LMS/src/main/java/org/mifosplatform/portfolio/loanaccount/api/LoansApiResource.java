@@ -823,13 +823,13 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
 	public String exportToXlsx(final String apiRequestBodyAsJson,
-			@QueryParam("command") final String commandParam) {
+			@QueryParam("command") final String commandParam, @QueryParam("type") final String type) {
 
 		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
-		String result = this.loanCalculatorWritePlatformService.exportToXls(apiRequestBodyAsJson, commandParam);
+		String jsonObjectInString = this.loanCalculatorWritePlatformService.getExportJsonString(apiRequestBodyAsJson, commandParam);
 
-		String fileName = this.loanReadPlatformService.exportToExcel(result);
+		String fileName = this.loanReadPlatformService.export(jsonObjectInString, type);
 
 		File file = new File(fileName);
 
@@ -837,7 +837,7 @@ public class LoansApiResource {
 			throw new LeaseScreenReportFileNotFoundException(fileName);
 		}
 
-		JsonElement element = this.fromJsonHelper.parse(result);
+		JsonElement element = this.fromJsonHelper.parse(jsonObjectInString);
 
 		Long prospectLoanCalculatorId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
 
@@ -875,7 +875,13 @@ public class LoansApiResource {
         
         final ResponseBuilder response = Response.ok(file);
         response.header("Content-Disposition", "attachment; filename=" + file.getName().replace(" ", "_"));
-        response.header("Content-Type", "application/vnd.ms-excel");
+        
+        
+        if(fileName.contains(".pdf")) {
+            response.header("Content-Type", "application/pdf");
+        } else {
+        	response.header("Content-Type", "application/vnd.ms-excel");
+		}
         
         return response.build();
     }
