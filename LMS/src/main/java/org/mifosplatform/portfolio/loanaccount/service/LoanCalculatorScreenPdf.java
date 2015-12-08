@@ -177,7 +177,7 @@ public class LoanCalculatorScreenPdf {
 
 			// Invoice Header box Text Headings
 			createHeadings(cb, 40, 695, "Lease Product");
-			createHeadings(cb, 125, 695, "Vehicle Cost price");
+			createHeadings(cb, 122, 695, "Vehicle Cost price");
 			createHeadings(cb, 230, 695, "Cof");
 			createHeadings(cb, 310, 695, "Maintenance");
 			createHeadings(cb, 410, 695, "Intrest");

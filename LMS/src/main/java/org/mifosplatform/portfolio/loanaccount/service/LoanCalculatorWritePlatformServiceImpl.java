@@ -416,8 +416,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
          
          Map<String, Object> changes = result.getChanges(); 
          
-         JsonObject object = this.fromApiJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 	
+         JsonObject object = this.fromApiJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 
          
+         String locale = this.fromApiJsonHelper.extractStringNamed("locale", jsonElement);
+                       
          object.addProperty("prospectLoanCalculatorId", entityId);  
          object.addProperty("productName", returnValue(jsonElement, "productName")); 
          object.addProperty("principal", returnValue("principal", jsonElement));  
@@ -425,7 +427,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
          object.addProperty("maintenance", returnValue("maintenance", jsonElement));  
          object.addProperty("interest", returnValue("interestRatePerPeriod", jsonElement));  
          object.addProperty("deposit", returnValue("deposit", jsonElement));  
-         object.addProperty("locale", returnValue(jsonElement, "locale"));  
+         object.addProperty("locale", locale); 
+         object.addProperty("phone", returnValue(jsonElement, "phone")); 
+         object.addProperty("address", returnValue(jsonElement, "address")); 
+         object.addProperty("customerName", returnValue(jsonElement, "customerName")); 
 		
 		return object.toString();
 	}
@@ -446,7 +451,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	
 	private String returnValue(JsonElement element, String parameter) {
 		
-		String value = null;
+		String value = "";
 		
 		if(this.fromApiJsonHelper.parameterExists(parameter, element)) {
 			
