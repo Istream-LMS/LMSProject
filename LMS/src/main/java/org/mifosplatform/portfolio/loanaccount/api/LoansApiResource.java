@@ -91,6 +91,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanSchedule
 import org.mifosplatform.portfolio.loanaccount.service.LoanCalculatorWritePlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanFeeMasterDataReadPlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanRePaymentScreenPdf;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanTaxReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
@@ -818,29 +819,76 @@ public class LoansApiResource {
         return null;
     }
     
+    private LoanScheduleData getLoanScheduleData(String apiRequestBodyAsJson) {
+    	
+    	final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+		
+		final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
+
+		final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
+		
+		return loanSchedule.toData();
+    }
+    
+	private Long returnProspectCalculatorId(String apiRequestBodyAsJson) {
+
+		if (apiRequestBodyAsJson == null) {
+			return -1L;
+		} else {
+			JsonElement element = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+			return this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
+		}
+	}
+    
     @POST
     @Path("calculator/export")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-	public String exportToXlsx(final String apiRequestBodyAsJson,
-			@QueryParam("command") final String commandParam, @QueryParam("type") final String type) {
+	public String exportToXlsx(final String apiRequestBodyAsJson, @QueryParam("command") final String commandParam, 
+			@QueryParam("downloadType") final String downloadType, @QueryParam("isProspect") final boolean isProspect) {
 
+    	String fileName = null, jsonObjectInString = null;
+    	
 		this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+		
+		if (is(commandParam, "repaymentSchedule") && isProspect) {	
+			
+			jsonObjectInString = this.loanCalculatorWritePlatformService.getExportJsonString(apiRequestBodyAsJson, isProspect);
+			
+			JsonElement element = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+			
+			String repaymentData = this.fromJsonHelper.extractStringNamed("repaymentSchedule", element);
+			String name = this.fromJsonHelper.extractStringNamed("customerName", element);
+			String phoneNumber = this.fromJsonHelper.extractStringNamed("phone", element);
+			String emailId = this.fromJsonHelper.extractStringNamed("emailId", element);
+			
+			LoanScheduleData loanScheduleData = getLoanScheduleData(repaymentData);
+			
+			fileName = new LoanRePaymentScreenPdf().createPDF(null, loanScheduleData, name, emailId, phoneNumber);
+			
+		} else if (is(commandParam, "repaymentSchedule")) {			
 
-		String jsonObjectInString = this.loanCalculatorWritePlatformService.getExportJsonString(apiRequestBodyAsJson, commandParam);
-
-		String fileName = this.loanReadPlatformService.export(jsonObjectInString, type);
-
+			LoanScheduleData loanScheduleData = getLoanScheduleData(apiRequestBodyAsJson);
+			JsonElement element = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+			String name = this.fromJsonHelper.extractStringNamed("customerName", element);
+			String phoneNumber = this.fromJsonHelper.extractStringNamed("phone", element);
+			String emailId = this.fromJsonHelper.extractStringNamed("emailId", element);
+			fileName = new LoanRePaymentScreenPdf().createPDF(null, loanScheduleData, name, emailId, phoneNumber);
+			
+		} else {		
+			
+			jsonObjectInString = this.loanCalculatorWritePlatformService.getExportJsonString(apiRequestBodyAsJson, isProspect);
+			fileName = this.loanReadPlatformService.export(jsonObjectInString, downloadType);
+		}
+		
 		File file = new File(fileName);
 
 		if (!file.exists()) {
 			throw new LeaseScreenReportFileNotFoundException(fileName);
 		}
 
-		JsonElement element = this.fromJsonHelper.parse(jsonObjectInString);
-
-		Long prospectLoanCalculatorId = this.fromJsonHelper.extractLongNamed("prospectLoanCalculatorId", element);
-
+		Long prospectLoanCalculatorId = returnProspectCalculatorId(jsonObjectInString);
+		
 		JsonObject jsonObject = new JsonObject();
 
 		jsonObject.addProperty("fileName", fileName.replace(FileSystemContentRepository.MIFOSX_BASE_DIR 

@@ -398,11 +398,11 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	}
 
 	@Override
-	public String getExportJsonString(String apiRequestBodyAsJson, String commandParam) {
+	public String getExportJsonString(String apiRequestBodyAsJson, boolean isProspect) {
 		
 		Long entityId = new Long(0);
     	
-    	if (null != commandParam && commandParam.equalsIgnoreCase(PROSPECT)) {
+    	if (isProspect) {
     		entityId = new Long(1);
 		}
     	
@@ -431,6 +431,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
          object.addProperty("phone", returnValue(jsonElement, "phone")); 
          object.addProperty("address", returnValue(jsonElement, "address")); 
          object.addProperty("customerName", returnValue(jsonElement, "customerName")); 
+         object.addProperty("emailId", returnValue(jsonElement, "emailId"));
 		
 		return object.toString();
 	}
