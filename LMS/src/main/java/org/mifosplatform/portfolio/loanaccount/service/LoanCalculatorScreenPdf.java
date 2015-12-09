@@ -60,7 +60,7 @@ public class LoanCalculatorScreenPdf {
 		this.fromApiJsonHelper = fromApiJsonHelper;
 	}
 
-	private String getFileLocation() {
+	public static String getFileLocation() {
 
 		String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE;
 

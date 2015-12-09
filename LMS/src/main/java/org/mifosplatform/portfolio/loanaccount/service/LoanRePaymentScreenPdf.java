@@ -40,6 +40,10 @@ public class LoanRePaymentScreenPdf {
 	DecimalFormat decimalFormat = new DecimalFormat(ZERO);
 
 	private String getFileLocation(Long loanId) {
+		
+		if(loanId == null) {
+			return LoanCalculatorScreenPdf.getFileLocation();
+		}
 
 		String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator + loanId;
 
@@ -72,7 +76,11 @@ public class LoanRePaymentScreenPdf {
 		if (null == phoneNumber) {
 			phoneNumber = "";
 		}
-
+		
+		if (null == name) {
+			name = "";
+		}
+		
 		try {			
 			doc = new Document();
 			initializeFonts();
@@ -265,7 +273,10 @@ public class LoanRePaymentScreenPdf {
 
 		try {
 
-			createHeadings(cb, 133, 743, loanId.toString());
+			if(null != loanId) {
+				createHeadings(cb, 133, 743, loanId.toString());
+			}
+			
 			createHeadings(cb, 133, 723, name);
 			createHeadings(cb, 133, 703, emailId);
 			createHeadings(cb, 133, 683, phoneNumber);

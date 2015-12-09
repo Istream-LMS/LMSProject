@@ -42,7 +42,8 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             "loanTermFrequencyType", "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
-            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId","depositArray","taxArray"));
+            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting", "linkAccountId","depositArray","taxArray",
+            "customerName", "phone", "emailId"));
     
     final Set<String> supportedParametersForTax = new HashSet<String>(Arrays.asList("taxes", "principal", "locale", 
     		"charges", "intrest", "deposit"));

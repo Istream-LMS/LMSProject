@@ -7,6 +7,6 @@ public interface LoanCalculatorWritePlatformService {
 
 	CommandProcessingResult createLoanCalculator(final Long entityId, final JsonCommand command);
 	
-	String getExportJsonString(String apiRequestBodyAsJson, String commandParam);
+	String getExportJsonString(final String apiRequestBodyAsJson, final boolean isProspect);
 	
 }

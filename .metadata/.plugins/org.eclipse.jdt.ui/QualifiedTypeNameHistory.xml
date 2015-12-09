@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="java.util.HashMap"/>
 <fullyQualifiedTypeName name="java.io.FileOutputStream"/>
 <fullyQualifiedTypeName name="java.io.FileNotFoundException"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
@@ -46,7 +45,6 @@
 <fullyQualifiedTypeName name="net.sf.jasperreports.engine.JasperCompileManager"/>
 <fullyQualifiedTypeName name="net.sf.jasperreports.engine.data.JRBeanCollectionDataSource"/>
 <fullyQualifiedTypeName name="org.springframework.data.jpa.repository.JpaRepository"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
 <fullyQualifiedTypeName name="java.util.Set"/>
 <fullyQualifiedTypeName name="com.google.common.collect.Multiset.Entry"/>
 <fullyQualifiedTypeName name="org.hibernate.ejb.packaging.Entry"/>
@@ -57,7 +55,9 @@
 <fullyQualifiedTypeName name="java.util.Random"/>
 <fullyQualifiedTypeName name="org.mifosplatform.infrastructure.core.serialization.FromJsonHelper"/>
 <fullyQualifiedTypeName name="org.mifosplatform.portfolio.loanaccount.service.LoanCalculatorScreenPdf"/>
-<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
 <fullyQualifiedTypeName name="java.math.BigDecimal"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonObject"/>
+<fullyQualifiedTypeName name="com.itextpdf.text.pdf.ArrayBasedStringTokenizer"/>
+<fullyQualifiedTypeName name="com.google.gson.JsonArray"/>
 <fullyQualifiedTypeName name="com.google.gson.JsonElement"/>
 </qualifiedTypeNameHistroy>
