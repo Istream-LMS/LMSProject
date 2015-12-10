@@ -19,6 +19,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
@@ -48,7 +49,8 @@ public final class LoanCalculatorCommandFromApiJsonDeserializer {
 		final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("principal", 
 				"interestRatePerPeriod", "costOfFund", "locale", "dateFormat", "maintenance", "payTerms", 
 				"deposit", "mileage", "excess", "FLPForYear", "deprecisationArray", "productId",
-				"replacementTyres", "comprehensiveInsurance", "residualArray"));
+				"replacementTyres", "comprehensiveInsurance", "residualArray", "productName",
+				"customerName", "address", "phone", "repaymentSchedule", "emailId"));
 
 		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
 		}.getType();
@@ -78,6 +80,13 @@ public final class LoanCalculatorCommandFromApiJsonDeserializer {
 		
 		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", element);
 		baseDataValidator.reset().parameter("productId").value(productId).notBlank();
+		
+		final JsonArray payTerms = this.fromApiJsonHelper.extractJsonArrayNamed("payTerms", element);
+		
+		if(null == payTerms || payTerms.size() < 1) {
+			baseDataValidator.reset().parameter("payTerms").notBlank();
+		}
+		
 				
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}

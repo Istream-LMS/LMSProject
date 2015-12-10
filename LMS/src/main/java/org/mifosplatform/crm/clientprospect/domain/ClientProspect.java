@@ -330,6 +330,7 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 		final String preferredLoanProduct = "preferredLoanProduct";
 		final String note = "note";
 		final String tin = "tin";
+		final String location = "location";
 
 		
 		if (command.isChangeInStringParameterNamed(firstName, this.firstName)) {
@@ -416,10 +417,17 @@ public class ClientProspect extends AbstractAuditableCustom<AppUser, Long> {
 			actualChanges.put(note, newValue);
 			this.note = newValue;
 		}
+		
 		if (command.isChangeInStringParameterNamed(note, this.tin)) {
 			final String newValue = command.stringValueOfParameterNamed(note);
 			actualChanges.put(tin, newValue);
 			this.tin = newValue;
+		}
+		
+		if (command.isChangeInStringParameterNamed(location, this.location)) {
+			final String newValue = command.stringValueOfParameterNamed(location);
+			actualChanges.put(location, newValue);
+			this.location = newValue;
 		}
 
 		return actualChanges;

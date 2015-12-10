@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 @Service
 public class LoanCalculatorWritePlatformServiceImpl implements
@@ -45,11 +46,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 	private final BigDecimal HUNDERED = new BigDecimal(100);
 	private final BigDecimal ONE = BigDecimal.ONE;
 	private final BigDecimal ZERO = BigDecimal.ZERO;
-	
-	//private final int payTerms[] = { 12, 24, 36, 48, 60 };
 
 	private final MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
 	private final MathContext mc2 = new MathContext(8, RoundingMode.HALF_UP);
+	private static final String PROSPECT = "Prospect";
 
 	private TaxMap accountWDV;
 	private TaxMap taxWDV;
@@ -96,12 +96,12 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		Gson gson = new Gson();
 
 		final JsonElement parsedJson = this.fromApiJsonHelper.parse(command.json());
-		String[] payTerms = this.fromApiJsonHelper.extractArrayNamed("payTerms", parsedJson);
+		JsonArray payTerms = this.fromApiJsonHelper.extractJsonArrayNamed("payTerms", parsedJson);
 		final BigDecimal deposit = getValue("deposit", parsedJson);
 		final BigDecimal principal = getValue("principal", parsedJson);
 		final BigDecimal interest = getValue("interestRatePerPeriod", parsedJson);
-		final BigDecimal costOfFund = getValue("costOfFund", parsedJson);
-		final BigDecimal maintenance = getValue("maintenance", parsedJson);
+		BigDecimal costOfFund = getValue("costOfFund", parsedJson);
+		BigDecimal maintenance = getValue("maintenance", parsedJson);
 		BigDecimal mileage = getValue("mileage", parsedJson);
 		final BigDecimal excess = getValue("excess", parsedJson);
 		final BigDecimal fLPForYear = getValue("FLPForYear", parsedJson);	
@@ -109,11 +109,9 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		final BigDecimal comprehensiveInsuranceForYear = getValue("comprehensiveInsurance", parsedJson);
 		final Long productId = this.fromApiJsonHelper.extractLongNamed("productId", parsedJson);
 		
-		mileage = divideAtCalc(mileage, new BigDecimal(payTerms.length));
-		//mileage = mileage.round(mc1);
-		
-		/*{"productId":16,"principal":150000,"interestRatePerPeriod":8,"deposit":0,"mileage":2500,"excess":0.39,
-			"FLPForYear":500,"costOfFund":"4004.76","maintenance":"4042.86","locale":"en","payTerms":[12,24,36,48,60]}*/
+		mileage = divideAtCalc(mileage, new BigDecimal(payTerms.size()));
+		costOfFund = divideAtCalc(costOfFund, new BigDecimal(payTerms.size()));
+		maintenance = divideAtCalc(maintenance, new BigDecimal(payTerms.size()));
 		
 		JsonArray deprecisationArray = this.fromApiJsonHelper.extractJsonArrayNamed("deprecisationArray", parsedJson);
 
@@ -147,14 +145,10 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				totalResidualAmountVEP = ZERO, totalResidualAmountVIP = ZERO;
 		
 		int keyPayTerm = 0;
-
-		if (payTerms.length == 0) {
-			payTerms = new String[] { "12", "24", "36", "48", "60" };
-		}
 		
-		for (String payTerm : payTerms) {
+		for (JsonElement payTerm : payTerms) {
 
-			keyPayTerm = Integer.parseInt(payTerm);
+			keyPayTerm = payTerm.getAsInt();
 			final BigDecimal payterm = new BigDecimal(keyPayTerm);
 			final BigDecimal percent = divideAtCalc(payterm, TWELVE);
 			
@@ -164,7 +158,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				
 				String key = this.fromApiJsonHelper.extractStringNamed("key", element);
 				
-				if (payTerm.equalsIgnoreCase(key)) {
+				if (payTerm.getAsString().equalsIgnoreCase(key)) {
 					residualVep = getValue("residualVep", element);
 				}
 				
@@ -173,10 +167,6 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			LoanCalculatorData loanCalculatorData = generateCalculation(
 					keyPayTerm, totalPrincipal, accountWDVRate, taxWDVRate, vatRate, 
 					processingAmount, mileage, fLPForYear, percent, residualVep);
-			
-			//final BigDecimal totalcoi, final BigDecimal totalCof, final BigDecimal totalMaintenances, 
-			//final BigDecimal totalReplacementTyres, final BigDecimal totalComprehensiveInsurance
-			
 			
 			calculateTotalAmount(processingAmount, interest, percent, payterm, loanCalculatorData.getResidualDeprecisation(), 
 					costOfFund, maintenance, replacementTyresForYear, comprehensiveInsuranceForYear, loanCalculatorData,
@@ -188,7 +178,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				final BigDecimal keyTerm = new BigDecimal(key);
 				BigDecimal keyPercent = divideAtCalc(keyTerm, TWELVE);
 				
-				if (payTerm.equalsIgnoreCase(key)) {
+				if (payTerm.getAsString().equalsIgnoreCase(key)) {
 					
 					BigDecimal subdeprecisation = divideAtCalc(getValue("deprecisation", element), HUNDERED) ;
 					
@@ -205,8 +195,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 							subCOF, subMaintenance, subReplacementTyresForYear, subComprehensiveInsuranceForYear, loanCalculatorData,
 							totalcoi, totalCof, totalMaintenances, totalReplacementTyres, totalComprehensiveInsurance);
 				}
-			}
-			
+			}		
 			
 			totalcoi = totalcoi.add(loanCalculatorData.getCoiForYear(), mc);
 			totalCof = totalCof.add(loanCalculatorData.getCofForYear(), mc);
@@ -230,6 +219,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 		
 		jsonObject.addProperty("principal", principal);
 		jsonObject.add("payTerms", jsonArray);
+		jsonObject.add("keyTerms", payTerms);
 
 		Map<String, Object> withChanges = new HashMap<String, Object>();
 		withChanges.put("data", jsonObject.toString());
@@ -298,7 +288,7 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 			BigDecimal residual = awAmount.add(twAmount, mc);
 	        residualAmountVEP = divideAtCalc(residual, TWO);// (5) //D45=(D55+D56) /2
 		}
-		
+        
 		BigDecimal residualAmountVIP = residualAmountVEP.multiply(ONEHALF, mc);// (6) //=D45*1.15
 		
 		BigDecimal residualCost = divideAtCalc(residualAmountVEP, processingAmount);// (7) //=D45/B18
@@ -405,6 +395,71 @@ public class LoanCalculatorWritePlatformServiceImpl implements
 				totalwoMaintenance, totalMaintenance, rateWOMaintenance,
 				costWOMaintenance, rateWithMaintenance, quoteWOMaintenance,
 				quoteWMaintenance, residualDeprecisation, loanCalculatorData);
+	}
+
+	@Override
+	public String getExportJsonString(String apiRequestBodyAsJson, boolean isProspect) {
+		
+		Long entityId = new Long(0);
+    	
+    	if (isProspect) {
+    		entityId = new Long(1);
+		}
+    	
+		final JsonElement jsonElement = this.fromApiJsonHelper.parse(apiRequestBodyAsJson);
+    	
+    	JsonCommand command = new JsonCommand(null, jsonElement.toString(),jsonElement, fromApiJsonHelper, null, null, null, null, null, null, null, null, null, null, null,null, null);
+    	
+    	CommandProcessingResult result = createLoanCalculator(entityId, command);
+    	
+ 		entityId = result.resourceId() == null ? 0 : result.resourceId();
+         
+         Map<String, Object> changes = result.getChanges(); 
+         
+         JsonObject object = this.fromApiJsonHelper.parse(changes.get("data").toString()).getAsJsonObject(); 
+         
+         String locale = this.fromApiJsonHelper.extractStringNamed("locale", jsonElement);
+                       
+         object.addProperty("prospectLoanCalculatorId", entityId);  
+         object.addProperty("productName", returnValue(jsonElement, "productName")); 
+         object.addProperty("principal", returnValue("principal", jsonElement));  
+         object.addProperty("cof", returnValue("costOfFund", jsonElement));  
+         object.addProperty("maintenance", returnValue("maintenance", jsonElement));  
+         object.addProperty("interest", returnValue("interestRatePerPeriod", jsonElement));  
+         object.addProperty("deposit", returnValue("deposit", jsonElement));  
+         object.addProperty("locale", locale); 
+         object.addProperty("phone", returnValue(jsonElement, "phone")); 
+         object.addProperty("address", returnValue(jsonElement, "address")); 
+         object.addProperty("customerName", returnValue(jsonElement, "customerName")); 
+         object.addProperty("emailId", returnValue(jsonElement, "emailId"));
+		
+		return object.toString();
+	}
+	
+	private BigDecimal returnValue(String parameter, JsonElement element) {
+		
+		BigDecimal value = BigDecimal.ZERO;
+		
+		if(this.fromApiJsonHelper.parameterExists(parameter, element)) {
+			
+			value = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameter, element);
+			
+			value = value.setScale(2, BigDecimal.ROUND_HALF_UP);
+		}
+		
+		return value;
+	}
+	
+	private String returnValue(JsonElement element, String parameter) {
+		
+		String value = "";
+		
+		if(this.fromApiJsonHelper.parameterExists(parameter, element)) {
+			
+			value = this.fromApiJsonHelper.extractStringNamed(parameter, element);
+		}
+		
+		return value;
 	}
 	
 	

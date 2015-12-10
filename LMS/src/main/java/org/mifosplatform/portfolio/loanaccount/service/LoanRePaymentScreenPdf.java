@@ -40,6 +40,10 @@ public class LoanRePaymentScreenPdf {
 	DecimalFormat decimalFormat = new DecimalFormat(ZERO);
 
 	private String getFileLocation(Long loanId) {
+		
+		if(loanId == null) {
+			return LoanCalculatorScreenPdf.getFileLocation();
+		}
 
 		String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + LEASE + File.separator + loanId;
 
@@ -48,8 +52,8 @@ public class LoanRePaymentScreenPdf {
 			new File(fileLocation).mkdirs();
 		}
 
-		System.out.println(fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
-				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION);
+//		System.out.println(fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
+//				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION);
 
 		return fileLocation + File.separator + LEASE + UNDERSCORE + loanId 
 				+ UNDERSCORE + dateFormat.format(new Date()) + PDF_FILE_EXTENSION;
@@ -63,11 +67,23 @@ public class LoanRePaymentScreenPdf {
 		int y = 0, height = 570, finalHeight = 0, count = 0;
 		PdfWriter docWriter = null;
 		
-		Document doc = new Document();	
-		initializeFonts();
+		Document doc = null;
 
+		if (null == emailId) {
+			emailId = "";
+		}
+
+		if (null == phoneNumber) {
+			phoneNumber = "";
+		}
+		
+		if (null == name) {
+			name = "";
+		}
+		
 		try {			
-
+			doc = new Document();
+			initializeFonts();
 			path = getFileLocation(loanId);
 			docWriter = PdfWriter.getInstance(doc, new FileOutputStream(path));
 			doc.addCreationDate();
@@ -257,7 +273,10 @@ public class LoanRePaymentScreenPdf {
 
 		try {
 
-			createHeadings(cb, 133, 743, loanId.toString());
+			if(null != loanId) {
+				createHeadings(cb, 133, 743, loanId.toString());
+			}
+			
 			createHeadings(cb, 133, 723, name);
 			createHeadings(cb, 133, 703, emailId);
 			createHeadings(cb, 133, 683, phoneNumber);

@@ -116,10 +116,13 @@ public class ClientProspectApiResource {
 	public String retriveProspectsForNewClient(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch, 
 			@QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset) {
 
-		AppUser user = context.authenticatedUser();
+		AppUser user = context.authenticatedUser();	
 		user.validateHasReadPermission(RESOURCETYPE);
+		
+		boolean flag = user.hasNotPermissionForAnyOf("ALL_FUNCTIONS");
+		
 		final SearchSqlQuery clientProspect = SearchSqlQuery.forSearch(sqlSearch, offset, limit);
-		final Page<ClientProspectData> clientProspectData = this.clientProspectReadPlatformService.retriveClientProspect(clientProspect,user.getId());
+		final Page<ClientProspectData> clientProspectData = this.clientProspectReadPlatformService.retriveClientProspect(clientProspect,user.getId(), flag);
 		return this.apiJsonSerializer.serialize(clientProspectData);
 	}
 	
@@ -195,200 +198,18 @@ public class ClientProspectApiResource {
 	@Path("{prospectId}")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Consumes({ MediaType.APPLICATION_JSON })
-	public String getSingleClient(@Context final UriInfo uriInfo,
-			@PathParam("prospectId") final Long prospectId) {
+	public String getSingleClient(@Context final UriInfo uriInfo,@PathParam("prospectId") final Long prospectId) {
 
 		AppUser user = context.authenticatedUser();
 		user.validateHasReadPermission(RESOURCETYPE);
 		final ClientProspectData clientData = clientProspectReadPlatformService.retriveSingleClient(prospectId, user.getId());
 		final Collection<MCodeData> sourceOfPublicityData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SOURCE_TYPE);
-		//final Collection<ProspectPlanCodeData> planData = clientProspectReadPlatformService.retrivePlans();
-		//clientData.setPlanData(planData);
+		final Collection<ProspectProductData> productData = clientProspectReadPlatformService.retriveProducts();
 		clientData.setSourceOfPublicityData(sourceOfPublicityData);
+		clientData.setProductData(productData);
 		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializerString.serialize(settings, clientData, PROSPECT_RESPONSE_DATA_PARAMETER);
 	}
-	
-	/**
-	 * calling for specific Prospect
-	 * @param uriInfo
-	 * @param id
-	 * @return
-	 *//*
-	@GET
-	@Path("{prospectId}")
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public String getSingleClient(@Context final UriInfo uriInfo,
-			@PathParam("prospectId") final Long prospectId) {
-
-		AppUser user = context.authenticatedUser();
-		user.validateHasReadPermission(RESOURCETYPE);
-		final ClientProspectData clientData = clientProspectReadPlatformService.retriveSingleClient(prospectId, user.getId());
-		final Collection<MCodeData> sourceOfPublicityData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SOURCE_TYPE);
-		final Collection<ProspectPlanCodeData> planData = clientProspectReadPlatformService.retrivePlans();
-		clientData.setPlanData(planData);
-		clientData.setSourceOfPublicityData(sourceOfPublicityData);
-		
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.apiJsonSerializerString.serialize(settings, clientData, PROSPECT_RESPONSE_DATA_PARAMETER);
-	}
-	
-	*//**
-	 * During Update Prospect
-	 * @param prospectId
-	 * @param jsonRequestBody
-	 * @return
-	 *//*
-	@PUT
-	@Path("{prospectId}")
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public String updateProspectDetails(@PathParam("prospectId") final Long prospectId,
-			final String jsonRequestBody) {
-		
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateProspect(prospectId).withJson(jsonRequestBody).build();
-		final CommandProcessingResult result = commandSourceWritePlatformService.logCommandSource(commandRequest);
-		return apiJsonSerializer.serialize(result);
-	}
-	
-	*//**
-	 * During cancel/delete Prospect
-	 * @param uriInfo
-	 * @param prospectId
-	 * @return
-	 *//*
-	@GET
-	@Path("cancel/{prospectId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retriveDataForCancle(@Context final UriInfo uriInfo,
-			@PathParam("prospectId") final Long prospectId) {
-		
-		context.authenticatedUser().validateHasReadPermission(RESOURCETYPE);
-		final Collection<MCodeData> mCodeData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_STATUS_REMARK);
-		final List<ProspectStatusRemarkData> statusRemarkData = new ArrayList<ProspectStatusRemarkData>();
-		
-		for (MCodeData codeData : mCodeData) {
-			statusRemarkData.add(new ProspectStatusRemarkData(codeData.getId(), codeData.getmCodeValue()));
-		}
-		
-		final ProspectStatusRemarkData data = new ProspectStatusRemarkData();
-		data.setStatusRemarkData(statusRemarkData);
-		
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.apiJsonSerializerForStatusRemark.serialize(settings, data, PROSPECTDETAILREMARK_RESPONSE_DATA_PARAMETER);
-
-	}
-	
-	*//**
-	 * During Deleteion of a prospect
-	 * @param prospectId
-	 * @param jsonRequestBody
-	 * @return
-	 *//*
-	@DELETE
-	@Path("{prospectId}")
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public String deleteProspect(@PathParam("prospectId") final Long prospectId,
-			final String jsonRequestBody) {
-
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteProspect(prospectId).withJson(jsonRequestBody).build();
-		final CommandProcessingResult result = commandSourceWritePlatformService.logCommandSource(commandRequest);
-		return apiJsonSerializer.serialize(result);
-	}
-
-	*//**
-	 * During Followup
-	 * @param uriInfo
-	 * @param prospectId
-	 * @return
-	 *//*
-	@GET
-	@Path("followup/{prospectId}")
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public String retriveProspects(@Context final UriInfo uriInfo, @PathParam("prospectId") final Long prospectId) {
-		
-		AppUser user = context.authenticatedUser();
-		user.validateHasReadPermission(RESOURCETYPE);
-		
-		final ProspectDetailData clientProspectData = this.clientProspectReadPlatformService.retriveClientProspect(prospectId);
-		final Collection<MCodeData> mCodeData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CALL_STATUS);
-		final List<ProspectDetailCallStatus> callStatusData = new ArrayList<ProspectDetailCallStatus>();
-		final List<ProspectDetailAssignedToData> assignedToData = clientProspectReadPlatformService.retrieveUsers();
-		
-		for (MCodeData code : mCodeData) {
-			final ProspectDetailCallStatus p = new ProspectDetailCallStatus(code.getId(), code.getmCodeValue());
-			callStatusData.add(p);
-		}
-		
-		clientProspectData.setCallStatusData(callStatusData);
-		clientProspectData.setAssignedToData(assignedToData);
-		
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.apiJsonSerializerForProspectDetail.serialize(settings, clientProspectData, PROSPECTDETAIL_RESPONSE_DATA_PARAMETER);
-	}
-	
-	*//**
-	 * during Followup saving
-	 * @param prospectId
-	 * @param jasonRequestBody
-	 * @return
-	 *//*
-	@PUT
-	@Path("followup/{prospectId}")
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public String followUpProspect(@PathParam("prospectId") final Long prospectId,
-			final String jasonRequestBody) {
-
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().followUpProspect(prospectId).withJson(jasonRequestBody).build();
-		final CommandProcessingResult result = commandSourceWritePlatformService.logCommandSource(commandRequest);
-		return apiJsonSerializer.serialize(result);
-	}
-	
-	*//** 
-	 * Convert to Client
-	 * @param prospectId
-	 * @param jsonRequestBody
-	 * @return
-	 *//*
-	@POST
-	@Path("converttoclient/{prospectId}")
-	@Produces({ MediaType.APPLICATION_JSON })
-	@Consumes({ MediaType.APPLICATION_JSON })
-	public String convertProspecttoClientCreation(@PathParam("prospectId") final Long prospectId,
-			final String jsonRequestBody) {
-
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().convertProspectToClient(prospectId).build();
-		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
-		return apiJsonSerializer.serialize(result);
-	}
-
-	*//**
-	 * calling on specific prospect 
-	 * @param uriInfo
-	 * @param prospectdetailid
-	 * @return
-	 *//*
-	@GET
-	@Path("{prospectdetailid}/history")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String history(@Context final UriInfo uriInfo,
-			@PathParam("prospectdetailid") final Long prospectdetailid) {
-		
-		AppUser user = context.authenticatedUser();
-		user.validateHasReadPermission(RESOURCETYPE);
-		final List<ProspectDetailData> prospectDetailData = this.clientProspectReadPlatformService.retriveProspectDetailHistory(prospectdetailid, user.getId());
-		final ProspectDetailData data = new ProspectDetailData(prospectDetailData);
-		
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.apiJsonSerializerForProspectDetail.serialize(settings, data, PROSPECT_RESPONSE_DATA_PARAMETER);
-	}
-*/
 	
 }

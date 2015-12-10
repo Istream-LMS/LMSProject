@@ -51,8 +51,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "transactionProcessingStrategyId", // settings
             "calendarId", // optional
             "syncDisbursementWithMeeting",// optional
-            "linkAccountId","depositArray"));
-
+            "linkAccountId","depositArray", "taxArray",
+            "interestRateFrequencyType", "loanType"));
+    
     private final FromJsonHelper fromApiJsonHelper;
     private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
 
