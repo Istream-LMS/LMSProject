@@ -28,7 +28,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	 
 	
 	 	Set<String> supportedParameters = new HashSet<String>(Arrays.asList("itemCode","itemDescription","units","chargeCode","locale","unitPrice","warranty","itemClass",
-	 			"reorderLevel","chargeCode", "itemPrices", "regionId", "price", "removeItemPrices","manufacturer","warrantyExpiryDate","dateFormat","chargeCodeData"));
+	 			"reorderLevel","chargeCode", "itemPrice", "regionId", "price", "removeItemPrices","manufacturer","warrantyExpiryDate","dateFormat","chargeCodeData"));
 	    private final FromJsonHelper fromApiJsonHelper;
 
 	    @Autowired
@@ -65,6 +65,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	        final Integer warranty = fromApiJsonHelper.extractIntegerNamed("warranty",element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
 	        final String manufacturer = fromApiJsonHelper.extractStringNamed("manufacturer", element);
 	        final LocalDate warrantyExpiryDate = fromApiJsonHelper.extractLocalDateNamed("warrantyExpiryDate", element);
+	        final BigDecimal itemPrice = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("itemPrice", element);
 	        
 	        baseDataValidator.reset().parameter("itemCode").value(itemCode).notBlank().notExceedingLengthOf(10);
 	        baseDataValidator.reset().parameter("itemDescription").value(itemDescription).notBlank();
@@ -74,6 +75,7 @@ public class ItemCommandFromApiJsonDeserializer {
 			baseDataValidator.reset().parameter("units").value(units).notBlank();
 			baseDataValidator.reset().parameter("manufacturer").value(manufacturer).notBlank();
 			baseDataValidator.reset().parameter("warrantyExpiryDate").value(warrantyExpiryDate).notBlank();
+			baseDataValidator.reset().parameter("itemPrice").value(itemPrice).notBlank();
 			//baseDataValidator.reset().parameter("defaultPrice").value(defaultPrice).notNull();
 			/*
 			final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);

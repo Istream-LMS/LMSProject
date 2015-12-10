@@ -102,7 +102,7 @@ private static final class SalesDataMapper implements
 
 	public String schema() {
 		return " a.id as id,a.item_code as itemCode,a.item_description as itemDescription,a.item_class as itemClass,a.units as units,a.charge_code as chargeCode,round(a.unit_price,2) price,a.warranty as warranty,a.reorder_level as reorderLevel,a.manufacturer as manufacturer,"+
-				"b.Used as used,b.Available as available,a.manufacturer as manufacturer,a.warranty_expiry_date as warrantyExpiryDate," +
+				"b.Used as used,b.Available as available,a.manufacturer as manufacturer,a.warranty_expiry_date as warrantyExpiryDate,a.item_price as itemPrice," +
 				" b.Total_items as totalItems from b_item_master a "+
 				"left join ( Select item_master_id,Sum(Case When Client_id IS NULL "+
                 "        Then 1 "+
@@ -182,7 +182,8 @@ private static final class SalesDataMapper implements
 		final Long reorderLevel = rs.getLong("reorderLevel");
 		final String manufacturer = rs.getString("manufacturer");
 		final LocalDate warrantyExpiryDate = JdbcSupport.getLocalDate(rs, "warrantyExpiryDate");
-		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel,manufacturer,warrantyExpiryDate);
+		final BigDecimal itemPrice = rs.getBigDecimal("itemPrice");
+		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel,manufacturer,warrantyExpiryDate,itemPrice);
 
 
 	}

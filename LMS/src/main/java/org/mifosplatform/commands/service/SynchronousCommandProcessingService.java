@@ -750,6 +750,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 			     }else {
 			           throw new UnsupportedCommandException(wrapper.commandName());
 			     }
+		   }else if(wrapper.isDeviceSaleResource()){
+			   if (wrapper.isCreate()) {
+					handler = applicationContext.getBean("createOneTimeSaleCommandHandler",NewCommandSourceHandler.class);
+				}else{
+					 throw new UnsupportedCommandException(wrapper.commandName());
+				}
+			   
 		   }else {
 
             throw new UnsupportedCommandException(wrapper.commandName());

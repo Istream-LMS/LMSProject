@@ -43,11 +43,12 @@ public class ItemData {
 	private String manufacturer;
 	private Collection<MCodeData> chargeCodeData;
 	private LocalDate warrantyExpiryDate;
+	private BigDecimal itemPrice;
 	/*private List<FeeMasterData> feeMasterData;
 	private Collection<InventoryGrnData> grnData;*/
 	
 	public ItemData(Long id, String itemCode, String itemDesc,String itemClass,String units,   String chargeCode, int warranty, BigDecimal unitPrice,
-			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel,String manufacturer, LocalDate warrantyExpiryDate) {
+			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel,String manufacturer, LocalDate warrantyExpiryDate,BigDecimal itemPrice) {
 		
 		this.id=id;
 		this.itemCode=itemCode;
@@ -63,6 +64,15 @@ public class ItemData {
 		this.reorderLevel = reorderLevel;
 		this.manufacturer = manufacturer;
 		this.warrantyExpiryDate = warrantyExpiryDate;
+		this.itemPrice = itemPrice;
+	}
+
+	public BigDecimal getItemPrice() {
+		return itemPrice;
+	}
+
+	public void setItemPrice(BigDecimal itemPrice) {
+		this.itemPrice = itemPrice;
 	}
 
 	public String getManufacturer() {
@@ -135,6 +145,7 @@ public class ItemData {
 		this.manufacturerDatas=manufacturerDatas;
 		this.manufacturer = itemData.getManufacturer();
 		this.warrantyExpiryDate = itemData.getWarrantyExpiryDate();
+		this.itemPrice = itemData.getItemPrice();
 		
 	}
 
@@ -153,13 +164,14 @@ public class ItemData {
 		this.regionId = regionId;
 	}
 	
-	public ItemData(final Long id, final String itemCode, final String itemDescription, final String chargeCode, final BigDecimal unitPrice) {
+	public ItemData(final Long id, final String itemCode, final String itemDescription, final String chargeCode, final BigDecimal unitPrice,final BigDecimal itemPrice) {
 		
 		this.id=id;
 		this.itemCode=itemCode;
 		this.itemDescription=itemDescription;
 		this.chargeCode = chargeCode;
 		this.unitPrice=unitPrice;
+		this.itemPrice=itemPrice;
 	}
 
 	public ItemData(Long id, Long itemId, Long regionId, String price) {
