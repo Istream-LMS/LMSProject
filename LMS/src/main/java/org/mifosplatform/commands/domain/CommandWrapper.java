@@ -765,4 +765,8 @@ public class CommandWrapper {
 	public boolean isDeleteInventoryItem(){
 		return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("INVENTORY");
 	}
+	public boolean isDeviceSaleResource() {
+		  return  this.entityName.equalsIgnoreCase("NEWSALE") || this.entityName.equalsIgnoreCase("SECONDSALE") 
+				   ||this.entityName.equalsIgnoreCase("DEVICERENTAL");
+	}
 }

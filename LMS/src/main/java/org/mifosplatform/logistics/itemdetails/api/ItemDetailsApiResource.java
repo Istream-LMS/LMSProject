@@ -233,10 +233,10 @@ public class ItemDetailsApiResource {
 	@Path("serialnum")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retriveItemDetailsBySerialNum(@QueryParam("query") final String query,@QueryParam("clientId") final Long clientId,@Context final UriInfo uriInfo){
+	public String retriveItemDetailsBySerialNum(@QueryParam("query") final String query/*,@QueryParam("clientId") final Long clientId*/,@Context final UriInfo uriInfo){
 		
 			 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissionsAllocation);
-			 final ItemData itemMasterData = this.itemDetailsReadPlatformService.retriveItemDetailsDataBySerialNum(query,clientId);
+			 final ItemData itemMasterData = this.itemDetailsReadPlatformService.retriveItemDetailsDataBySerialNum(query/*,clientId*/);
 			// final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId,"Deposit");
 			// itemMasterData.setFeeMasterData(feeMasterData);
 			 ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

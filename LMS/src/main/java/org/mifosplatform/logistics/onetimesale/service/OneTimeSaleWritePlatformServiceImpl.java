@@ -52,6 +52,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	private final PlatformSecurityContext context;
 	private final ItemRepository itemMasterRepository;
 	private final OneTimesaleCommandFromApiJsonDeserializer apiJsonDeserializer;
+	//private final InvoiceOneTimeSale invoiceOneTimeSale;
 	private final OneTimeSaleRepository oneTimeSaleRepository;
 	private final ItemReadPlatformService itemReadPlatformService;
 	private final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService;
@@ -62,7 +63,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	@Autowired
 	public OneTimeSaleWritePlatformServiceImpl(final PlatformSecurityContext context,final OneTimeSaleRepository oneTimeSaleRepository,
 			final ItemRepository itemMasterRepository,final OneTimesaleCommandFromApiJsonDeserializer apiJsonDeserializer,
-	        final ItemReadPlatformService itemReadPlatformService,
+	        final ItemReadPlatformService itemReadPlatformService/*,final InvoiceOneTimeSale invoiceOneTimeSale*/,
 			final FromJsonHelper fromJsonHelper,final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
 			final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService,
 		     final InventoryGrnRepository inventoryGrnRepository,
@@ -78,6 +79,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		this.inventoryItemDetailsWritePlatformService = inventoryItemDetailsWritePlatformService;
 		this.inventoryGrnRepository = inventoryGrnRepository;
 		this.grnReadPlatformService = grnReadPlatformService;
+		/*this.invoiceOneTimeSale = invoiceOneTimeSale;*/
 	}
 
 	/* (non-Javadoc)
@@ -104,12 +106,12 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final List<OneTimeSaleData> oneTimeSaleDatas = this.oneTimeSaleReadPlatformService.retrieveOnetimeSalesForInvoice(clientId);
 			JsonObject jsonObject = new JsonObject();
 			final String saleType = command.stringValueOfParameterNamed("saleType");
-			/*if (saleType.equalsIgnoreCase("NEWSALE")) {
+			if (saleType.equalsIgnoreCase("NEWSALE")) {
 				for (OneTimeSaleData oneTimeSaleData : oneTimeSaleDatas) {
-					CommandProcessingResult invoice=this.invoiceOneTimeSale.invoiceOneTimeSale(clientId,oneTimeSaleData,false);
-					updateOneTimeSale(oneTimeSaleData,invoice);
+					//CommandProcessingResult invoice=this.invoiceOneTimeSale.invoiceOneTimeSale(clientId,oneTimeSaleData,false);
+					updateOneTimeSale(oneTimeSaleData/*,invoice*/);
 				}
-			}*/
+			}
 			
 			/** Deposit&Refund table *//*
 			if(command.hasParameter("addDeposit")){
@@ -207,11 +209,11 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 
 	}
 
-	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData,final CommandProcessingResult invoice) {
+	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData/*,final CommandProcessingResult invoice*/) {
 
 		OneTimeSale oneTimeSale = oneTimeSaleRepository.findOne(oneTimeSaleData.getId());
 		oneTimeSale.setIsInvoiced('Y');
-		oneTimeSale.setInvoiceId(invoice.resourceId());
+		//oneTimeSale.setInvoiceId(invoice.resourceId());
 		oneTimeSaleRepository.save(oneTimeSale);
 
 	}

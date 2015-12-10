@@ -58,6 +58,9 @@ public class ItemMaster extends AbstractPersistable<Long>{
 	@Column(name="warranty_expiry_date",nullable = true,length=100)
 	private Date warrantyExpiryDate;
 	
+	@Column(name = "item_price")
+	private BigDecimal itemPrice;
+	
 	@Column(name = "is_deleted", nullable = false)
 	private char deleted = 'n';
 	
@@ -69,7 +72,7 @@ public class ItemMaster extends AbstractPersistable<Long>{
 	
 	public ItemMaster(String itemCode, String itemDescription,
 			String itemClass, BigDecimal unitPrice, String units,
-			Long warranty, String chargeCode,Long reorderLevel,String manufacturer,Date warrantyExpiryDate) {
+			Long warranty, String chargeCode,Long reorderLevel,String manufacturer,Date warrantyExpiryDate,BigDecimal itemPrice) {
              this.itemCode=itemCode;
              this.itemDescription=itemDescription;
              this.itemClass=itemClass;
@@ -80,7 +83,16 @@ public class ItemMaster extends AbstractPersistable<Long>{
              this.reorderLevel=reorderLevel; 
              this.manufacturer=manufacturer;
              this.warrantyExpiryDate=warrantyExpiryDate;
+             this.itemPrice=itemPrice;
 
+	}
+
+	public BigDecimal getItrmPrice() {
+		return itemPrice;
+	}
+
+	public void setItrmPrice(BigDecimal itrmPrice) {
+		this.itemPrice = itrmPrice;
 	}
 
 	public Date getWarrantyExpiryDate() {
@@ -207,6 +219,12 @@ public class ItemMaster extends AbstractPersistable<Long>{
 			actualChanges.put(warrantyexpirydateParamName, newValue);
 			this.warrantyExpiryDate = newValue.toDate();
 		}
+		final String itemPriceParamName = "itemPrice";
+		if(command.isChangeInBigDecimalParameterNamed(itemPriceParamName, this.itemPrice)){
+			final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(itemPriceParamName);
+			actualChanges.put(itemPriceParamName,newValue);
+			this.itemPrice = newValue;
+		}
 		
 		return actualChanges;
 	
@@ -230,7 +248,8 @@ public class ItemMaster extends AbstractPersistable<Long>{
 		final Long reorderLevel=command.longValueOfParameterNamed("reorderLevel");
 		final String manufacturer=command.stringValueOfParameterNamed("manufacturer");
 		final Date warrantyExpiryDate=command.DateValueOfParameterNamed("warrantyExpiryDate");
-		return new ItemMaster(itemCode, itemDescription, itemClass, unitPrice, units, warranty, chargeCodeData, reorderLevel,manufacturer,warrantyExpiryDate);
+		final BigDecimal itemPrice=command.bigDecimalValueOfParameterNamed("itemPrice");
+		return new ItemMaster(itemCode, itemDescription, itemClass, unitPrice, units, warranty, chargeCodeData, reorderLevel,manufacturer,warrantyExpiryDate,itemPrice);
 	}
 	
 	public void addItemPrices(final ItemPrice itemPrice) {

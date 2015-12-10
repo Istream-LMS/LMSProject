@@ -67,20 +67,20 @@ public final class OneTimesaleCommandFromApiJsonDeserializer {
         final Long itemId = fromApiJsonHelper.extractLongNamed("itemId", element);
         baseDataValidator.reset().parameter("itemId").value(itemId).notNull();
         
-        final String quantity = fromApiJsonHelper.extractStringNamed("quantity", element);
-        baseDataValidator.reset().parameter("quantity").value(quantity).notBlank().notExceedingLengthOf(50).positiveAmount(); 
+        /*final String quantity = fromApiJsonHelper.extractStringNamed("quantity", element);
+        baseDataValidator.reset().parameter("quantity").value(quantity).notBlank().notExceedingLengthOf(50).positiveAmount(); */
         
-        final Long discountId = fromApiJsonHelper.extractLongNamed("discountId", element);
-        baseDataValidator.reset().parameter("discountId").value(discountId).notNull();
-        
+        /*final Long discountId = fromApiJsonHelper.extractLongNamed("discountId", element);
+        baseDataValidator.reset().parameter("discountId").value(discountId).notNull();*/
+        /*
         final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
-        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(10);
+        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(10);*/
         
-        final BigDecimal totalPrice=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalPrice", element);
-        baseDataValidator.reset().parameter("totalPrice").value(totalPrice).notNull();
+        /*final BigDecimal totalPrice=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalPrice", element);
+        baseDataValidator.reset().parameter("totalPrice").value(totalPrice).notNull();*/
         
-        final BigDecimal unitPrice=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("unitPrice", element);
-        baseDataValidator.reset().parameter("unitPrice").value(unitPrice).notNull();
+        /*final BigDecimal unitPrice=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("unitPrice", element);
+        baseDataValidator.reset().parameter("unitPrice").value(unitPrice).notNull();*/
         
         final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
         baseDataValidator.reset().parameter("officeId").value(officeId).notNull();

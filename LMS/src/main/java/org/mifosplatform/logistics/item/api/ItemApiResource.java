@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.data.ItemData;
+import org.mifosplatform.logistics.item.domain.ItemPrice;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.logistics.supplier.service.SearchSqlQuery;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
